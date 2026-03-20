@@ -9,6 +9,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_LINKS = [
+  { href: "/simulation/property-list", label: "Mes pistes d'achat", flagship: true },
   { href: "/simulation/capacite-emprunt", label: "Capacité d'emprunt" },
   { href: "/simulation/budget-cible", label: "Budget cible" },
   { href: "/simulation/frais-notaire", label: "Frais de notaire" },
@@ -28,7 +29,7 @@ export default function AppNav() {
             disableRipple
             sx={{
               fontFamily: "var(--font-fraunces)",
-              fontSize: "1.125rem",
+              fontSize: { xs: "1.7rem", sm: "2rem" },
               fontWeight: 700,
               color: "primary.main",
               letterSpacing: "-0.01em",
@@ -36,12 +37,12 @@ export default function AppNav() {
               "&:hover": { bgcolor: "transparent" },
             }}
           >
-            Vesta Immo
+            Vesta
           </Button>
 
           {/* Navigation links */}
           <Box sx={{ display: "flex", gap: 0.5 }}>
-            {NAV_LINKS.map(({ href, label }) => {
+            {NAV_LINKS.map(({ href, label, flagship }) => {
               const active = pathname === href || pathname.startsWith(href);
               return (
                 <Button
@@ -49,9 +50,25 @@ export default function AppNav() {
                   component={Link}
                   href={href}
                   size="small"
-                  variant={active ? "contained" : "text"}
+                  variant={active || flagship ? "contained" : "text"}
                   color="primary"
-                  sx={active ? {} : { color: "text.secondary" }}
+                  sx={
+                    active || flagship
+                      ? flagship
+                        ? {
+                            fontWeight: 700,
+                            boxShadow: "none",
+                            bgcolor: active ? "primary.main" : "primary.light",
+                            color: "primary.contrastText",
+                            "&:hover": {
+                              boxShadow: "none",
+                              bgcolor: active ? "primary.dark" : "primary.main",
+                              color: "primary.contrastText",
+                            },
+                          }
+                        : {}
+                      : { color: "text.secondary" }
+                  }
                 >
                   {label}
                 </Button>

@@ -1,7 +1,7 @@
 ---
 name: Vesta Front Architect
 description: "Use when designing frontend architecture for Vesta Immo with Next.js App Router, feature folders, layouts, components, hooks, services, composition patterns, or frontend separation of concerns. Best for architecture decisions, project structure, data flow mapping, and maintainability tradeoffs."
-tools: [read, search, todo]
+tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
 argument-hint: "Describe the frontend architecture problem, scope, and constraints."
 ---
 

@@ -7,11 +7,12 @@ import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import Link from "next/link";
 import AppNav from "@/components/AppNav";
 
-const CARDS = [
+const SUPPORT_TOOLS = [
   {
     href: "/simulation/capacite-emprunt",
     step: "01",
@@ -52,43 +53,70 @@ export default function Home() {
 
       <Container maxWidth="lg" sx={{ flex: 1, py: { xs: 6, md: 10 } }}>
         {/* Hero */}
-        <Box sx={{ mb: { xs: 6, md: 10 }, maxWidth: 640 }}>
-          <Typography
-            variant="overline"
-            color="primary"
-            sx={{ fontWeight: 700, letterSpacing: "0.14em" }}
-          >
-            Vesta Immo
+        <Card
+          elevation={0}
+          sx={{
+            mb: { xs: 6, md: 8 },
+            borderRadius: 4,
+            border: "1px solid",
+            borderColor: "divider",
+            background:
+              "linear-gradient(120deg, rgba(245,124,0,0.14) 0%, rgba(25,118,210,0.08) 100%)",
+          }}
+        >
+          <Box sx={{ p: { xs: 3, sm: 4, md: 5 } }}>
+            <Stack spacing={2} sx={{ maxWidth: 760 }}>
+              <Typography
+                variant="h1"
+                sx={{
+                  mt: 0.5,
+                  fontSize: { xs: "2.2rem", sm: "3.1rem", md: "4rem" },
+                  lineHeight: 1.05,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                Pilotez tout votre projet avec Mes pistes d'achat.
+              </Typography>
+
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                sx={{ fontSize: "1.08rem", lineHeight: 1.75 }}
+              >
+                L'outil coeur de Vesta pour comparer vos biens, visualiser les risques,
+                et prioriser les meilleures opportunites selon votre profil financement.
+              </Typography>
+
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ pt: 0.5 }}>
+                <Button
+                  component={Link}
+                  href="/simulation/property-list"
+                  variant="contained"
+                  size="large"
+                  endIcon={<ArrowForwardIcon />}
+                >
+                  Ouvrir Mes pistes d'achat
+                </Button>
+                <Button
+                  component={Link}
+                  href="/simulation/capacite-emprunt"
+                  variant="outlined"
+                  size="large"
+                >
+                  Outils complémentaires
+                </Button>
+              </Stack>
+            </Stack>
+          </Box>
+        </Card>
+
+        <Box sx={{ mb: 2.5 }}>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>
+            Outils complémentaires
           </Typography>
-          <Typography
-            variant="h1"
-            sx={{
-              mt: 1.5,
-              fontSize: { xs: "2.5rem", sm: "3.5rem", md: "4.5rem" },
-              lineHeight: 1.05,
-              letterSpacing: "-0.02em",
-            }}
-          >
-            Simulez votre projet immobilier.
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
+            Des simulateurs rapides pour enrichir votre analyse principale.
           </Typography>
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{ mt: 3, fontSize: "1.125rem", lineHeight: 1.75 }}
-          >
-            Trois outils gratuits pour évaluer votre capacité d&apos;emprunt,
-            votre budget total et les frais de notaire — en quelques secondes.
-          </Typography>
-          <Button
-            component={Link}
-            href="/simulation/capacite-emprunt"
-            variant="contained"
-            size="large"
-            endIcon={<ArrowForwardIcon />}
-            sx={{ mt: 4 }}
-          >
-            Commencer la simulation
-          </Button>
         </Box>
 
         {/* Simulation cards */}
@@ -99,7 +127,7 @@ export default function Home() {
             gap: 3,
           }}
         >
-          {CARDS.map(({ href, step, title, description, fields }) => (
+          {SUPPORT_TOOLS.map(({ href, step, title, description, fields }) => (
             <Card key={href} elevation={0}>
               <CardActionArea
                 component={Link}
