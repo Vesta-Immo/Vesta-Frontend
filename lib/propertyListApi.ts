@@ -1,10 +1,49 @@
 import type {
   FinancingSettings,
+  PropertyListSimulation,
   PropertyItem,
   PropertyListResponse,
 } from "@/types/simulation";
 
 const BASE_URL = "/api/proxy/property-list";
+
+function toPropertyRequest(property: PropertyItem): Record<string, unknown> {
+  const payload: Record<string, unknown> = {
+    ...property,
+  };
+
+  if (!property.listingUrl) {
+    delete payload.listingUrl;
+  }
+
+  return payload;
+}
+
+function fromProperty<T extends PropertyItem>(raw: T): T {
+  return {
+    ...raw,
+    listingUrl: raw.listingUrl || undefined,
+  } as T;
+}
+
+function fromSimulation(raw?: PropertyListSimulation | null): PropertyListSimulation | null {
+  if (!raw) {
+    return null;
+  }
+
+  return {
+    ...raw,
+    results: raw.results.map(fromProperty),
+  };
+}
+
+function fromPropertyListResponse(raw: PropertyListResponse): PropertyListResponse {
+  return {
+    ...raw,
+    properties: raw.properties.map(fromProperty),
+    lastSimulation: fromSimulation(raw.lastSimulation),
+  };
+}
 
 async function request<TRes>(
   method: "GET" | "POST" | "DELETE",
@@ -50,11 +89,12 @@ export async function saveSettings(
 }
 
 export async function addProperty(property: PropertyItem): Promise<void> {
-  return request("POST", "/items", property);
+  return request("POST", "/items", toPropertyRequest(property));
 }
 
 export async function getPropertyList(): Promise<PropertyListResponse> {
-  return request("GET", "/items");
+  const response = await request<PropertyListResponse>("GET", "/items");
+  return fromPropertyListResponse(response);
 }
 
 export async function deleteProperty(propertyId: string): Promise<void> {

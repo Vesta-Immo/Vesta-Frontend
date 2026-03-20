@@ -11,6 +11,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import Divider from "@mui/material/Divider";
+import Link from "@mui/material/Link";
 import type { PropertyItem, PropertyWithResults } from "@/types/simulation";
 import { formatEuros } from "@/lib/format";
 
@@ -68,11 +69,16 @@ export default function PropertyListView({
                 </Box>
 
                 {result && (
-                  <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+                  <Stack
+                    direction={{ xs: "column", sm: "row" }}
+                    spacing={1}
+                    alignItems={{ xs: "stretch", sm: "center" }}
+                  >
                     <Chip
-                      label={`Mensualite + charges: ${formatEuros(result.monthlyPaymentWithCharges)}`}
-                      color="primary"
+                      label={`Mensualite credit: ${formatEuros(result.monthlyCreditPayment)}`}
+                      color="default"
                       size="small"
+                      sx={{ alignSelf: "flex-start" }}
                     />
                     <Chip
                       label={`Endettement: ${result.debtRatioPercent.toFixed(1)}%`}
@@ -84,6 +90,14 @@ export default function PropertyListView({
                             : "error"
                       }
                       size="small"
+                      sx={{ alignSelf: "flex-start" }}
+                    />
+                    <Divider orientation="vertical" flexItem />
+                    <Chip
+                      label={`Mensualite + charges: ${formatEuros(result.monthlyPaymentWithCharges)}`}
+                      color="primary"
+                      size="small"
+                      sx={{ alignSelf: "flex-start" }}
                     />
                   </Stack>
                 )}
@@ -92,6 +106,17 @@ export default function PropertyListView({
                   {property.propertyType === "NEW" ? "Neuf" : "Ancien"}
                   {property.departmentCode && ` • ${property.departmentCode}`}
                 </Typography>
+
+                {property.listingUrl && (
+                  <Link
+                    href={property.listingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="body2"
+                  >
+                    Voir l'annonce
+                  </Link>
+                )}
 
                 <Divider sx={{ my: 1 }} />
 

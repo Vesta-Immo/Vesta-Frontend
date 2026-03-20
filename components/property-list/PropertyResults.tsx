@@ -11,7 +11,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Divider from "@mui/material/Divider";
+import Link from "@mui/material/Link";
 import type { PropertyWithResults } from "@/types/simulation";
 import { formatEuros } from "@/lib/format";
 
@@ -68,6 +68,17 @@ export default function PropertyResults({ results }: PropertyResultsProps) {
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {property.addressOrSector}
                     </Typography>
+                    {property.listingUrl && (
+                      <Link
+                        href={property.listingUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        variant="caption"
+                        sx={{ display: "inline-block", mt: 0.5 }}
+                      >
+                        Voir l'annonce
+                      </Link>
+                    )}
                     <Chip
                       label={property.status === "wanted" ? "Convoitée" : "Visitée"}
                       size="small"

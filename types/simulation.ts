@@ -63,6 +63,7 @@ export interface PropertyItem {
   status: PropertyStatus;
   propertyType: PropertyType;
   departmentCode?: string;
+  listingUrl?: string;
   price: number;
   addressOrSector: string;
   propertyTaxAnnual: number;

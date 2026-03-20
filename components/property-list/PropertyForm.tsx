@@ -18,6 +18,15 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import type { PropertyItem, PropertyStatus, PropertyType } from "@/types/simulation";
 
+export function isValidListingUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 interface PropertyFormProps {
   initialValues?: PropertyItem;
   onSubmit: (property: PropertyItem) => Promise<void>;
@@ -31,11 +40,13 @@ export default function PropertyForm({
   loading,
   error,
 }: PropertyFormProps) {
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [form, setForm] = useState<PropertyItem>(
     initialValues || {
       id: "",
       status: "wanted",
       propertyType: "OLD",
+      listingUrl: "",
       price: 0,
       addressOrSector: "",
       propertyTaxAnnual: 0,
@@ -47,9 +58,18 @@ export default function PropertyForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
+      const trimmedListingUrl = form.listingUrl?.trim() || "";
+
+      if (trimmedListingUrl && !isValidListingUrl(trimmedListingUrl)) {
+        setValidationError("Le lien d'annonce doit etre une URL valide (http:// ou https://).");
+        return;
+      }
+
+      setValidationError(null);
       const payload: PropertyItem = {
         ...form,
         id: form.id || `prop-${crypto.randomUUID()}`,
+        listingUrl: trimmedListingUrl || undefined,
       };
       await onSubmit(payload);
     } catch {
@@ -100,8 +120,9 @@ export default function PropertyForm({
   }
 
   return (
-    <Box component="form" onSubmit={handleSubmit}>
+    <Box component="form" onSubmit={handleSubmit} noValidate>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {validationError && <Alert severity="error" sx={{ mb: 2 }}>{validationError}</Alert>}
 
       <Stack spacing={2.5} sx={{ pt: 1 }}>
         {/* Core property fields */}
@@ -130,7 +151,7 @@ export default function PropertyForm({
         </FormControl>
 
         <TextField
-          label="Adresse ou secteur"
+          label="Titre du bien"
           placeholder="Exemple: Lyon 7e - Gerland"
           value={form.addressOrSector}
           onChange={field("addressOrSector")}
@@ -143,6 +164,19 @@ export default function PropertyForm({
           placeholder="69"
           value={form.departmentCode || ""}
           onChange={(e) => setForm((prev) => ({ ...prev, departmentCode: e.target.value || undefined }))}
+          fullWidth
+        />
+
+        <TextField
+          label="Lien d'annonce"
+          placeholder="https://..."
+          type="url"
+          value={form.listingUrl || ""}
+          onChange={(e) => {
+            const value = e.target.value;
+            setValidationError(null);
+            setForm((prev) => ({ ...prev, listingUrl: value }));
+          }}
           fullWidth
         />
 
