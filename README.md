@@ -56,15 +56,14 @@ Variables attendues dans `.env.docker`:
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 NEXT_PUBLIC_SUPABASE_REDIRECT_URL=http://localhost:3000/auth/callback
-SIMULATION_API_URL=
-SIMULATION_API_KEY=
-BACKEND_API_KEY=
+VESTA_API_URL=
+VESTA_API_KEY=
 ```
 
 Notes:
 
 - les variables `NEXT_PUBLIC_*` sont injectees au moment du build de l'image
-- les variables `SIMULATION_API_*` et `BACKEND_API_KEY` sont passees au conteneur au demarrage
+- les variables `VESTA_API_URL` et `VESTA_API_KEY` sont passees au conteneur au demarrage
 - `.env.docker` doit etre renseigne avant d'executer `./docker-start.sh`
 
 ## CI Docker et GCP Artifact Registry
@@ -94,9 +93,8 @@ Configurer les variables suivantes dans votre environnement local et de producti
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 NEXT_PUBLIC_SUPABASE_REDIRECT_URL=http://localhost:3000/auth/callback
-SIMULATION_API_URL=http://localhost:3001
-SIMULATION_API_KEY=
-BACKEND_API_KEY=
+VESTA_API_URL=http://localhost:3001
+VESTA_API_KEY=
 ```
 
 Notes:

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createUpstreamHeaders } from "@/lib/server/forwardAuth";
 
-const API_URL = process.env.SIMULATION_API_URL ?? "http://localhost:3001";
-const API_KEY = process.env.SIMULATION_API_KEY ?? "";
+const API_URL = process.env.VESTA_API_URL ?? "http://localhost:3001";
+const API_KEY = process.env.VESTA_API_KEY ?? "";
 
 export async function POST(req: NextRequest) {
   try {

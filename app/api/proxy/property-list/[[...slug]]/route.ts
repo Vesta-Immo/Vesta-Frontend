@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createUpstreamHeaders } from "@/lib/server/forwardAuth";
 
-const BACKEND_URL = `${process.env.SIMULATION_API_URL}/api/v1/simulations/property-list`;
+const BACKEND_URL = `${process.env.VESTA_API_URL}/api/v1/simulations/property-list`;
+const API_KEY = process.env.VESTA_API_KEY || "test";
 
 async function parseBackendBody(response: Response): Promise<unknown> {
   const text = await response.text();
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
   try {
     const rawBody = await request.text();
     const headers = createUpstreamHeaders(request, {
-      "x-api-key": process.env.BACKEND_API_KEY || "test",
+      "x-api-key": API_KEY,
     });
 
     const hasBody = rawBody.trim().length > 0;
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
       method: "GET",
       headers: createUpstreamHeaders(request, {
         "Content-Type": "application/json",
-        "x-api-key": process.env.BACKEND_API_KEY || "test",
+        "x-api-key": API_KEY,
       }),
     });
 
@@ -83,7 +84,7 @@ export async function DELETE(request: NextRequest) {
       method: "DELETE",
       headers: createUpstreamHeaders(request, {
         "Content-Type": "application/json",
-        "x-api-key": process.env.BACKEND_API_KEY || "test",
+        "x-api-key": API_KEY,
       }),
     });
 
