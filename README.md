@@ -67,24 +67,24 @@ Notes:
 - les variables `SIMULATION_API_*` et `BACKEND_API_KEY` sont passees au conteneur au demarrage
 - `.env.docker` doit etre renseigne avant d'executer `./docker-start.sh`
 
-## CI Docker et GHCR
+## CI Docker et GCP Artifact Registry
 
 Le workflow GitHub Actions [.github/workflows/build-image.yml](.github/workflows/build-image.yml) suit GitHub Flow:
 
 - sur pull request, il verifie uniquement que l'image Docker se construit
-- sur `push` vers `main`, il construit puis publie l'image sur GHCR
+- sur `push` vers `main`, il construit puis publie l'image sur GCP Artifact Registry
 - un declenchement manuel via `workflow_dispatch` permet un build de verification sans publication
-- le workflow echoue si les variables de build GitHub requises sont absentes
+- le workflow echoue si les secrets et variables de build GitHub requis sont absents
 - le job utilise l'environment GitHub `prod`
 
 Images publiees:
 
-- `ghcr.io/<owner>/<repo>:main`
-- `ghcr.io/<owner>/<repo>:sha-<commit>`
+- `europe-west1-docker.pkg.dev/<GCP_PROJECT_ID>/vesta/nextjs:<github.sha>`
 
 Configuration GitHub recommandee:
 
-- autoriser GitHub Actions a ecrire les packages du repository ou de l'organisation
+- secrets d'organisation partages: `GCP_SA_KEY`, `GCP_PROJECT_ID`
+- secret specifique au repo frontend: `NEXT_PUBLIC_API_URL`
 - definir dans l'environment GitHub `prod` les `vars` ou `secrets` `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_REDIRECT_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 
 ## Variables d'environnement
