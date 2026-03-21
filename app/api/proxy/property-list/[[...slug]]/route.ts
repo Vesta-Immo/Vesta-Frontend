@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createUpstreamHeaders } from "@/lib/server/forwardAuth";
 
-const BACKEND_URL = "http://localhost:3001/api/v1/simulations/property-list";
+const BACKEND_URL = `${process.env.SIMULATION_API_URL}/api/v1/simulations/property-list`;
 
 async function parseBackendBody(response: Response): Promise<unknown> {
   const text = await response.text();

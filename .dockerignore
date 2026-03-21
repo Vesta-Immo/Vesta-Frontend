@@ -1,0 +1,5 @@
+node_modules
+.next
+docker-start.sh
+docker-stop.sh
+.env*
