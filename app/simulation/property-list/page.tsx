@@ -17,6 +17,8 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { usePropertyListStore } from "@/lib/usePropertyListStore";
 import PropertyForm from "@/components/property-list/PropertyForm";
 import PropertyListView from "@/components/property-list/PropertyListView";
@@ -28,27 +30,45 @@ const FinancingSettingsForm = dynamic(
 );
 
 export default function PropertyListPage() {
-  const store = usePropertyListStore();
+  const pathname = usePathname();
+  const {
+    financingSettings,
+    properties,
+    results,
+    loading,
+    error,
+    loadPropertyList,
+    updateFinancingSettings,
+    updateProperty,
+    removeProperty,
+  } = usePropertyListStore();
+  const { authLoading, signInWithGoogle, user } = useAuth();
   const [editingProperty, setEditingProperty] = useState<PropertyItem | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [settingsSuccess, setSettingsSuccess] = useState(false);
   const [showFinancingProfile, setShowFinancingProfile] = useState(false);
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   // Load initial data
   useEffect(() => {
-    store.loadPropertyList();
-  }, []);
+    if (authLoading || !user) {
+      return;
+    }
 
-  async function handleSaveSettings(settings: typeof store.financingSettings) {
+    loadPropertyList();
+  }, [authLoading, loadPropertyList, user]);
+
+  async function handleSaveSettings(settings: typeof financingSettings) {
     if (!settings) return;
-    await store.updateFinancingSettings(settings);
+    await updateFinancingSettings(settings);
     setShowFinancingProfile(false);
     setSettingsSuccess(true);
     setTimeout(() => setSettingsSuccess(false), 3000);
   }
 
   async function handleAddProperty(property: PropertyItem) {
-    await store.updateProperty(property);
+    await updateProperty(property);
     setShowAddDialog(false);
     setEditingProperty(null);
   }
@@ -58,7 +78,22 @@ export default function PropertyListPage() {
     setShowAddDialog(true);
   }
 
-  const resultsByPropertyId = (store.results || []).reduce<Record<string, PropertyWithResults>>(
+  async function handleSignIn() {
+    setAuthBusy(true);
+    setAuthError(null);
+
+    const returnTo = typeof window === "undefined"
+      ? pathname
+      : `${window.location.pathname}${window.location.search}`;
+
+    const { error: signInError } = await signInWithGoogle(returnTo);
+    if (signInError) {
+      setAuthError(signInError);
+      setAuthBusy(false);
+    }
+  }
+
+  const resultsByPropertyId = (results || []).reduce<Record<string, PropertyWithResults>>(
     (acc, item) => {
       acc[item.id] = item;
       return acc;
@@ -66,7 +101,7 @@ export default function PropertyListPage() {
     {}
   );
 
-  const riskyPropertiesCount = (store.results || []).filter(
+  const riskyPropertiesCount = (results || []).filter(
     (item) => item.debtRatioLevel === "HIGH"
   ).length;
 
@@ -86,12 +121,9 @@ export default function PropertyListPage() {
         }}
       >
         <Stack spacing={1.25}>
-          <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
-            <Chip color="primary" label="Outil principal" size="small" />
-            <Typography variant="overline" sx={{ fontWeight: 700, letterSpacing: "0.1em" }}>
-              Pilotage immobilier Vesta
-            </Typography>
-          </Stack>
+          <Typography variant="overline" sx={{ fontWeight: 700, letterSpacing: "0.1em" }}>
+            Pilotage immobilier
+          </Typography>
 
           <Typography
             variant="h3"
@@ -106,17 +138,51 @@ export default function PropertyListPage() {
           </Typography>
 
           <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ pt: 0.5 }}>
-            <Chip label={`Biens: ${store.properties.length}`} variant="outlined" />
-            <Chip
-              label={`Biens a risque: ${riskyPropertiesCount}`}
-              color={riskyPropertiesCount > 0 ? "error" : "success"}
-              variant="outlined"
-            />
+            {user ? (
+              <>
+                <Chip label={`Biens: ${properties.length}`} variant="outlined" />
+                <Chip
+                  label={`Biens a risque: ${riskyPropertiesCount}`}
+                  color={riskyPropertiesCount > 0 ? "error" : "success"}
+                  variant="outlined"
+                />
+              </>
+            ) : null}
           </Stack>
         </Stack>
       </Paper>
 
       <Stack spacing={3}>
+        {authError && <Alert severity="error">{authError}</Alert>}
+
+        {authLoading ? (
+          <Paper sx={{ p: 3.5 }}>
+            <Typography color="text.secondary">Verification de votre session...</Typography>
+          </Paper>
+        ) : !user ? (
+          <Paper sx={{ p: { xs: 3, sm: 4 } }}>
+            <Stack spacing={2.5} alignItems="flex-start">
+              <Box>
+                <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+                  Connectez-vous pour retrouver vos pistes d'achat
+                </Typography>
+                <Typography color="text.secondary">
+                  Vos biens suivis, votre profil de financement et vos resultats consolides
+                  sont disponibles apres connexion.
+                </Typography>
+              </Box>
+
+              <Button
+                variant="contained"
+                onClick={handleSignIn}
+                disabled={authBusy}
+              >
+                {authBusy ? "Connexion..." : "Se connecter avec Google"}
+              </Button>
+            </Stack>
+          </Paper>
+        ) : (
+          <>
         {settingsSuccess && (
           <Alert severity="success">
             Paramètres enregistrés avec succès
@@ -136,21 +202,21 @@ export default function PropertyListPage() {
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
                 Profil financement
               </Typography>
-              {store.financingSettings && (
+              {financingSettings && (
                 <Chip
                   size="small"
                   variant="outlined"
-                  label={`${store.financingSettings.annualRatePercent}% • ${store.financingSettings.durationMonths} mois`}
+                  label={`${financingSettings.annualRatePercent}% • ${financingSettings.durationMonths} mois`}
                 />
               )}
             </Stack>
           </AccordionSummary>
           <AccordionDetails>
             <FinancingSettingsForm
-              initialValues={store.financingSettings || undefined}
+              initialValues={financingSettings || undefined}
               onSubmit={handleSaveSettings}
-              loading={store.loading}
-              error={store.error}
+              loading={loading}
+              error={error}
             />
           </AccordionDetails>
         </Accordion>
@@ -182,37 +248,39 @@ export default function PropertyListPage() {
               </Button>
             </Stack>
 
-            {store.error && <Alert severity="error">{store.error}</Alert>}
+            {error && <Alert severity="error">{error}</Alert>}
 
-            {!store.financingSettings && (
+            {!financingSettings && (
               <Alert severity="info">
                 Renseignez d'abord votre profil financement pour voir les calculs consolidés.
               </Alert>
             )}
 
-            {store.financingSettings && !store.results && (
+            {financingSettings && !results && (
               <Alert severity="info">
                 Ajoutez ou modifiez une piste d'achat pour afficher les résultats recalcules automatiquement.
               </Alert>
             )}
 
-            {store.loading ? (
+            {loading ? (
               <Typography color="text.secondary">Chargement...</Typography>
             ) : (
               <PropertyListView
-                properties={store.properties}
+                properties={properties}
                 resultsByPropertyId={resultsByPropertyId}
                 onEdit={handleEditProperty}
-                onDelete={store.removeProperty}
-                loading={store.loading}
+                onDelete={removeProperty}
+                loading={loading}
               />
             )}
           </Stack>
         </Paper>
+          </>
+        )}
       </Stack>
 
       {/* Add/Edit Property Dialog */}
-      <Dialog open={showAddDialog} onClose={() => setShowAddDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog open={user ? showAddDialog : false} onClose={() => setShowAddDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
           {editingProperty ? "Éditer la piste" : "Ajouter une piste"}
         </DialogTitle>
@@ -220,8 +288,8 @@ export default function PropertyListPage() {
           <PropertyForm
             initialValues={editingProperty || undefined}
             onSubmit={handleAddProperty}
-            loading={store.loading}
-            error={store.error}
+            loading={loading}
+            error={error}
           />
         </DialogContent>
       </Dialog>

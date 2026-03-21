@@ -95,15 +95,7 @@ export default function Home() {
                   size="large"
                   endIcon={<ArrowForwardIcon />}
                 >
-                  Ouvrir Mes pistes d'achat
-                </Button>
-                <Button
-                  component={Link}
-                  href="/simulation/capacite-emprunt"
-                  variant="outlined"
-                  size="large"
-                >
-                  Outils complémentaires
+                  Mes pistes d'achat
                 </Button>
               </Stack>
             </Stack>
