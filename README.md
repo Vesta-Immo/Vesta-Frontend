@@ -84,7 +84,6 @@ Images publiees:
 Configuration GitHub recommandee:
 
 - secrets d'organisation partages: `GCP_SA_KEY`, `GCP_PROJECT_ID`
-- secret specifique au repo frontend: `NEXT_PUBLIC_API_URL`
 - definir dans l'environment GitHub `prod` les `vars` ou `secrets` `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_REDIRECT_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 
 ## Variables d'environnement
