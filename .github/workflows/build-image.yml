@@ -1,0 +1,78 @@
+name: Build and publish Docker image
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/build-image.yml"
+      - "Dockerfile"
+      - "next.config.ts"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "app/**"
+      - "components/**"
+      - "lib/**"
+      - "types/**"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/build-image.yml"
+      - "Dockerfile"
+      - "next.config.ts"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "app/**"
+      - "components/**"
+      - "lib/**"
+      - "types/**"
+
+jobs:
+  build-image:
+    name: Build image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=main,enable=${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+            type=sha,prefix=sha-,enable=${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+
+      - name: Log in to GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          load: false
+          tags: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.meta.outputs.tags || 'vesta-frontend:ci' }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_SUPABASE_URL=${{ vars.NEXT_PUBLIC_SUPABASE_URL || secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://example.supabase.co' }}
+            NEXT_PUBLIC_SUPABASE_REDIRECT_URL=${{ vars.NEXT_PUBLIC_SUPABASE_REDIRECT_URL || secrets.NEXT_PUBLIC_SUPABASE_REDIRECT_URL || 'http://localhost:3000/auth/callback' }}
+            NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'ci-placeholder-key' }}

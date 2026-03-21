@@ -67,6 +67,24 @@ Notes:
 - les variables `SIMULATION_API_*` et `BACKEND_API_KEY` sont passees au conteneur au demarrage
 - `.env.docker` doit etre renseigne avant d'executer `./docker-start.sh`
 
+## CI Docker et GHCR
+
+Le workflow GitHub Actions [.github/workflows/build-image.yml](.github/workflows/build-image.yml) suit GitHub Flow:
+
+- sur pull request, il verifie uniquement que l'image Docker se construit
+- sur `push` vers `main`, il construit puis publie l'image sur GHCR
+- un declenchement manuel via `workflow_dispatch` permet un build de verification sans publication
+
+Images publiees:
+
+- `ghcr.io/<owner>/<repo>:main`
+- `ghcr.io/<owner>/<repo>:sha-<commit>`
+
+Configuration GitHub recommandee:
+
+- autoriser GitHub Actions a ecrire les packages du repository ou de l'organisation
+- definir si besoin `vars` ou `secrets` pour `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_REDIRECT_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+
 ## Variables d'environnement
 
 Configurer les variables suivantes dans votre environnement local et de production:
