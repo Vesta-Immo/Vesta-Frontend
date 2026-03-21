@@ -28,8 +28,8 @@ on:
       - "types/**"
 
 jobs:
-  build-image:
-    name: Build image
+  build-&-deploy:
+    name: Build image and push it to GCP Artifact Registry, then deploy to Cloud Run
     runs-on: ubuntu-latest
     environment: prod
     permissions:
@@ -121,3 +121,23 @@ jobs:
             NEXT_PUBLIC_SUPABASE_URL=${{ env.NEXT_PUBLIC_SUPABASE_URL }}
             NEXT_PUBLIC_SUPABASE_REDIRECT_URL=${{ env.NEXT_PUBLIC_SUPABASE_REDIRECT_URL }}
             NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${{ env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+
+      - name: Deploy to Cloud Run
+        if: |
+          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+          (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+        run: |
+          gcloud run deploy nextjs-app \
+            --image=${{ env.IMAGE_URI }} \
+            --region=europe-west1 \
+            --platform=managed \
+            --memory=512Mi \
+            --min-instances=0 \
+            --max-instances=5 \
+            --allow-unauthenticated \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --set-env-vars="\
+              SIMULATION_API_KEY=${{ secrets.SIMULATION_API_KEY }},\
+              BACKEND_API_KEY=${{ secrets.BACKEND_API_KEY }},\
+              SIMULATION_API_URL=${{ secrets.SIMULATION_API_URL }},\
+              NODE_ENV=production"
