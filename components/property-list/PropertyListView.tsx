@@ -46,7 +46,18 @@ export default function PropertyListView({
         Pistes d'achat ({properties.length})
       </Typography>
 
-      {properties.map((property) => {
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "repeat(2, 1fr)",
+            md: "repeat(3, 1fr)",
+          },
+          gap: 2,
+        }}
+      >
+        {properties.map((property) => {
         const result = resultsByPropertyId?.[property.id];
         const totalRenovation = property.renovationWorkItems.reduce(
           (sum, item) => sum + item.cost,
@@ -72,7 +83,9 @@ export default function PropertyListView({
                   <Stack
                     direction={{ xs: "column", sm: "row" }}
                     spacing={1}
-                    alignItems={{ xs: "stretch", sm: "center" }}
+                    alignItems={{ xs: "flex-start", sm: "center" }}
+                    useFlexGap
+                    flexWrap="wrap"
                   >
                     <Chip
                       label={`Mensualite credit: ${formatEuros(result.monthlyCreditPayment)}`}
@@ -92,7 +105,6 @@ export default function PropertyListView({
                       size="small"
                       sx={{ alignSelf: "flex-start" }}
                     />
-                    <Divider orientation="vertical" flexItem />
                     <Chip
                       label={`Mensualite + charges: ${formatEuros(result.monthlyPaymentWithCharges)}`}
                       color="primary"
@@ -225,6 +237,7 @@ export default function PropertyListView({
           </Card>
         );
       })}
+      </Box>
     </Stack>
   );
 }

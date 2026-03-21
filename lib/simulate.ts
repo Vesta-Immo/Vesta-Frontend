@@ -6,20 +6,14 @@ import type {
   NotaryFeesRequest,
   NotaryFeesResult,
 } from "@/types/simulation";
+import { requestJson } from "@/lib/apiFetch";
 
 async function post<TReq, TRes>(path: string, body: TReq): Promise<TRes> {
-  const response = await fetch(path, {
+  return requestJson<TRes>(path, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({})) as { message?: string };
-    throw new Error(error.message ?? "Une erreur est survenue.");
-  }
-
-  return response.json() as Promise<TRes>;
 }
 
 export function computeBorrowingCapacity(

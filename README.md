@@ -32,6 +32,27 @@ npm install
 npm run dev
 ```
 
+## Variables d'environnement
+
+Configurer les variables suivantes dans votre environnement local et de production:
+
+```text
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+NEXT_PUBLIC_SUPABASE_REDIRECT_URL=http://localhost:3000/auth/callback
+SIMULATION_API_URL=http://localhost:3001
+SIMULATION_API_KEY=
+BACKEND_API_KEY=
+```
+
+Notes:
+
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` est la cle publique a utiliser dans le frontend. L'ancienne variable `NEXT_PUBLIC_SUPABASE_ANON_KEY` reste acceptee en secours.
+- La `secret` key Supabase n'est pas utilisee dans ce frontend et ne doit pas etre exposee au navigateur.
+- `NEXT_PUBLIC_SUPABASE_REDIRECT_URL` peut pointer vers votre domaine public, par exemple `https://monapp.com/auth/callback`.
+- Cette URL doit aussi etre autorisee dans la configuration OAuth Google et dans Supabase.
+- Le JWT Supabase est ajoute automatiquement aux requetes frontend, puis relaie par les routes Next vers les APIs backend.
+
 Application locale:
 
 ```text

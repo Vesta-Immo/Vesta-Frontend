@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type {
   FinancingSettings,
   PropertyItem,
@@ -10,6 +10,7 @@ import {
   getPropertyList,
   deleteProperty,
 } from "./propertyListApi";
+import { useSessionReset } from "./SessionResetContext";
 
 interface PropertyListStore {
   financingSettings: FinancingSettings | null;
@@ -27,6 +28,21 @@ export function usePropertyListStore() {
     loading: false,
     error: null,
   });
+  const { registerPropertyListReset } = useSessionReset();
+
+  // Enregistrer la fonction de reset au mount
+  useEffect(() => {
+    const resetFn = () => {
+      setStore({
+        financingSettings: null,
+        properties: [],
+        results: null,
+        loading: false,
+        error: null,
+      });
+    };
+    registerPropertyListReset(resetFn);
+  }, [registerPropertyListReset]);
 
   const setError = useCallback((error: string | null) => {
     setStore((prev) => ({ ...prev, error }));

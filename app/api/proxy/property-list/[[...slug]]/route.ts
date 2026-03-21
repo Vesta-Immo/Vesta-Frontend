@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createUpstreamHeaders } from "@/lib/server/forwardAuth";
 
 const BACKEND_URL = "http://localhost:3001/api/v1/simulations/property-list";
 
@@ -21,14 +22,13 @@ export async function POST(request: NextRequest) {
 
   try {
     const rawBody = await request.text();
-
-    const headers: HeadersInit = {
+    const headers = createUpstreamHeaders(request, {
       "x-api-key": process.env.BACKEND_API_KEY || "test",
-    };
+    });
 
     const hasBody = rawBody.trim().length > 0;
     if (hasBody) {
-      headers["Content-Type"] = "application/json";
+      headers.set("Content-Type", "application/json");
     }
 
     const response = await fetch(`${BACKEND_URL}${path}`, {
@@ -58,10 +58,10 @@ export async function GET(request: NextRequest) {
   try {
     const response = await fetch(`${BACKEND_URL}${path}`, {
       method: "GET",
-      headers: {
+      headers: createUpstreamHeaders(request, {
         "Content-Type": "application/json",
         "x-api-key": process.env.BACKEND_API_KEY || "test",
-      },
+      }),
     });
 
     const data = await parseBackendBody(response);
@@ -81,10 +81,10 @@ export async function DELETE(request: NextRequest) {
   try {
     const response = await fetch(`${BACKEND_URL}${path}`, {
       method: "DELETE",
-      headers: {
+      headers: createUpstreamHeaders(request, {
         "Content-Type": "application/json",
         "x-api-key": process.env.BACKEND_API_KEY || "test",
-      },
+      }),
     });
 
     if (response.status === 204) {

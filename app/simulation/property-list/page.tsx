@@ -42,6 +42,7 @@ export default function PropertyListPage() {
   async function handleSaveSettings(settings: typeof store.financingSettings) {
     if (!settings) return;
     await store.updateFinancingSettings(settings);
+    setShowFinancingProfile(false);
     setSettingsSuccess(true);
     setTimeout(() => setSettingsSuccess(false), 3000);
   }

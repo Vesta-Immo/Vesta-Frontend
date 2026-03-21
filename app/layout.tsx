@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Fraunces, Manrope } from "next/font/google";
+import AuthProvider from "@/components/auth/AuthProvider";
 import ThemeRegistry from "@/components/ThemeRegistry";
+import { SessionResetProvider } from "@/lib/SessionResetContext";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -31,7 +33,11 @@ export default function RootLayout({
       className={`${manrope.variable} ${fraunces.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ThemeRegistry>{children}</ThemeRegistry>
+        <ThemeRegistry>
+          <SessionResetProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </SessionResetProvider>
+        </ThemeRegistry>
       </body>
     </html>
   );

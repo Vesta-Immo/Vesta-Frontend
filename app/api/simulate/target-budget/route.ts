@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createUpstreamHeaders } from "@/lib/server/forwardAuth";
 
 const API_URL = process.env.SIMULATION_API_URL ?? "http://localhost:3001";
 const API_KEY = process.env.SIMULATION_API_KEY ?? "";
@@ -10,7 +11,10 @@ export async function POST(req: NextRequest) {
       `${API_URL}/api/v1/simulations/target-budget/compute`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+        headers: createUpstreamHeaders(req, {
+          "Content-Type": "application/json",
+          "x-api-key": API_KEY,
+        }),
         body: JSON.stringify(body),
       }
     );
