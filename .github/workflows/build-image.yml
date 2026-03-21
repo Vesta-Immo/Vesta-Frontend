@@ -28,7 +28,7 @@ on:
       - "types/**"
 
 jobs:
-  build-&-deploy:
+  build-and-deploy:
     name: Build image and push it to GCP Artifact Registry, then deploy to Cloud Run
     runs-on: ubuntu-latest
     environment: prod
