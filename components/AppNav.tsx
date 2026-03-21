@@ -9,9 +9,11 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
+import vestaHouseLogo from "@/img/vesta-house-no-bg.png";
 
 const NAV_LINKS = [
   { href: "/simulation/property-list", label: "Mes pistes d'achat", flagship: true },
@@ -91,15 +93,26 @@ export default function AppNav() {
             href="/"
             disableRipple
             sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 1,
               fontFamily: "var(--font-fraunces)",
               fontSize: { xs: "1.7rem", sm: "2rem" },
               fontWeight: 700,
               color: "primary.main",
               letterSpacing: "-0.01em",
               px: 0,
+              textTransform: "none",
               "&:hover": { bgcolor: "transparent" },
             }}
           >
+            <Image
+              src={vestaHouseLogo}
+              alt="Logo Vesta"
+              width={30}
+              height={30}
+              style={{ width: "auto", height: "1.7rem" }}
+            />
             Vesta
           </Button>
 
