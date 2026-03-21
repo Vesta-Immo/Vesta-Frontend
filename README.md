@@ -32,6 +32,41 @@ npm install
 npm run dev
 ```
 
+## Demarrage avec Docker
+
+Le projet inclut le script `docker-start.sh` pour lancer l'application dans un conteneur Docker avec les variables d'environnement attendues.
+
+Ce script existe pour centraliser deux operations:
+
+- charger les variables definies dans `.env.docker`
+- construire l'image Docker avec les variables publiques necessaires au build Next.js
+- lancer le conteneur avec les variables serveur necessaires a l'execution
+
+Utilisation:
+
+```bash
+./docker-start.sh
+```
+
+Le fichier `.env.docker` sert donc de source de configuration dediee au lancement Docker. Il permet de separer la configuration utilisee par le conteneur de votre configuration locale classique dans `.env`.
+
+Variables attendues dans `.env.docker`:
+
+```text
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+NEXT_PUBLIC_SUPABASE_REDIRECT_URL=http://localhost:3000/auth/callback
+SIMULATION_API_URL=
+SIMULATION_API_KEY=
+BACKEND_API_KEY=
+```
+
+Notes:
+
+- les variables `NEXT_PUBLIC_*` sont injectees au moment du build de l'image
+- les variables `SIMULATION_API_*` et `BACKEND_API_KEY` sont passees au conteneur au demarrage
+- `.env.docker` doit etre renseigne avant d'executer `./docker-start.sh`
+
 ## Variables d'environnement
 
 Configurer les variables suivantes dans votre environnement local et de production:
