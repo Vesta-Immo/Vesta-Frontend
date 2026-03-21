@@ -74,6 +74,8 @@ Le workflow GitHub Actions [.github/workflows/build-image.yml](.github/workflows
 - sur pull request, il verifie uniquement que l'image Docker se construit
 - sur `push` vers `main`, il construit puis publie l'image sur GHCR
 - un declenchement manuel via `workflow_dispatch` permet un build de verification sans publication
+- le workflow echoue si les variables de build GitHub requises sont absentes
+- le job utilise l'environment GitHub `prod`
 
 Images publiees:
 
@@ -83,7 +85,7 @@ Images publiees:
 Configuration GitHub recommandee:
 
 - autoriser GitHub Actions a ecrire les packages du repository ou de l'organisation
-- definir si besoin `vars` ou `secrets` pour `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_REDIRECT_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- definir dans l'environment GitHub `prod` les `vars` ou `secrets` `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_REDIRECT_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 
 ## Variables d'environnement
 
