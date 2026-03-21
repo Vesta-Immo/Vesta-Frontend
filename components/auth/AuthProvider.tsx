@@ -55,7 +55,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let isMounted = true;
-    let unsubscribe = () => undefined;
+    let unsubscribe: () => void = () => {};
 
     async function bootstrapAuth() {
       try {
