@@ -39,6 +39,24 @@ const SUPPORT_TOOLS = [
   },
 ];
 
+const BUYING_TRACK_DESCRIPTION = [
+  {
+    title: "Centraliser les biens qui comptent vraiment",
+    description:
+      "Rassemblez au meme endroit les biens qui meritent d'etre suivis dans un projet d'achat, pour comparer les opportunites sans vous perdre dans des notes eparses.",
+  },
+  {
+    title: "Cadrer la faisabilite financiere",
+    description:
+      "Visualisez rapidement si un dossier reste soutenable avec le taux d'endettement, la capacite d'emprunt et les autres indicateurs qui conditionnent la decision.",
+  },
+  {
+    title: "Traduire un bien en vrai cout mensuel",
+    description:
+      "Appuyez-vous sur une lecture plus juste du 'vrai' loyer TTC et des charges pour mesurer l'effort reel a financer, pas seulement le prix d'annonce.",
+  },
+];
+
 export default function Home() {
   return (
     <Box
@@ -65,7 +83,7 @@ export default function Home() {
           }}
         >
           <Box sx={{ p: { xs: 3, sm: 4, md: 5 } }}>
-            <Stack spacing={2} sx={{ maxWidth: 760 }}>
+            <Stack spacing={2.5} sx={{ maxWidth: 960 }}>
               <Typography
                 variant="h1"
                 sx={{
@@ -83,9 +101,40 @@ export default function Home() {
                 color="text.secondary"
                 sx={{ fontSize: "1.08rem", lineHeight: 1.75 }}
               >
-                L'outil coeur de Vesta pour comparer vos biens, visualiser les risques,
-                et prioriser les meilleures opportunites selon votre profil financement.
+                Mes pistes d'achat aide un particulier a garder la main sur plusieurs biens en
+                parallele, a verifier rapidement la faisabilite financiere, et a arbitrer sur
+                des bases concretes plutot que sur l'intuition seule.
               </Typography>
+
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
+                  gap: { xs: 2.5, md: 0 },
+                  alignItems: "start",
+                }}
+              >
+                {BUYING_TRACK_DESCRIPTION.map(({ title, description }, index) => (
+                  <Box
+                    key={title}
+                    sx={{
+                      pr: { md: index < BUYING_TRACK_DESCRIPTION.length - 1 ? 3 : 0 },
+                      pl: { md: index > 0 ? 3 : 0 },
+                      borderLeft:
+                        index > 0
+                          ? { md: "1px solid rgba(33, 43, 54, 0.10)" }
+                          : "none",
+                    }}
+                  >
+                    <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
+                      {title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                      {description}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
 
               <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ pt: 0.5 }}>
                 <Button

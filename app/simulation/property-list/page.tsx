@@ -17,6 +17,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { usePropertyListStore } from "@/lib/usePropertyListStore";
@@ -149,6 +150,34 @@ export default function PropertyListPage() {
               </>
             ) : null}
           </Stack>
+
+          <Button
+            component={Link}
+            href="/#mes-pistes-dachat"
+            variant="text"
+            color="primary"
+            size="small"
+            sx={{
+              alignSelf: "flex-end",
+              mt: 0.5,
+              px: 1.5,
+              py: 0.6,
+              minHeight: 36,
+              borderRadius: 999,
+              fontSize: "0.84rem",
+              fontWeight: 600,
+              textTransform: "none",
+              color: "text.secondary",
+              bgcolor: "transparent",
+              boxShadow: "none",
+              "&:hover": {
+                bgcolor: "rgba(25, 118, 210, 0.05)",
+                boxShadow: "none",
+              },
+            }}
+          >
+            Pourquoi cet outil ?
+          </Button>
         </Stack>
       </Paper>
 
