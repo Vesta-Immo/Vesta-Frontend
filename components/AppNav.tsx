@@ -9,9 +9,20 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import Drawer from "@mui/material/Drawer";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import Divider from "@mui/material/Divider";
+import Slide from "@mui/material/Slide";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import useScrollTrigger from "@mui/material/useScrollTrigger";
+import { useTheme } from "@mui/material/styles";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import { useAuth } from "@/components/auth/AuthProvider";
 import vestaHouseLogo from "@/img/vesta-house-no-bg.png";
 
@@ -24,10 +35,17 @@ const NAV_LINKS = [
 
 export default function AppNav() {
   const pathname = usePathname();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const hideOnScroll = useScrollTrigger({
+    disableHysteresis: true,
+    threshold: 72,
+  });
   const { authLoading, signInWithGoogle, signOut, user } = useAuth();
   const [authError, setAuthError] = useState<string | null>(null);
   const [authBusy, setAuthBusy] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -75,19 +93,61 @@ export default function AppNav() {
     }
   }
 
-  return (
-    <AppBar position="sticky" color="default" enableColorOnDark={false}>
+  const navLinks = (
+    <>
+      {NAV_LINKS.map(({ href, label, flagship }) => {
+        const active = pathname === href || pathname.startsWith(href);
+        return (
+          <Button
+            key={href}
+            component={Link}
+            href={href}
+            size="small"
+            variant={active || flagship ? "contained" : "text"}
+            color="primary"
+            sx={
+              active || flagship
+                ? flagship
+                  ? {
+                      fontWeight: 700,
+                      boxShadow: "none",
+                      bgcolor: active ? "primary.main" : "primary.light",
+                      color: "primary.contrastText",
+                      "&:hover": {
+                        boxShadow: "none",
+                        bgcolor: active ? "primary.dark" : "primary.main",
+                        color: "primary.contrastText",
+                      },
+                    }
+                  : {}
+                : { color: "text.secondary" }
+            }
+          >
+            {label}
+          </Button>
+        );
+      })}
+    </>
+  );
+
+  const navBar = (
+    <AppBar
+      position={isMobile ? "fixed" : "sticky"}
+      color="default"
+      enableColorOnDark={false}
+      sx={{ boxShadow: isMobile ? "0 2px 10px rgba(27, 32, 30, 0.08)" : undefined }}
+    >
       <Container maxWidth="lg">
         <Toolbar
           disableGutters
           sx={{
             justifyContent: "space-between",
-            gap: 2,
-            flexWrap: "wrap",
-            py: 1,
+            gap: { xs: 1, sm: 2 },
+            flexWrap: "nowrap",
+            py: { xs: 0.25, sm: 1 },
+            minHeight: { xs: 56, sm: 68 },
           }}
         >
-          {/* Logo */}
           <Button
             component={Link}
             href="/"
@@ -97,7 +157,7 @@ export default function AppNav() {
               alignItems: "center",
               gap: 1,
               fontFamily: "var(--font-fraunces)",
-              fontSize: { xs: "1.7rem", sm: "2rem" },
+              fontSize: { xs: "1.3rem", sm: "2rem" },
               fontWeight: 700,
               color: "primary.main",
               letterSpacing: "-0.01em",
@@ -111,48 +171,21 @@ export default function AppNav() {
               alt="Logo Vesta"
               width={30}
               height={30}
-              style={{ width: "auto", height: "1.7rem" }}
+              style={{ width: "auto", height: isMobile ? "1.35rem" : "1.7rem" }}
             />
             Vesta
           </Button>
 
-          {/* Navigation links */}
-          <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", flex: 1 }}>
-            {NAV_LINKS.map(({ href, label, flagship }) => {
-              const active = pathname === href || pathname.startsWith(href);
-              return (
-                <Button
-                  key={href}
-                  component={Link}
-                  href={href}
-                  size="small"
-                  variant={active || flagship ? "contained" : "text"}
-                  color="primary"
-                  sx={
-                    active || flagship
-                      ? flagship
-                        ? {
-                            fontWeight: 700,
-                            boxShadow: "none",
-                            bgcolor: active ? "primary.main" : "primary.light",
-                            color: "primary.contrastText",
-                            "&:hover": {
-                              boxShadow: "none",
-                              bgcolor: active ? "primary.dark" : "primary.main",
-                              color: "primary.contrastText",
-                            },
-                          }
-                        : {}
-                      : { color: "text.secondary" }
-                  }
-                >
-                  {label}
-                </Button>
-              );
-            })}
+          <Box sx={{ display: { xs: "none", md: "flex" }, gap: 0.5, flexWrap: "wrap", flex: 1 }}>
+            {navLinks}
           </Box>
 
-          <Stack direction="row" spacing={0.75} alignItems="center" sx={{ ml: "auto" }}>
+          <Stack
+            direction="row"
+            spacing={0.75}
+            alignItems="center"
+            sx={{ ml: "auto", display: { xs: "none", md: "flex" } }}
+          >
             {mounted && user?.email ? (
               <Typography
                 variant="body2"
@@ -179,37 +212,46 @@ export default function AppNav() {
                 color="primary"
                 onClick={user ? handleSignOut : handleSignIn}
                 disabled={authLoading || authBusy}
-              sx={{
-                minWidth: "auto",
-                minHeight: 36,
-                px: 1.4,
-                borderRadius: 999,
-                borderColor: user ? "rgba(25, 118, 210, 0.16)" : "rgba(25, 118, 210, 0.22)",
-                backgroundColor: user ? "transparent" : "rgba(255, 255, 255, 0.72)",
-                color: user ? "text.secondary" : "primary.main",
-                fontSize: "0.84rem",
-                fontWeight: 600,
-                letterSpacing: "-0.01em",
-                textTransform: "none",
-                boxShadow: "none",
-                backdropFilter: "blur(10px)",
-                "&:hover": {
-                  borderColor: user ? "rgba(25, 118, 210, 0.28)" : "rgba(25, 118, 210, 0.34)",
-                  backgroundColor: user
-                    ? "rgba(25, 118, 210, 0.05)"
-                    : "rgba(255, 255, 255, 0.9)",
+                sx={{
+                  minWidth: "auto",
+                  minHeight: 36,
+                  px: 1.4,
+                  borderRadius: 999,
+                  borderColor: user ? "rgba(25, 118, 210, 0.16)" : "rgba(25, 118, 210, 0.22)",
+                  backgroundColor: user ? "transparent" : "rgba(255, 255, 255, 0.72)",
+                  color: user ? "text.secondary" : "primary.main",
+                  fontSize: "0.84rem",
+                  fontWeight: 600,
+                  letterSpacing: "-0.01em",
+                  textTransform: "none",
                   boxShadow: "none",
-                },
-                "&.Mui-disabled": {
-                  borderColor: "rgba(25, 118, 210, 0.12)",
-                  color: "text.disabled",
-                },
-              }}
-            >
-              {authButtonLabel}
-            </Button>
+                  backdropFilter: "blur(10px)",
+                  "&:hover": {
+                    borderColor: user ? "rgba(25, 118, 210, 0.28)" : "rgba(25, 118, 210, 0.34)",
+                    backgroundColor: user
+                      ? "rgba(25, 118, 210, 0.05)"
+                      : "rgba(255, 255, 255, 0.9)",
+                    boxShadow: "none",
+                  },
+                  "&.Mui-disabled": {
+                    borderColor: "rgba(25, 118, 210, 0.12)",
+                    color: "text.disabled",
+                  },
+                }}
+              >
+                {authButtonLabel}
+              </Button>
             ) : null}
           </Stack>
+
+          <IconButton
+            aria-label="Ouvrir le menu"
+            onClick={() => setMobileMenuOpen(true)}
+            color="primary"
+            sx={{ display: { xs: "inline-flex", md: "none" } }}
+          >
+            <MenuRoundedIcon />
+          </IconButton>
         </Toolbar>
 
         {authError ? (
@@ -219,5 +261,83 @@ export default function AppNav() {
         ) : null}
       </Container>
     </AppBar>
+  );
+
+  return (
+    <>
+      {isMobile ? (
+        <Slide appear={false} direction="down" in={!hideOnScroll}>
+          {navBar}
+        </Slide>
+      ) : (
+        navBar
+      )}
+
+      {isMobile ? <Toolbar sx={{ minHeight: 56 }} /> : null}
+
+      <Drawer
+        anchor="right"
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        PaperProps={{ sx: { width: "min(88vw, 360px)", p: 1.25 } }}
+      >
+        <Typography
+          variant="subtitle2"
+          sx={{ px: 1, pb: 1, fontWeight: 700, color: "text.secondary", textTransform: "uppercase" }}
+        >
+          Navigation
+        </Typography>
+
+        <List disablePadding>
+          {NAV_LINKS.map(({ href, label }) => {
+            const active = pathname === href || pathname.startsWith(href);
+            return (
+              <ListItemButton
+                key={href}
+                component={Link}
+                href={href}
+                selected={active}
+                onClick={() => setMobileMenuOpen(false)}
+                sx={{ borderRadius: 1.5, mb: 0.5 }}
+              >
+                <ListItemText
+                  primary={label}
+                  slotProps={{
+                    primary: {
+                      fontSize: "0.95rem",
+                      fontWeight: active ? 700 : 500,
+                    },
+                  }}
+                />
+              </ListItemButton>
+            );
+          })}
+        </List>
+
+        <Divider sx={{ my: 1 }} />
+
+        {mounted && user?.email ? (
+          <Typography
+            variant="body2"
+            sx={{ px: 1, pb: 1, color: "text.secondary", overflowWrap: "anywhere" }}
+          >
+            {user.email}
+          </Typography>
+        ) : null}
+
+        {mounted ? (
+          <Button
+            fullWidth
+            variant="outlined"
+            color="primary"
+            onClick={user ? handleSignOut : handleSignIn}
+            disabled={authLoading || authBusy}
+            sx={{ mt: 0.5, textTransform: "none", borderRadius: 999 }}
+          >
+            {authButtonLabel}
+          </Button>
+        ) : null}
+      </Drawer>
+    </>
   );
 }
