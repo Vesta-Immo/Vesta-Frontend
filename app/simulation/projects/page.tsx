@@ -2,9 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 import Link from "next/link";
-import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -15,6 +13,7 @@ import Alert from "@mui/material/Alert";
 import AddIcon from "@mui/icons-material/Add";
 
 import { useAuth } from "@/components/auth/AuthProvider";
+import AuthPrompt from "@/components/auth/AuthPrompt";
 import type { Project } from "@/types/project";
 import { useProjects } from "@/lib/projects";
 import ProjectCard from "@/components/projects/ProjectCard";
@@ -23,33 +22,16 @@ import ProjectsSkeleton from "@/components/projects/ProjectsSkeleton";
 import EmptyState from "@/components/projects/EmptyState";
 
 export default function ProjectsPage() {
-  const pathname = usePathname();
-  const { authLoading, signInWithGoogle, user } = useAuth();
+  const { authLoading, user } = useAuth();
   const { data: projects, isLoading, isError, error } = useProjects();
   const [createOpen, setCreateOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [authBusy, setAuthBusy] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  async function handleSignIn() {
-    setAuthBusy(true);
-    setAuthError(null);
-
-    const returnTo = typeof window === "undefined"
-      ? pathname
-      : `${window.location.pathname}${window.location.search}`;
-
-    const { error: signInError } = await signInWithGoogle(returnTo);
-    if (signInError) {
-      setAuthError(signInError);
-      setAuthBusy(false);
-    }
-  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -127,26 +109,10 @@ export default function ProjectsPage() {
             <Typography color="text.secondary">Vérification de votre session...</Typography>
           </Paper>
         ) : mounted && !user ? (
-          <Paper sx={{ p: { xs: 3, sm: 4 } }}>
-            <Stack spacing={2.5} alignItems="flex-start">
-              <Box>
-                <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-                  Connectez-vous pour accéder à vos projets
-                </Typography>
-                <Typography color="text.secondary">
-                  Vos projets et scénarios de financement sont disponibles après connexion.
-                </Typography>
-              </Box>
-
-              <Button
-                variant="contained"
-                onClick={handleSignIn}
-                disabled={authBusy}
-              >
-                {authBusy ? "Connexion..." : "Se connecter avec Google"}
-              </Button>
-            </Stack>
-          </Paper>
+          <AuthPrompt
+            title="Connectez-vous pour accéder à vos projets"
+            description="Vos projets et scénarios de financement sont disponibles après connexion."
+          />
         ) : (
           <>
             <Stack direction="row" justifyContent="flex-end" alignItems="center">
