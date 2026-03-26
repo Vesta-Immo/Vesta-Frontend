@@ -1,19 +1,21 @@
 // filepath: app/simulation/projects/[projectId]/page.tsx
 "use client";
 
-import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useParams, useRouter, usePathname } from "next/navigation";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
+import Paper from "@mui/material/Paper";
 import AddIcon from "@mui/icons-material/Add";
 import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Skeleton from "@mui/material/Skeleton";
 import Alert from "@mui/material/Alert";
 
+import { useAuth } from "@/components/auth/AuthProvider";
 import { useProject, useScenarios } from "@/lib/projects";
 import ScenarioCard from "@/components/projects/ScenarioCard";
 import ScenarioForm from "@/components/projects/ScenarioForm";
@@ -24,9 +26,18 @@ import type { Scenario } from '@/types/project';
 export default function ProjectDashboardPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const router = useRouter();
+  const pathname = usePathname();
+  const { authLoading, signInWithGoogle, user } = useAuth();
   const [scenarioFormOpen, setScenarioFormOpen] = useState(false);
   const [editingScenario, setEditingScenario] = useState<Scenario | null>(null);
   const [selectedScenarioIds, setSelectedScenarioIds] = useState<string[]>([]);
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const {
     data: project,
@@ -38,6 +49,21 @@ export default function ProjectDashboardPage() {
     data: scenarios,
     isLoading: scenariosLoading,
   } = useScenarios(projectId);
+
+  async function handleSignIn() {
+    setAuthBusy(true);
+    setAuthError(null);
+
+    const returnTo = typeof window === "undefined"
+      ? pathname
+      : `${window.location.pathname}${window.location.search}`;
+
+    const { error: signInError } = await signInWithGoogle(returnTo);
+    if (signInError) {
+      setAuthError(signInError);
+      setAuthBusy(false);
+    }
+  }
 
   const toggleScenarioSelection = (id: string) => {
     setSelectedScenarioIds((prev) =>
@@ -64,6 +90,35 @@ export default function ProjectDashboardPage() {
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
+      {authError && <Alert severity="error" sx={{ mb: 3 }}>{authError}</Alert>}
+
+      {mounted && authLoading ? (
+        <Paper sx={{ p: 3.5, mb: 3 }}>
+          <Typography color="text.secondary">Vérification de votre session...</Typography>
+        </Paper>
+      ) : mounted && !user ? (
+        <Paper sx={{ p: { xs: 3, sm: 4 }, mb: 3 }}>
+          <Stack spacing={2.5} alignItems="flex-start">
+            <Box>
+              <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+                Connectez-vous pour accéder à vos scénarios
+              </Typography>
+              <Typography color="text.secondary">
+                Vos scénarios de financement et vos projets sont disponibles après connexion.
+              </Typography>
+            </Box>
+
+            <Button
+              variant="contained"
+              onClick={handleSignIn}
+              disabled={authBusy}
+            >
+              {authBusy ? "Connexion..." : "Se connecter avec Google"}
+            </Button>
+          </Stack>
+        </Paper>
+      ) : null}
+
       {/* Header */}
       <Stack direction="row" alignItems="center" gap={1} sx={{ mb: 1 }}>
         <Button

@@ -50,6 +50,11 @@ export default function PropertyListPage() {
   const [showFinancingProfile, setShowFinancingProfile] = useState(false);
   const [authBusy, setAuthBusy] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Load initial data
   useEffect(() => {
@@ -184,11 +189,11 @@ export default function PropertyListPage() {
       <Stack spacing={3}>
         {authError && <Alert severity="error">{authError}</Alert>}
 
-        {authLoading ? (
+        {mounted && authLoading ? (
           <Paper sx={{ p: 3.5 }}>
             <Typography color="text.secondary">Verification de votre session...</Typography>
           </Paper>
-        ) : !user ? (
+        ) : mounted && !user ? (
           <Paper sx={{ p: { xs: 3, sm: 4 } }}>
             <Stack spacing={2.5} alignItems="flex-start">
               <Box>

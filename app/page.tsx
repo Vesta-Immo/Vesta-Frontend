@@ -74,6 +74,7 @@ export default function Home() {
       <Container maxWidth="lg" sx={{ flex: 1, py: { xs: 6, md: 10 } }}>
         {/* Hero */}
         <Card
+          id="mes-pistes-dachat"
           elevation={0}
           sx={{
             mb: { xs: 6, md: 8 },
@@ -82,6 +83,7 @@ export default function Home() {
             borderColor: "divider",
             background:
               "linear-gradient(120deg, rgba(245,124,0,0.14) 0%, rgba(25,118,210,0.08) 100%)",
+            scrollMarginTop: "80px",
           }}
         >
           <Box sx={{ p: { xs: 3, sm: 4, md: 5 } }}>
@@ -155,6 +157,7 @@ export default function Home() {
 
         {/* Scénarios financement */}
         <Card
+          id="scenarios-financement"
           elevation={0}
           sx={{
             mb: { xs: 6, md: 8 },
@@ -163,6 +166,7 @@ export default function Home() {
             borderColor: "divider",
             background:
               "linear-gradient(120deg, rgba(25,118,210,0.10) 0%, rgba(245,124,0,0.06) 100%)",
+            scrollMarginTop: "80px",
           }}
         >
           <Box sx={{ p: { xs: 3, sm: 4, md: 5 } }}>
