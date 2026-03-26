@@ -155,7 +155,7 @@ export default function CompareTable({
             })}
           </TableRow>
           <TableRow sx={{ "& td": { borderRight: "1px solid", borderColor: "divider" } }}>
-            <TableCell sx={{ fontWeight: 500 }}>Budget max achat</TableCell>
+            <TableCell sx={{ fontWeight: 500 }}>Budget achat</TableCell>
             {scenarios.map((s) => {
               const isBest = s.scenarioId === insights.highestTotalBudget.scenarioId;
               const delta = deltas[s.scenarioId];

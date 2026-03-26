@@ -66,14 +66,14 @@ export default function InsightsCards({ insights, scenarios }: InsightsCardsProp
         </CardContent>
       </Card>
 
-      {/* Budget max achat */}
+      {/* Budget achat */}
       {insights.highestTotalBudget && (
         <Card sx={{ flex: 1 }}>
           <CardContent>
             <Stack direction="row" alignItems="center" gap={1} sx={{ mb: 1 }}>
               <TrendingUpIcon color="success" fontSize="small" />
               <Typography variant="caption" color="text.secondary">
-                Budget max achat
+                Budget achat
               </Typography>
             </Stack>
             <Typography variant="h6" fontWeight={700}>
