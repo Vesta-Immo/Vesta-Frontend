@@ -26,6 +26,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 function buildRedirectTo(returnTo?: string) {
   const configuredRedirect = process.env.NEXT_PUBLIC_SUPABASE_REDIRECT_URL;
+  console.log('[DEBUG] REDIRECT_URL:', configuredRedirect); // ← ajouter
   const callbackUrl =
     configuredRedirect && configuredRedirect.length > 0
       ? configuredRedirect

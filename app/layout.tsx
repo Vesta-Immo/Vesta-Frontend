@@ -3,6 +3,7 @@ import { Fraunces, Manrope } from "next/font/google";
 import AuthProvider from "@/components/auth/AuthProvider";
 import ThemeRegistry from "@/components/ThemeRegistry";
 import { SessionResetProvider } from "@/lib/SessionResetContext";
+import QueryClientProviderWrapper from "@/components/providers/QueryClientProvider";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -35,7 +36,11 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ThemeRegistry>
           <SessionResetProvider>
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              <QueryClientProviderWrapper>
+                {children}
+              </QueryClientProviderWrapper>
+            </AuthProvider>
           </SessionResetProvider>
         </ThemeRegistry>
       </body>
