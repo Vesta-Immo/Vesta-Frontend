@@ -27,10 +27,9 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import vestaHouseLogo from "@/img/vesta-house-no-bg.png";
 
 const NAV_LINKS = [
-  { href: "/simulation/property-list", label: "Mes pistes d'achat", flagship: true },
+  { href: "/simulation/projects", label: "Scénarios financement" },
+  { href: "/simulation/property-list", label: "Mes pistes d'achat" },
   { href: "/simulation/capacite-emprunt", label: "Capacité d'emprunt" },
-  { href: "/simulation/budget-cible", label: "Budget cible" },
-  { href: "/simulation/frais-notaire", label: "Frais de notaire" },
 ];
 
 export default function AppNav() {
