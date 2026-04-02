@@ -49,25 +49,20 @@ export async function deleteProject(projectId: string): Promise<void> {
 
 // ─── Scenarios ────────────────────────────────────────────────────────────────
 
-export async function getScenarios(projectId: string): Promise<Scenario[]> {
-  return requestJson<Scenario[]>(`${BASE}/${projectId}/scenarios`, { method: 'GET' });
+const SCENARIOS_BASE = '/api/scenarios';
+
+export async function getScenarios(): Promise<Scenario[]> {
+  return requestJson<Scenario[]>(SCENARIOS_BASE, { method: 'GET' });
 }
 
-export async function getScenario(
-  projectId: string,
-  scenarioId: string,
-): Promise<Scenario> {
-  return requestJson<Scenario>(
-    `${BASE}/${projectId}/scenarios/${scenarioId}`,
-    { method: 'GET' },
-  );
+export async function getScenario(scenarioId: string): Promise<Scenario> {
+  return requestJson<Scenario>(`${SCENARIOS_BASE}/${scenarioId}`, { method: 'GET' });
 }
 
 export async function createScenario(
-  projectId: string,
   data: CreateScenarioInput,
 ): Promise<Scenario> {
-  return requestJson<Scenario>(`${BASE}/${projectId}/scenarios`, {
+  return requestJson<Scenario>(SCENARIOS_BASE, {
     method: 'POST',
     body: JSON.stringify(data),
     headers: { 'Content-Type': 'application/json' },
@@ -75,43 +70,30 @@ export async function createScenario(
 }
 
 export async function updateScenario(
-  projectId: string,
   scenarioId: string,
   data: UpdateScenarioInput,
 ): Promise<Scenario> {
-  return requestJson<Scenario>(`${BASE}/${projectId}/scenarios/${scenarioId}`, {
+  return requestJson<Scenario>(`${SCENARIOS_BASE}/${scenarioId}`, {
     method: 'PATCH',
     body: JSON.stringify(data),
     headers: { 'Content-Type': 'application/json' },
   });
 }
 
-export async function deleteScenario(
-  projectId: string,
-  scenarioId: string,
-): Promise<void> {
-  return requestJson<void>(
-    `${BASE}/${projectId}/scenarios/${scenarioId}`,
-    { method: 'DELETE' },
-  );
+export async function deleteScenario(scenarioId: string): Promise<void> {
+  return requestJson<void>(`${SCENARIOS_BASE}/${scenarioId}`, { method: 'DELETE' });
 }
 
-export async function copyScenario(
-  projectId: string,
-  scenarioId: string,
-): Promise<Scenario> {
+export async function copyScenario(scenarioId: string): Promise<Scenario> {
   return requestJson<Scenario>(
-    `${BASE}/${projectId}/scenarios/${scenarioId}/copy`,
+    `${SCENARIOS_BASE}/${scenarioId}/copy`,
     { method: 'POST' },
   );
 }
 
-export async function recomputeScenario(
-  projectId: string,
-  scenarioId: string,
-): Promise<Scenario> {
+export async function recomputeScenario(scenarioId: string): Promise<Scenario> {
   return requestJson<Scenario>(
-    `${BASE}/${projectId}/scenarios/${scenarioId}/compute`,
+    `${SCENARIOS_BASE}/${scenarioId}/compute`,
     { method: 'POST' },
   );
 }
@@ -119,13 +101,12 @@ export async function recomputeScenario(
 // ─── Compare ──────────────────────────────────────────────────────────────────
 
 export async function compareScenarios(
-  projectId: string,
   scenarioIds: string[],
 ): Promise<CompareScenariosResponse> {
   // Backend expects comma-separated single value: ?ids=sc1,sc2,sc3
   const query = `ids=${scenarioIds.map((id) => encodeURIComponent(id)).join(',')}`;
   return requestJson<CompareScenariosResponse>(
-    `${BASE}/${projectId}/scenarios/compare?${query}`,
+    `${SCENARIOS_BASE}/compare?${query}`,
     { method: 'GET' },
   );
 }

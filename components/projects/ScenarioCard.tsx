@@ -26,7 +26,6 @@ import StalenessBadge from "./StalenessBadge";
 
 interface ScenarioCardProps {
   scenario: Scenario;
-  projectId: string;
   isSelected: boolean;
   onToggleSelect: () => void;
   onEdit: () => void;
@@ -34,7 +33,6 @@ interface ScenarioCardProps {
 
 export default function ScenarioCard({
   scenario,
-  projectId,
   isSelected,
   onToggleSelect,
   onEdit,
@@ -84,9 +82,7 @@ export default function ScenarioCard({
                 )}
                 {stale && hasResult && (
                   <StalenessBadge
-                    onRecalculate={() =>
-                      recomputeMutation.mutate({ projectId, scenarioId: scenario.id })
-                    }
+                    onRecalculate={() => recomputeMutation.mutate(scenario.id)}
                     isRecomputing={recomputeMutation.isPending}
                   />
                 )}
@@ -174,7 +170,7 @@ export default function ScenarioCard({
         <MenuItem
           onClick={() => {
             setAnchorEl(null);
-            copyMutation.mutate({ projectId, scenarioId: scenario.id });
+            copyMutation.mutate(scenario.id);
           }}
         >
           <ListItemIcon>
@@ -186,7 +182,7 @@ export default function ScenarioCard({
           onClick={() => {
             setAnchorEl(null);
             if (confirm(`Supprimer "${scenario.name}" ?`)) {
-              deleteMutation.mutate({ projectId, scenarioId: scenario.id });
+              deleteMutation.mutate(scenario.id);
             }
           }}
           sx={{ color: "error.main" }}

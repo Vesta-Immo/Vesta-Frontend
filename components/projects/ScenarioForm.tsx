@@ -18,14 +18,12 @@ import type { CreateScenarioInput, ScenarioInput } from '@/types/project';
 interface ScenarioFormProps {
   open: boolean;
   onClose: () => void;
-  projectId: string;
   initialValues?: Partial<CreateScenarioInput> & { id?: string };
 }
 
 export default function ScenarioForm({
   open,
   onClose,
-  projectId,
   initialValues,
 }: ScenarioFormProps) {
   const [name, setName] = useState(initialValues?.name ?? "");
@@ -83,12 +81,11 @@ export default function ScenarioForm({
     try {
       if (isEdit && initialValues?.id) {
         await updateMutation.mutateAsync({
-          projectId,
           scenarioId: initialValues.id,
           data: payload,
         });
       } else {
-        await createMutation.mutateAsync({ projectId, data: payload });
+        await createMutation.mutateAsync(payload);
       }
       handleClose();
     } catch (err: unknown) {

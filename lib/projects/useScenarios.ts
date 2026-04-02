@@ -6,21 +6,20 @@ import * as api from './api';
 import type { CreateScenarioInput, UpdateScenarioInput, Scenario } from '@/types/project';
 import type { ApiError } from '@/types/project';
 
-export function useScenarios(projectId: string) {
+export function useScenarios() {
   return useQuery({
-    queryKey: queryKeys.scenarios(projectId),
-    queryFn: () => api.getScenarios(projectId),
+    queryKey: queryKeys.scenarios(),
+    queryFn: api.getScenarios,
     staleTime: 0,
-    enabled: !!projectId,
   });
 }
 
-export function useScenario(projectId: string, scenarioId: string) {
+export function useScenario(scenarioId: string) {
   return useQuery({
-    queryKey: queryKeys.scenario(projectId, scenarioId),
-    queryFn: () => api.getScenario(projectId, scenarioId),
+    queryKey: queryKeys.scenario(scenarioId),
+    queryFn: () => api.getScenario(scenarioId),
     staleTime: 0,
-    enabled: !!projectId && !!scenarioId,
+    enabled: !!scenarioId,
   });
 }
 
@@ -29,11 +28,10 @@ export function useCreateScenario() {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: ({ projectId, data }: { projectId: string; data: CreateScenarioInput }) =>
-      api.createScenario(projectId, data),
-    onSuccess: (_scenario: Scenario, vars) => {
-      qc.invalidateQueries({ queryKey: queryKeys.scenarios(vars.projectId) });
-      qc.invalidateQueries({ queryKey: queryKeys.project(vars.projectId) });
+    mutationFn: (data: CreateScenarioInput) => api.createScenario(data),
+    onSuccess: (_scenario: Scenario) => {
+      qc.invalidateQueries({ queryKey: queryKeys.scenarios() });
+      qc.invalidateQueries({ queryKey: queryKeys.projects() });
     },
     onError: (err: ApiError) => {
       if (err.statusCode === 403 || err.statusCode === 404) {
@@ -48,18 +46,16 @@ export function useUpdateScenario() {
 
   return useMutation({
     mutationFn: ({
-      projectId,
       scenarioId,
       data,
     }: {
-      projectId: string;
       scenarioId: string;
       data: UpdateScenarioInput;
-    }) => api.updateScenario(projectId, scenarioId, data),
+    }) => api.updateScenario(scenarioId, data),
     onSuccess: (_res, vars) => {
-      qc.invalidateQueries({ queryKey: queryKeys.scenarios(vars.projectId) });
-      qc.invalidateQueries({ queryKey: queryKeys.scenario(vars.projectId, vars.scenarioId) });
-      qc.invalidateQueries({ queryKey: queryKeys.project(vars.projectId) });
+      qc.invalidateQueries({ queryKey: queryKeys.scenarios() });
+      qc.invalidateQueries({ queryKey: queryKeys.scenario(vars.scenarioId) });
+      qc.invalidateQueries({ queryKey: queryKeys.projects() });
     },
   });
 }
@@ -68,11 +64,10 @@ export function useDeleteScenario() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ projectId, scenarioId }: { projectId: string; scenarioId: string }) =>
-      api.deleteScenario(projectId, scenarioId),
-    onSuccess: (_res, vars) => {
-      qc.invalidateQueries({ queryKey: queryKeys.scenarios(vars.projectId) });
-      qc.invalidateQueries({ queryKey: queryKeys.project(vars.projectId) });
+    mutationFn: (scenarioId: string) => api.deleteScenario(scenarioId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.scenarios() });
+      qc.invalidateQueries({ queryKey: queryKeys.projects() });
     },
   });
 }
@@ -81,11 +76,10 @@ export function useCopyScenario() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ projectId, scenarioId }: { projectId: string; scenarioId: string }) =>
-      api.copyScenario(projectId, scenarioId),
-    onSuccess: (_res, vars) => {
-      qc.invalidateQueries({ queryKey: queryKeys.scenarios(vars.projectId) });
-      qc.invalidateQueries({ queryKey: queryKeys.project(vars.projectId) });
+    mutationFn: (scenarioId: string) => api.copyScenario(scenarioId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.scenarios() });
+      qc.invalidateQueries({ queryKey: queryKeys.projects() });
     },
   });
 }
@@ -94,11 +88,10 @@ export function useRecomputeScenario() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ projectId, scenarioId }: { projectId: string; scenarioId: string }) =>
-      api.recomputeScenario(projectId, scenarioId),
-    onSuccess: (updated: Scenario, vars) => {
-      qc.setQueryData(queryKeys.scenario(vars.projectId, vars.scenarioId), updated);
-      qc.invalidateQueries({ queryKey: queryKeys.scenarios(vars.projectId) });
+    mutationFn: (scenarioId: string) => api.recomputeScenario(scenarioId),
+    onSuccess: (updated: Scenario) => {
+      qc.setQueryData(queryKeys.scenario(updated.id), updated);
+      qc.invalidateQueries({ queryKey: queryKeys.scenarios() });
     },
   });
 }

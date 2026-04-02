@@ -2,36 +2,44 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
-import Chip from "@mui/material/Chip";
 import Alert from "@mui/material/Alert";
 import AddIcon from "@mui/icons-material/Add";
+import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
+import Skeleton from "@mui/material/Skeleton";
 
 import { useAuth } from "@/components/auth/AuthProvider";
 import AuthPrompt from "@/components/auth/AuthPrompt";
-import type { Project } from "@/types/project";
-import { useProjects } from "@/lib/projects";
-import ProjectCard from "@/components/projects/ProjectCard";
-import ProjectForm from "@/components/projects/ProjectForm";
-import ProjectsSkeleton from "@/components/projects/ProjectsSkeleton";
+import type { Scenario } from "@/types/project";
+import { useScenarios } from "@/lib/projects";
+import ScenarioCard from "@/components/projects/ScenarioCard";
+import ScenarioForm from "@/components/projects/ScenarioForm";
 import EmptyState from "@/components/projects/EmptyState";
 
 export default function ProjectsPage() {
+  const router = useRouter();
   const { authLoading, user } = useAuth();
-  const { data: projects, isLoading, isError, error } = useProjects();
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const { data: scenarios, isLoading: scenariosLoading } = useScenarios();
+  const [scenarioFormOpen, setScenarioFormOpen] = useState(false);
+  const [editingScenario, setEditingScenario] = useState<Scenario | null>(null);
+  const [selectedScenarioIds, setSelectedScenarioIds] = useState<string[]>([]);
   const [authError, setAuthError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const toggleScenarioSelection = (id: string) => {
+    setSelectedScenarioIds((prev) =>
+      prev.includes(id) ? prev.filter((scenarioId) => scenarioId !== id) : [...prev, id],
+    );
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -63,43 +71,13 @@ export default function ProjectsPage() {
           </Typography>
 
           <Typography variant="body1" color="text.secondary">
-            Créez des projets et comparez différents scénarios de financement pour trouver
-            la configuration qui correspond le mieux à votre situation.
+            Créez, ajustez et comparez vos scénarios de financement pour identifier la meilleure
+            configuration selon vos mensualités, votre apport et votre budget global.
           </Typography>
 
-          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ pt: 0.5 }}>
-            {user ? (
-              <Chip label={`Projets: ${projects?.length ?? 0}`} variant="outlined" />
-            ) : null}
-          </Stack>
-
-          <Button
-            component={Link}
-            href="/#scenarios-financement"
-            variant="text"
-            color="primary"
-            size="small"
-            sx={{
-              alignSelf: "flex-end",
-              mt: 0.5,
-              px: 1.5,
-              py: 0.6,
-              minHeight: 36,
-              borderRadius: 999,
-              fontSize: "0.84rem",
-              fontWeight: 600,
-              textTransform: "none",
-              color: "text.secondary",
-              bgcolor: "transparent",
-              boxShadow: "none",
-              "&:hover": {
-                bgcolor: "rgba(25, 118, 210, 0.05)",
-                boxShadow: "none",
-              },
-            }}
-          >
-            Pourquoi cet outil ?
-          </Button>
+          <Typography variant="body2" color="text.secondary">
+            Sélectionnez au moins deux scénarios pour lancer une comparaison détaillée.
+          </Typography>
         </Stack>
       </Paper>
 
@@ -110,54 +88,62 @@ export default function ProjectsPage() {
           </Paper>
         ) : mounted && !user ? (
           <AuthPrompt
-            title="Connectez-vous pour accéder à vos projets"
-            description="Vos projets et scénarios de financement sont disponibles après connexion."
+            title="Connectez-vous pour accéder à vos scénarios"
+            description="Vos scénarios de financement sont disponibles après connexion."
           />
         ) : (
           <>
-            <Stack direction="row" justifyContent="flex-end" alignItems="center">
+            <Stack direction="row" justifyContent="space-between" alignItems="center" useFlexGap flexWrap="wrap" spacing={1}>
+              <Button
+                variant="outlined"
+                startIcon={<CompareArrowsIcon />}
+                disabled={selectedScenarioIds.length < 2}
+                onClick={() => {
+                  const ids = selectedScenarioIds.join(",");
+                  router.push(`/simulation/projects/compare?ids=${ids}`);
+                }}
+              >
+                Comparer ({selectedScenarioIds.length})
+              </Button>
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}
-                onClick={() => setCreateOpen(true)}
+                onClick={() => setScenarioFormOpen(true)}
               >
-                Nouveau projet
+                Nouveau scénario
               </Button>
             </Stack>
 
-            {isLoading && <ProjectsSkeleton />}
-
-            {isError && !isLoading && (
-              <EmptyState
-                title="Erreur de chargement"
-                description={error instanceof Error ? error.message : "Impossible de charger vos projets."}
-                action={{
-                  label: "Réessayer",
-                  onClick: () => window.location.reload(),
-                }}
-              />
-            )}
-
-            {!isLoading && !isError && projects?.length === 0 && (
-              <EmptyState
-                title="Aucun projet"
-                description="Créez votre premier projet pour comparer des scénarios de financement."
-                action={{
-                  label: "Créer un projet",
-                  onClick: () => setCreateOpen(true),
-                }}
-              />
-            )}
-
-            {!isLoading && !isError && projects && projects.length > 0 && (
+            {scenariosLoading && (
               <Stack spacing={2}>
-                {projects.map((project) => (
-                  <ProjectCard
-                    key={project.id}
-                    project={project}
-                    onRename={(p) => {
-                      setEditingProject(p);
-                      setCreateOpen(true);
+                {[1, 2, 3].map((index) => (
+                  <Skeleton key={index} variant="rectangular" height={140} sx={{ borderRadius: 2 }} />
+                ))}
+              </Stack>
+            )}
+
+            {!scenariosLoading && scenarios?.length === 0 && (
+              <EmptyState
+                title="Aucun scénario"
+                description="Créez votre premier scénario pour commencer vos comparaisons de financement."
+                action={{
+                  label: "Créer un scénario",
+                  onClick: () => setScenarioFormOpen(true),
+                }}
+              />
+            )}
+
+            {!scenariosLoading && scenarios && scenarios.length > 0 && (
+              <Stack spacing={2}>
+                {scenarios.map((scenario) => (
+                  <ScenarioCard
+                    key={scenario.id}
+                    scenario={scenario}
+                    isSelected={selectedScenarioIds.includes(scenario.id)}
+                    onToggleSelect={() => toggleScenarioSelection(scenario.id)}
+                    onEdit={() => {
+                      setEditingScenario(scenario);
+                      setScenarioFormOpen(true);
                     }}
                   />
                 ))}
@@ -167,13 +153,22 @@ export default function ProjectsPage() {
         )}
       </Stack>
 
-      <ProjectForm
-        open={createOpen || Boolean(editingProject)}
+      <ScenarioForm
+        key={editingScenario?.id ?? "new"}
+        open={scenarioFormOpen}
         onClose={() => {
-          setCreateOpen(false);
-          setEditingProject(null);
+          setScenarioFormOpen(false);
+          setEditingScenario(null);
         }}
-        initialValues={editingProject ?? undefined}
+        initialValues={
+          editingScenario
+            ? {
+                ...editingScenario.inputParams,
+                id: editingScenario.id,
+                name: editingScenario.name,
+              }
+            : undefined
+        }
       />
     </Container>
   );

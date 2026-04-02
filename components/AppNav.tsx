@@ -34,7 +34,7 @@ type NavLink = {
 
 const NAV_LINKS: NavLink[] = [
   { href: "/simulation/property-list", label: "Mes pistes d'achat" },
-  { href: "/simulation/projects", label: "Scénarios financement" },
+  { href: "/simulation/projects", label: "Mes scénarios" },
   { href: "/simulation/capacite-emprunt", label: "Capacité d'emprunt" },
 ];
 

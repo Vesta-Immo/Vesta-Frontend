@@ -3,11 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from './queryKeys';
 import { compareScenarios } from './api';
 
-export function useCompareScenarios(projectId: string, scenarioIds: string[]) {
+export function useCompareScenarios(scenarioIds: string[]) {
   return useQuery({
-    queryKey: queryKeys.compare(projectId, scenarioIds),
-    queryFn: () => compareScenarios(projectId, scenarioIds),
+    queryKey: queryKeys.compare(scenarioIds),
+    queryFn: () => compareScenarios(scenarioIds),
     staleTime: 0, // never cache comparison results
-    enabled: !!projectId && scenarioIds.length >= 2,
+    enabled: scenarioIds.length >= 2,
   });
 }

@@ -6,13 +6,12 @@ export const queryKeys = {
 
   project: (id: string) => ['projects', id] as const,
 
-  scenarios: (projectId: string) => ['projects', projectId, 'scenarios'] as const,
+  scenarios: () => ['scenarios'] as const,
 
-  scenario: (projectId: string, scenarioId: string) =>
-    ['projects', projectId, 'scenarios', scenarioId] as const,
+  scenario: (scenarioId: string) => ['scenarios', scenarioId] as const,
 
-  compare: (projectId: string, scenarioIds: string[]) =>
-    ['projects', projectId, 'compare', ...[...scenarioIds].sort()] as const,
+  compare: (scenarioIds: string[]) =>
+    ['scenarios', 'compare', ...[...scenarioIds].sort()] as const,
 } as const;
 
 export type QueryKeys = typeof queryKeys;
