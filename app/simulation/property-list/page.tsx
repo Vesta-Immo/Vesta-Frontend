@@ -21,8 +21,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { usePropertyListStore } from "@/lib/usePropertyListStore";
+import { useActiveFinancingProfile, useFinancingProfiles, useSetActiveFinancingProfile } from "@/lib/financingProfile";
 import PropertyForm from "@/components/property-list/PropertyForm";
 import PropertyListView from "@/components/property-list/PropertyListView";
+import ActiveProfileBanner from "@/components/property-list/ActiveProfileBanner";
+import ProfileSelectorDrawer from "@/components/property-list/ProfileSelectorDrawer";
 import type { PropertyItem, PropertyWithResults } from "@/types/simulation";
 
 const FinancingSettingsForm = dynamic(
@@ -48,9 +51,16 @@ export default function PropertyListPage() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [settingsSuccess, setSettingsSuccess] = useState(false);
   const [showFinancingProfile, setShowFinancingProfile] = useState(false);
+  const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [authBusy, setAuthBusy] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+
+  // Profils de financement
+  const { data: profilesData, isLoading: profilesLoading, isError: profilesError } = useFinancingProfiles();
+  const { data: activeProfile, isLoading: activeProfileLoading } = useActiveFinancingProfile();
+  const setActiveProfile = useSetActiveFinancingProfile();
 
   useEffect(() => {
     setMounted(true);
@@ -96,6 +106,25 @@ export default function PropertyListPage() {
     if (signInError) {
       setAuthError(signInError);
       setAuthBusy(false);
+    }
+  }
+
+  async function handleSelectProfile(profileId: string) {
+    const normalizedProfileId = profileId?.trim();
+
+    if (!normalizedProfileId) {
+      setProfileError("Selection de profil invalide. Veuillez reessayer.");
+      return;
+    }
+
+    try {
+      setProfileError(null);
+      await setActiveProfile.mutateAsync(normalizedProfileId);
+      setShowProfileDrawer(false);
+      // Recharger la liste des propriétés avec le nouveau profil
+      await loadPropertyList();
+    } catch {
+      // L'erreur est gérée par React Query
     }
   }
 
@@ -188,6 +217,7 @@ export default function PropertyListPage() {
 
       <Stack spacing={3}>
         {authError && <Alert severity="error">{authError}</Alert>}
+        {profileError && <Alert severity="error">{profileError}</Alert>}
 
         {mounted && authLoading ? (
           <Paper sx={{ p: 3.5 }}>
@@ -223,6 +253,27 @@ export default function PropertyListPage() {
           </Alert>
         )}
 
+        {/* Banner du profil actif */}
+        <ActiveProfileBanner
+          profile={activeProfile}
+          isLoading={activeProfileLoading}
+          isError={profilesError}
+          onOpenDrawer={() => setShowProfileDrawer(true)}
+        />
+
+        {/* Drawer de sélection de profil */}
+        <ProfileSelectorDrawer
+          open={showProfileDrawer}
+          onClose={() => setShowProfileDrawer(false)}
+          profiles={profilesData?.profiles}
+          activeProfileId={profilesData?.activeProfileId}
+          isLoading={profilesLoading}
+          isError={profilesError}
+          onSelectProfile={handleSelectProfile}
+          isSelecting={setActiveProfile.isPending}
+        />
+
+        {/* Section paramètres legacy (cachée par défaut) */}
         <Accordion
           expanded={showFinancingProfile}
           onChange={(_, expanded) => setShowFinancingProfile(expanded)}
@@ -234,7 +285,7 @@ export default function PropertyListPage() {
               alignItems={{ xs: "flex-start", sm: "center" }}
             >
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                Profil financement
+                Paramètres avancés
               </Typography>
               {financingSettings && (
                 <Chip

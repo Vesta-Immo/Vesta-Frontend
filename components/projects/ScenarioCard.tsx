@@ -16,12 +16,16 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import Stack from "@mui/material/Stack";
 import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
+import Tooltip from "@mui/material/Tooltip";
 import { useState } from "react";
 import type { Scenario } from '@/types/project';
 import { isStale, formatComputedAt } from '@/types/project';
 import { useDeleteScenario, useCopyScenario, useRecomputeScenario } from "@/lib/projects";
+import { useCreateOrUpdateProfileFromScenario, useActiveFinancingProfile } from "@/lib/financingProfile";
 import StalenessBadge from "./StalenessBadge";
 
 interface ScenarioCardProps {
@@ -43,6 +47,10 @@ export default function ScenarioCard({
   const deleteMutation = useDeleteScenario();
   const copyMutation = useCopyScenario();
   const recomputeMutation = useRecomputeScenario();
+  const createOrUpdateProfileMutation = useCreateOrUpdateProfileFromScenario();
+  const { data: activeProfile } = useActiveFinancingProfile();
+
+  const isActiveProfile = activeProfile?.sourceScenarioId === scenario.id;
 
   const hasResult = Boolean(scenario.outputResult);
   const stale = isStale(scenario.computedAt);
@@ -79,6 +87,15 @@ export default function ScenarioCard({
                     label="Baseline"
                     size="small"
                     color="primary"
+                    variant="outlined"
+                  />
+                )}
+                {isActiveProfile && (
+                  <Chip
+                    icon={<AccountBalanceWalletIcon sx={{ fontSize: 14 }} />}
+                    label="Profil actif"
+                    size="small"
+                    color="success"
                     variant="outlined"
                   />
                 )}
@@ -138,6 +155,28 @@ export default function ScenarioCard({
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                   Non calculé — ouvrez pour calculer
                 </Typography>
+              )}
+
+              {/* Bouton définir comme profil */}
+              {hasResult && !isActiveProfile && (
+                <Box sx={{ mt: 2 }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={createOrUpdateProfileMutation.isPending ? undefined : <AccountBalanceWalletIcon />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      createOrUpdateProfileMutation.mutate({
+                        projectId,
+                        scenarioId: scenario.id,
+                        scenarioName: scenario.name,
+                      });
+                    }}
+                    disabled={createOrUpdateProfileMutation.isPending}
+                  >
+                    {createOrUpdateProfileMutation.isPending ? 'Mise à jour...' : 'Définir comme profil par défaut'}
+                  </Button>
+                </Box>
               )}
             </Box>
 
