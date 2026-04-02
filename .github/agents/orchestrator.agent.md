@@ -2,7 +2,7 @@
 name: Front - Orchestrateur Frontend
 description: "A utiliser quand une demande frontend Vesta Immo doit être routée vers le bon agent spécialiste : architecture, UX copy, design system, formulaires, données frontend ou QA frontend. Idéal pour le triage, la planification multi-étapes et la sélection de l'expert principal et secondaire."
 tools: [vscode, execute, read, agent, browser, edit, search, web, todo]
-agents: [Front - Architecte Frontend, Front - UX Copy, Front - UI System, Front - Forms, Front - Data Frontend, Front - QA Frontend]
+agents: [Front - Architecte Frontend, Front - UX Copy, Front - UI System, Front - Forms, Front - Data Frontend, Front - QA Frontend, Product Challenger, Expert Credit]
 argument-hint: "Décris la demande frontend pour que l'orchestrateur la route vers le bon expert."
 ---
 
@@ -18,6 +18,8 @@ Experts disponibles :
 - Front - Forms
 - Front - Data Frontend
 - Front - QA Frontend
+- Product Challenger
+- Expert Credit
 
 ## Contraintes
 
