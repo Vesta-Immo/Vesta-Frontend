@@ -14,12 +14,20 @@ import AppNav from "@/components/AppNav";
 
 const SUPPORT_TOOLS = [
   {
-    href: "/simulation/capacite-emprunt",
+    href: "/outils/capacite-emprunt",
     step: "01",
     title: "Capacité d'emprunt",
     description:
       "Calculez le montant maximum que vous pouvez emprunter selon vos revenus, vos crédits en cours et la durée souhaitée.",
     fields: ["Revenus du foyer", "Crédits en cours", "Durée et taux"],
+  },
+  {
+    href: "/outils/prix-immobilier",
+    step: "02",
+    title: "Prix immobilier",
+    description:
+      "Consultez les prix moyens du mètre carré par département pour mieux évaluer le marché immobilier.",
+    fields: ["Département", "Type de bien", "Prix m² moyen"],
   },
 ];
 

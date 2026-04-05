@@ -23,6 +23,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import { useAuth } from "@/components/auth/AuthProvider";
 import vestaHouseLogo from "@/img/vesta-house-no-bg.png";
 
@@ -35,7 +38,11 @@ type NavLink = {
 const NAV_LINKS: NavLink[] = [
   { href: "/simulation/property-list", label: "Mes pistes d'achat" },
   { href: "/simulation/projects", label: "Mes scénarios" },
-  { href: "/simulation/capacite-emprunt", label: "Capacité d'emprunt" },
+];
+
+const OUTILS_LINKS: NavLink[] = [
+  { href: "/outils/capacite-emprunt", label: "Capacité d'emprunt" },
+  { href: "/outils/prix-immobilier", label: "Prix immobilier" },
 ];
 
 export default function AppNav() {
@@ -51,10 +58,23 @@ export default function AppNav() {
   const [authBusy, setAuthBusy] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [outilMenuAnchor, setOutilMenuAnchor] = useState<null | HTMLElement>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const isOutilActive = OUTILS_LINKS.some(
+    ({ href }) => pathname === href || pathname.startsWith(href)
+  );
+
+  const handleOutilMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setOutilMenuAnchor(event.currentTarget);
+  };
+
+  const handleOutilMenuClose = () => {
+    setOutilMenuAnchor(null);
+  };
 
   const authButtonLabel = authLoading
     ? "Session"
@@ -183,6 +203,47 @@ export default function AppNav() {
 
           <Box sx={{ display: { xs: "none", md: "flex" }, gap: 0.5, flexWrap: "wrap", flex: 1 }}>
             {navLinks}
+            <Button
+              size="small"
+              variant={isOutilActive ? "contained" : "text"}
+              color="primary"
+              onClick={handleOutilMenuOpen}
+              endIcon={<ExpandMoreIcon />}
+              sx={
+                isOutilActive
+                  ? {}
+                  : { color: "text.secondary" }
+              }
+              aria-haspopup="true"
+              aria-expanded={Boolean(outilMenuAnchor)}
+            >
+              Outils complémentaires
+            </Button>
+            <Menu
+              anchorEl={outilMenuAnchor}
+              open={Boolean(outilMenuAnchor)}
+              onClose={handleOutilMenuClose}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "left",
+              }}
+            >
+              {OUTILS_LINKS.map(({ href, label }) => (
+                <MenuItem
+                  key={href}
+                  component={Link}
+                  href={href}
+                  onClick={handleOutilMenuClose}
+                  selected={pathname === href || pathname.startsWith(href)}
+                >
+                  {label}
+                </MenuItem>
+              ))}
+            </Menu>
           </Box>
 
           <Stack
@@ -295,6 +356,39 @@ export default function AppNav() {
 
         <List disablePadding>
           {NAV_LINKS.map(({ href, label }) => {
+            const active = pathname === href || pathname.startsWith(href);
+            return (
+              <ListItemButton
+                key={href}
+                component={Link}
+                href={href}
+                selected={active}
+                onClick={() => setMobileMenuOpen(false)}
+                sx={{ borderRadius: 1.5, mb: 0.5 }}
+              >
+                <ListItemText
+                  primary={label}
+                  slotProps={{
+                    primary: {
+                      fontSize: "0.95rem",
+                      fontWeight: active ? 700 : 500,
+                    },
+                  }}
+                />
+              </ListItemButton>
+            );
+          })}
+        </List>
+
+        <Typography
+          variant="subtitle2"
+          sx={{ px: 1, pt: 2, pb: 1, fontWeight: 700, color: "text.secondary", textTransform: "uppercase" }}
+        >
+          Outils complémentaires
+        </Typography>
+
+        <List disablePadding>
+          {OUTILS_LINKS.map(({ href, label }) => {
             const active = pathname === href || pathname.startsWith(href);
             return (
               <ListItemButton
