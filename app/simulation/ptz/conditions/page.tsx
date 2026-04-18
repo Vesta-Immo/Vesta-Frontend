@@ -26,6 +26,7 @@ import {
 
 const ZONE_LABELS: Record<PtzZone, string> = {
   A: "Zone A - Paris et petite couronne",
+  A_BIS: "Zone A bis - Paris et petite couronne (renforcée)",
   B1: "Zone B1 - Grandes agglomérations",
   B2: "Zone B2 - Villes moyennes",
   C: "Zone C - Zones rurales",
