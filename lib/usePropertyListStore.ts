@@ -30,7 +30,7 @@ export function usePropertyListStore() {
   });
   const { registerPropertyListReset } = useSessionReset();
 
-  // Enregistrer la fonction de reset au mount
+  // Register reset function on mount
   useEffect(() => {
     const resetFn = () => {
       setStore({

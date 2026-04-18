@@ -56,7 +56,7 @@ export default function ScenarioFormFields({
     <Stack spacing={2}>
       {/* Income */}
       <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1 }}>
-        Situation financière
+        Financial situation
       </Typography>
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
         <TextField
@@ -85,7 +85,7 @@ export default function ScenarioFormFields({
 
       {/* Credit */}
       <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1 }}>
-        Crédit
+        Credit
       </Typography>
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr" }, gap: 2 }}>
         <TextField

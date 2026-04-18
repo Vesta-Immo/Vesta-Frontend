@@ -43,6 +43,7 @@ const NAV_LINKS: NavLink[] = [
 const OUTILS_LINKS: NavLink[] = [
   { href: "/outils/capacite-emprunt", label: "Capacité d'emprunt" },
   { href: "/outils/prix-immobilier", label: "Prix immobilier" },
+  { href: "/simulation/ptz", label: "Simulateur PTZ", flagship: true },
 ];
 
 export default function AppNav() {

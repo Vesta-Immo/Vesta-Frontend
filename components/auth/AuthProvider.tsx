@@ -46,7 +46,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const sessionReset = useSessionReset();
   const prevSessionRef = useRef<Session | null>(null);
 
-  // Détecteur de déconnexion : réinitialise l'état si session passe de non-null à null
+  // Logout detector: resets state if session changes from non-null to null
   useEffect(() => {
     if (prevSessionRef.current !== null && session === null) {
       sessionReset.clearAllState();

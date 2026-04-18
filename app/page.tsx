@@ -163,7 +163,7 @@ export default function Home() {
           </Box>
         </Card>
 
-        {/* Scénarios financement */}
+        {/* Financing scenarios */}
         <Card
           id="scenarios-financement"
           elevation={0}
