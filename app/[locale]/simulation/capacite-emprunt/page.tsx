@@ -1,18 +1,9 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import Container from "@mui/material/Container";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
-import MenuItem from "@mui/material/MenuItem";
-import InputAdornment from "@mui/material/InputAdornment";
-import Button from "@mui/material/Button";
-import Alert from "@mui/material/Alert";
-import Paper from "@mui/material/Paper";
-import Stack from "@mui/material/Stack";
-import CircularProgress from "@mui/material/CircularProgress";
-import ResultBadge from "@/components/ui/ResultBadge";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import Input from "@/components/ui/Input";
 import { computeBorrowingCapacity } from "@/lib/simulate";
 import { useFormat } from "@/lib/format";
 import type { BorrowingCapacityResult } from "@/types/simulation";
@@ -35,8 +26,15 @@ export default function CapaciteEmpruntPage() {
   const [error, setError] = useState<string | null>(null);
 
   function field(key: keyof typeof form) {
-    return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-      setForm((prev) => ({ ...prev, [key]: e.target.value }));
+    return (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >
+    ) =>
+      setForm((prev) => ({
+        ...prev,
+        [key]: e.target.value as typeof prev[typeof key],
+      }));
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -61,155 +59,159 @@ export default function CapaciteEmpruntPage() {
   }
 
   return (
-    <Container maxWidth="sm" sx={{ py: 6 }}>
-      <Box sx={{ mb: 5 }}>
-        <Typography
-          variant="overline"
-          color="primary"
-          sx={{ fontWeight: 700, letterSpacing: "0.12em" }}
-        >
+    <div className="mx-auto max-w-lg px-4 py-12">
+      <div className="mb-8">
+        <span className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
           {t("overline")}
-        </Typography>
-        <Typography
-          variant="h3"
-          sx={{ mt: 1, fontSize: { xs: "2rem", sm: "2.5rem" } }}
-        >
+        </span>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--foreground)] sm:text-4xl">
           {t("title")}
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 1.5 }}>
-          {t("description")}
-        </Typography>
-      </Box>
+        </h1>
+        <p className="mt-3 text-[var(--muted)]">{t("description")}</p>
+      </div>
 
-      <Stack component="form" onSubmit={handleSubmit} spacing={3}>
-        <TextField
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <Input
           label={t("fields.annualHouseholdIncome.label")}
-          helperText={t("fields.annualHouseholdIncome.helperText")}
+          hint={t("fields.annualHouseholdIncome.helperText")}
           type="number"
           required
           placeholder="60 000"
           value={form.annualHouseholdIncome}
           onChange={field("annualHouseholdIncome")}
-          slotProps={{
-            input: {
-              endAdornment: (
-                <InputAdornment position="end">€ / an</InputAdornment>
-              ),
-            },
-            htmlInput: { min: 0, step: 1000 },
-          }}
+          unit="€ / an"
+          min={0}
+          step={1000}
         />
 
-        <TextField
+        <Input
           label={t("fields.monthlyDebtPayments.label")}
-          helperText={t("fields.monthlyDebtPayments.helperText")}
+          hint={t("fields.monthlyDebtPayments.helperText")}
           type="number"
           required
           placeholder="0"
           value={form.monthlyDebtPayments}
           onChange={field("monthlyDebtPayments")}
-          slotProps={{
-            input: {
-              endAdornment: (
-                <InputAdornment position="end">€ / mois</InputAdornment>
-              ),
-            },
-            htmlInput: { min: 0, step: 50 },
-          }}
+          unit="€ / mois"
+          min={0}
+          step={50}
         />
 
-        <TextField
+        <Input
           label={t("fields.annualRatePercent.label")}
-          helperText={t("fields.annualRatePercent.helperText")}
+          hint={t("fields.annualRatePercent.helperText")}
           type="number"
           required
           placeholder="3.6"
           value={form.annualRatePercent}
           onChange={field("annualRatePercent")}
-          slotProps={{
-            input: {
-              endAdornment: <InputAdornment position="end">%</InputAdornment>,
-            },
-            htmlInput: { min: 0, max: 20, step: 0.01 },
-          }}
+          unit="%"
+          min={0}
+          max={20}
+          step={0.01}
         />
 
-        <TextField
-          select
-          label={t("fields.durationMonths.label")}
-          value={form.durationMonths}
-          onChange={field("durationMonths")}
-        >
-          {DURATION_VALUES.map((value) => (
-            <MenuItem key={value} value={value}>
-              {t(`fields.durationMonths.options.${value}`)}
-            </MenuItem>
-          ))}
-        </TextField>
+        <div className="grid gap-1.5">
+          <label className="text-sm font-medium text-[var(--foreground)]">
+            {t("fields.durationMonths.label")}
+          </label>
+          <select
+            className="w-full rounded-[var(--radius)] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
+            value={form.durationMonths}
+            onChange={field("durationMonths")}
+          >
+            {DURATION_VALUES.map((value) => (
+              <option key={value} value={value}>
+                {t(`fields.durationMonths.options.${value}`)}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <TextField
+        <Input
           label={t("fields.maxDebtRatioPercent.label")}
-          helperText={t("fields.maxDebtRatioPercent.helperText")}
+          hint={t("fields.maxDebtRatioPercent.helperText")}
           type="number"
           required
           placeholder="35"
           value={form.maxDebtRatioPercent}
           onChange={field("maxDebtRatioPercent")}
-          slotProps={{
-            input: {
-              endAdornment: <InputAdornment position="end">%</InputAdornment>,
-            },
-            htmlInput: { min: 1, max: 50, step: 0.5 },
-          }}
+          unit="%"
+          min={1}
+          max={50}
+          step={0.5}
         />
 
         <Button
           type="submit"
-          variant="contained"
-          size="large"
+          variant="primary"
+          size="lg"
           disabled={loading}
-          startIcon={
-            loading ? <CircularProgress size={16} color="inherit" /> : null
-          }
-          sx={{ mt: 1 }}
+          className="mt-1"
         >
+          {loading && (
+            <svg
+              className="mr-2 h-4 w-4 animate-spin text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+          )}
           {loading ? t("button.loading") : t("button.submit")}
         </Button>
-      </Stack>
+      </form>
 
       {error && (
-        <Alert severity="error" sx={{ mt: 4 }}>
+        <div className="mt-6 rounded-[var(--radius)] border border-red-200 bg-red-50 p-4 text-sm text-red-800">
           {error}
-        </Alert>
+        </div>
       )}
 
       {result && (
-        <Paper
-          component="section"
-          aria-live="polite"
-          variant="outlined"
-          sx={{ mt: 5, p: 3 }}
-        >
-          <Typography
-            variant="overline"
-            color="primary"
-            sx={{ fontWeight: 700, letterSpacing: "0.12em" }}
-          >
+        <section aria-live="polite" className="mt-8">
+          <span className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
             {t("result.title")}
-          </Typography>
-          <Stack spacing={2} sx={{ mt: 2 }}>
-            <ResultBadge
-              label={t("result.borrowingCapacityLabel")}
-              value={formatEuros(result.borrowingCapacity)}
-              prominent
-            />
-            <ResultBadge
-              label={t("result.monthlyPaymentLabel")}
-              value={t("result.monthlyPaymentValue", { value: formatEuros(result.monthlyPaymentCapacity) })}
-            />
-          </Stack>
-        </Paper>
+          </span>
+          <div className="mt-3 flex flex-col gap-3">
+            <Card className="bg-[var(--accent)] text-white">
+              <div className="p-4">
+                <div className="mb-1 text-xs font-bold uppercase tracking-widest text-white/70">
+                  {t("result.borrowingCapacityLabel")}
+                </div>
+                <div className="text-xl font-semibold">
+                  {formatEuros(result.borrowingCapacity)}
+                </div>
+              </div>
+            </Card>
+            <Card>
+              <div className="p-4">
+                <div className="mb-1 text-xs font-bold uppercase tracking-widest text-[var(--muted)]">
+                  {t("result.monthlyPaymentLabel")}
+                </div>
+                <div className="text-lg font-semibold text-[var(--foreground)]">
+                  {t("result.monthlyPaymentValue", {
+                    value: formatEuros(result.monthlyPaymentCapacity),
+                  })}
+                </div>
+              </div>
+            </Card>
+          </div>
+        </section>
       )}
-    </Container>
+    </div>
   );
 }

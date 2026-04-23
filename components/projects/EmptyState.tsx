@@ -1,9 +1,6 @@
-// filepath: components/projects/EmptyState.tsx
 "use client";
 
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
+import Button from "@/components/ui/Button";
 
 interface EmptyStateProps {
   title: string;
@@ -16,28 +13,14 @@ interface EmptyStateProps {
 
 export default function EmptyState({ title, description, action }: EmptyStateProps) {
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        py: 8,
-        px: 3,
-        textAlign: "center",
-      }}
-    >
-      <Typography variant="h6" component="h2" fontWeight={600} gutterBottom>
-        {title}
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3, maxWidth: 400 }}>
-        {description}
-      </Typography>
+    <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+      <h2 className="mb-2 text-lg font-semibold text-[var(--foreground)]">{title}</h2>
+      <p className="mb-6 max-w-sm text-sm text-[var(--foreground)]/60">{description}</p>
       {action && (
-        <Button variant="contained" onClick={action.onClick}>
+        <Button variant="primary" onClick={action.onClick}>
           {action.label}
         </Button>
       )}
-    </Box>
+    </div>
   );
 }

@@ -1,38 +1,20 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Stack from "@mui/material/Stack";
-import Grid from "@mui/material/Grid";
-import TextField from "@mui/material/TextField";
-import InputAdornment from "@mui/material/InputAdornment";
-import SearchIcon from "@mui/icons-material/Search";
-import CircularProgress from "@mui/material/CircularProgress";
-import Alert from "@mui/material/Alert";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Chip from "@mui/material/Chip";
-import Divider from "@mui/material/Divider";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import TrendingDownIcon from "@mui/icons-material/TrendingDown";
-import TrendingFlatIcon from "@mui/icons-material/TrendingFlat";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import HomeIcon from "@mui/icons-material/Home";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
+import {
+  Search,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  MapPin,
+  Calendar,
+  Home,
+  Banknote,
+  ArrowLeftRight,
+  Loader2,
+} from "lucide-react";
+import Card from "@/components/ui/Card";
+import Badge from "@/components/ui/Badge";
 import { useTranslations, useLocale } from "next-intl";
 import { getRegions } from "@/lib/prix-immo-api";
 import type { PrixImmoRegion } from "@/types/prix-immo";
@@ -114,126 +96,119 @@ export default function RegionList({
     return filteredData.find((item) => item.nomRegion === selectedRegion);
   }, [filteredData, selectedRegion]);
 
-  const getEvolutionColor = (evolution: number | null) => {
-    if (evolution === null) return "text.secondary";
-    if (evolution > 0) return "success.main";
-    if (evolution < 0) return "error.main";
-    return "text.secondary";
+  const getEvolutionColorClass = (evolution: number | null) => {
+    if (evolution === null) return "text-[var(--muted-foreground)]";
+    if (evolution > 0) return "text-green-600";
+    if (evolution < 0) return "text-red-600";
+    return "text-[var(--muted-foreground)]";
   };
 
   const getEvolutionIcon = (evolution: number | null) => {
-    if (evolution === null) return <TrendingFlatIcon fontSize="small" />;
-    if (evolution > 0) return <TrendingUpIcon fontSize="small" />;
-    if (evolution < 0) return <TrendingDownIcon fontSize="small" />;
-    return <TrendingFlatIcon fontSize="small" />;
+    if (evolution === null) return <Minus className="h-4 w-4" />;
+    if (evolution > 0) return <TrendingUp className="h-4 w-4" />;
+    if (evolution < 0) return <TrendingDown className="h-4 w-4" />;
+    return <Minus className="h-4 w-4" />;
   };
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-        <CircularProgress />
-      </Box>
+      <div className="flex justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin text-[var(--accent)]" />
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Alert severity="error" sx={{ mb: 2 }}>
+      <div className="mb-2 rounded-[var(--radius)] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
         {error}
-      </Alert>
+      </div>
     );
   }
 
   return (
-    <Stack spacing={3}>
-      <TextField
-        fullWidth
-        placeholder={t("searchPlaceholder")}
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="action" />
-              </InputAdornment>
-            ),
-          },
-        }}
-        sx={{
-          "& .MuiOutlinedInput-root": {
-            borderRadius: 2,
-          },
-        }}
-      />
+    <div className="flex flex-col gap-6">
+      <div className="relative flex items-center">
+        <Search className="absolute left-3 h-4 w-4 text-[var(--muted-foreground)]" />
+        <input
+          type="text"
+          placeholder={t("searchPlaceholder")}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full rounded-[var(--radius)] border border-[var(--border-strong)] bg-white py-3 pl-9 pr-4 text-sm text-[var(--foreground)] transition-colors placeholder:text-[var(--muted-foreground)] focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
+        />
+      </div>
 
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-        <FormControl fullWidth size="small">
-          <InputLabel id="type-bien-label">{t("propertyTypeLabel")}</InputLabel>
-          <Select
-            labelId="type-bien-label"
+      <div className="flex flex-col gap-4 sm:flex-row">
+        <div className="grid gap-1.5 flex-1">
+          <label className="text-sm font-medium text-[var(--foreground)]">
+            {t("propertyTypeLabel")}
+          </label>
+          <select
+            className="w-full rounded-[var(--radius)] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
             value={typeBien}
-            label={t("propertyTypeLabel")}
             onChange={(e) => setTypeBien(e.target.value)}
           >
             {TYPES_BIEN.map((type) => (
-              <MenuItem key={type.value} value={type.value}>
+              <option key={type.value} value={type.value}>
                 {type.label}
-              </MenuItem>
+              </option>
             ))}
-          </Select>
-        </FormControl>
+          </select>
+        </div>
 
-        <FormControl fullWidth size="small">
-          <InputLabel id="annee-label">{t("yearLabel")}</InputLabel>
-          <Select
-            labelId="annee-label"
+        <div className="grid gap-1.5 flex-1">
+          <label className="text-sm font-medium text-[var(--foreground)]">
+            {t("yearLabel")}
+          </label>
+          <select
+            className="w-full rounded-[var(--radius)] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
             value={annee}
-            label={t("yearLabel")}
             onChange={(e) => setAnnee(Number(e.target.value))}
           >
             {ANNEES_DISPONIBLES.map((a) => (
-              <MenuItem key={a} value={a}>
+              <option key={a} value={a}>
                 {a}
-              </MenuItem>
+              </option>
             ))}
-          </Select>
-        </FormControl>
-      </Stack>
+          </select>
+        </div>
+      </div>
 
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, lg: selectedRegionData ? 7 : 12 }}>
-          <TableContainer component={Paper} elevation={0}>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>{t("table.region")}</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }} align="right">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <div className={selectedRegionData ? "lg:col-span-7" : "lg:col-span-12"}>
+          <div className="overflow-x-auto rounded-[var(--radius)] border border-[var(--border)]">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[var(--border)] bg-gray-50">
+                  <th className="py-2 pr-4 pl-4 text-left font-semibold text-[var(--foreground)]">
+                    {t("table.region")}
+                  </th>
+                  <th className="py-2 px-4 text-right font-semibold text-[var(--foreground)]">
                     {t("table.propertyType")}
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600 }} align="right">
+                  </th>
+                  <th className="py-2 px-4 text-right font-semibold text-[var(--foreground)]">
                     {t("table.medianPrice")}
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600 }} align="right">
+                  </th>
+                  <th className="py-2 pl-4 pr-4 text-right font-semibold text-[var(--foreground)]">
                     {t("table.evolution1y")}
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
                 {filteredData.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} align="center" sx={{ py: 4 }}>
-                      <Typography color="text.secondary">
-                        {t("noRegionsFound")}
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
+                  <tr>
+                    <td colSpan={4} className="py-8 text-center text-[var(--muted-foreground)]">
+                      {t("noRegionsFound")}
+                    </td>
+                  </tr>
                 ) : (
                   filteredData.map((item) => (
-                    <TableRow
+                    <tr
                       key={`${item.nomRegion}-${item.typeBien}-${item.annee}`}
-                      hover
-                      selected={selectedRegion === item.nomRegion}
+                      className={`cursor-pointer border-b border-[var(--border)] transition-colors hover:bg-gray-50 ${
+                        selectedRegion === item.nomRegion ? "bg-[var(--accent)]/5" : ""
+                      }`}
                       onClick={() =>
                         onRegionSelect(
                           selectedRegion === item.nomRegion
@@ -241,201 +216,143 @@ export default function RegionList({
                             : item.nomRegion
                         )
                       }
-                      sx={{ cursor: "pointer" }}
                     >
-                      <TableCell>
-                        <Typography fontWeight={500}>
+                      <td className="py-2 pr-4 pl-4">
+                        <span className="font-medium text-[var(--foreground)]">
                           {item.nomRegion}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            textTransform: "capitalize",
-                            color: "text.secondary",
-                          }}
-                        >
-                          {item.typeBien}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
+                        </span>
+                      </td>
+                      <td className="py-2 px-4 text-right capitalize text-[var(--muted-foreground)]">
+                        {item.typeBien}
+                      </td>
+                      <td className="py-2 px-4 text-right">
                         {formatPrice(item.prixMedianM2)}
-                      </TableCell>
-                      <TableCell align="right">
-                        <Stack
-                          direction="row"
-                          spacing={0.5}
-                          alignItems="center"
-                          justifyContent="flex-end"
-                        >
+                      </td>
+                      <td className="py-2 pl-4 pr-4">
+                        <div className="flex items-center justify-end gap-1">
                           {getEvolutionIcon(item.evolution1anPct)}
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: getEvolutionColor(item.evolution1anPct),
-                              fontWeight: 500,
-                            }}
-                          >
+                          <span className={`text-sm font-medium ${getEvolutionColorClass(item.evolution1anPct)}`}>
                             {item.evolution1anPct !== null
                               ? `${item.evolution1anPct > 0 ? "+" : ""}${item.evolution1anPct.toFixed(1)}%`
                               : t("na")}
-                          </Typography>
-                        </Stack>
-                      </TableCell>
-                    </TableRow>
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
                   ))
                 )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Grid>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         {selectedRegionData && (
-          <Grid size={{ xs: 12, lg: 5 }}>
-            <Card elevation={2} sx={{ height: "fit-content" }}>
-              <CardContent>
-                <Stack spacing={3}>
-                  <Box>
-                    <Typography
-                      variant="h6"
-                      component="h3"
-                      sx={{ fontWeight: 600, mb: 1 }}
-                    >
-                      {selectedRegionData.nomRegion}
-                    </Typography>
-                    <Divider />
-                  </Box>
+          <div className="lg:col-span-5">
+            <Card className="h-fit p-6">
+              <div className="flex flex-col gap-6">
+                <div>
+                  <h3 className="mb-2 text-lg font-semibold text-[var(--foreground)]">
+                    {selectedRegionData.nomRegion}
+                  </h3>
+                  <hr className="border-[var(--border)]" />
+                </div>
 
-                  <Stack spacing={2}>
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <AttachMoneyIcon color="primary" />
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
-                          {t("medianPrice")}
-                        </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                          {formatPrice(selectedRegionData.prixMedianM2)}
-                        </Typography>
-                      </Box>
-                    </Stack>
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-3">
+                    <Banknote className="h-5 w-5 text-[var(--accent)]" />
+                    <div>
+                      <p className="text-xs text-[var(--muted-foreground)]">
+                        {t("medianPrice")}
+                      </p>
+                      <p className="text-lg font-semibold text-[var(--foreground)]">
+                        {formatPrice(selectedRegionData.prixMedianM2)}
+                      </p>
+                    </div>
+                  </div>
 
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      {selectedRegionData.evolution1anPct !== null &&
-                      selectedRegionData.evolution1anPct > 0 ? (
-                        <TrendingUpIcon color="success" />
-                      ) : selectedRegionData.evolution1anPct !== null &&
-                        selectedRegionData.evolution1anPct < 0 ? (
-                        <TrendingDownIcon color="error" />
-                      ) : (
-                        <TrendingFlatIcon color="disabled" />
-                      )}
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
-                          {t("evolution1y")}
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontWeight: 600,
-                            color: getEvolutionColor(
-                              selectedRegionData.evolution1anPct
-                            ),
-                          }}
-                        >
-                          {selectedRegionData.evolution1anPct !== null
-                            ? `${selectedRegionData.evolution1anPct > 0 ? "+" : ""}${selectedRegionData.evolution1anPct.toFixed(1)}%`
-                            : t("na")}
-                        </Typography>
-                      </Box>
-                    </Stack>
+                  <div className="flex items-center gap-3">
+                    {selectedRegionData.evolution1anPct !== null &&
+                    selectedRegionData.evolution1anPct > 0 ? (
+                      <TrendingUp className="h-5 w-5 text-green-600" />
+                    ) : selectedRegionData.evolution1anPct !== null &&
+                      selectedRegionData.evolution1anPct < 0 ? (
+                      <TrendingDown className="h-5 w-5 text-red-600" />
+                    ) : (
+                      <Minus className="h-5 w-5 text-[var(--muted-foreground)]" />
+                    )}
+                    <div>
+                      <p className="text-xs text-[var(--muted-foreground)]">
+                        {t("evolution1y")}
+                      </p>
+                      <p className={`font-semibold ${getEvolutionColorClass(selectedRegionData.evolution1anPct)}`}>
+                        {selectedRegionData.evolution1anPct !== null
+                          ? `${selectedRegionData.evolution1anPct > 0 ? "+" : ""}${selectedRegionData.evolution1anPct.toFixed(1)}%`
+                          : t("na")}
+                      </p>
+                    </div>
+                  </div>
 
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <SwapHorizIcon color="primary" />
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
-                          {t("transactions")}
-                        </Typography>
-                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                          {formatNumber(selectedRegionData.nbTransactions)}
-                        </Typography>
-                      </Box>
-                    </Stack>
+                  <div className="flex items-center gap-3">
+                    <ArrowLeftRight className="h-5 w-5 text-[var(--accent)]" />
+                    <div>
+                      <p className="text-xs text-[var(--muted-foreground)]">
+                        {t("transactions")}
+                      </p>
+                      <p className="font-medium text-[var(--foreground)]">
+                        {formatNumber(selectedRegionData.nbTransactions)}
+                      </p>
+                    </div>
+                  </div>
 
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <HomeIcon color="primary" />
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
-                          {t("propertyType")}
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontWeight: 500,
-                            textTransform: "capitalize",
-                          }}
-                        >
-                          {selectedRegionData.typeBien}
-                        </Typography>
-                      </Box>
-                    </Stack>
+                  <div className="flex items-center gap-3">
+                    <Home className="h-5 w-5 text-[var(--accent)]" />
+                    <div>
+                      <p className="text-xs text-[var(--muted-foreground)]">
+                        {t("propertyType")}
+                      </p>
+                      <p className="font-medium capitalize text-[var(--foreground)]">
+                        {selectedRegionData.typeBien}
+                      </p>
+                    </div>
+                  </div>
 
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <CalendarTodayIcon color="primary" />
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
-                          {t("year")}
-                        </Typography>
-                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                          {selectedRegionData.annee}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </Stack>
+                  <div className="flex items-center gap-3">
+                    <Calendar className="h-5 w-5 text-[var(--accent)]" />
+                    <div>
+                      <p className="text-xs text-[var(--muted-foreground)]">
+                        {t("year")}
+                      </p>
+                      <p className="font-medium text-[var(--foreground)]">
+                        {selectedRegionData.annee}
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-                  <Box>
-                    <Stack
-                      direction="row"
-                      spacing={1}
-                      alignItems="center"
-                      sx={{ mb: 1.5 }}
-                    >
-                      <LocationOnIcon color="primary" fontSize="small" />
-                      <Typography variant="caption" color="text.secondary">
-                        {t("departments", { count: selectedRegionData.departements.length })}
-                      </Typography>
-                    </Stack>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: 1,
-                      }}
-                    >
-                      {selectedRegionData.departements.map((dept) => (
-                        <Chip
-                          key={dept}
-                          label={dept}
-                          size="small"
-                          variant="outlined"
-                          sx={{
-                            borderRadius: 1,
-                            fontWeight: 500,
-                          }}
-                        />
-                      ))}
-                    </Box>
-                  </Box>
-                </Stack>
-              </CardContent>
+                <div>
+                  <div className="mb-3 flex items-center gap-1">
+                    <MapPin className="h-4 w-4 text-[var(--accent)]" />
+                    <p className="text-xs text-[var(--muted-foreground)]">
+                      {t("departments", { count: selectedRegionData.departements.length })}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedRegionData.departements.map((dept) => (
+                      <Badge key={dept} variant="outline" className="rounded px-2 py-1 text-xs font-medium">
+                        {dept}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </Card>
-          </Grid>
+          </div>
         )}
-      </Grid>
+      </div>
 
-      <Typography variant="caption" color="text.secondary">
+      <p className="text-xs text-[var(--muted-foreground)]">
         {t("footer")}
-      </Typography>
-    </Stack>
+      </p>
+    </div>
   );
 }

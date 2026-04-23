@@ -1,20 +1,12 @@
 "use client";
 
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardActions from "@mui/material/CardActions";
-import Divider from "@mui/material/Divider";
-import Link from "@mui/material/Link";
+import Badge from "@/components/ui/Badge";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
 import { useTranslations } from "next-intl";
 import type { PropertyItem, PropertyWithResults } from "@/types/simulation";
 import { useFormat } from "@/lib/format";
+import { Pencil, Trash2, ExternalLink } from "lucide-react";
 
 interface PropertyListViewProps {
   properties: PropertyItem[];
@@ -36,212 +28,207 @@ export default function PropertyListView({
 
   if (properties.length === 0) {
     return (
-      <Box sx={{ textAlign: "center", py: 4 }}>
-        <Typography color="text.secondary">
-          {t("noProperties")}
-        </Typography>
-      </Box>
+      <div className="py-8 text-center text-sm text-[var(--muted-foreground)]">
+        {t("noProperties")}
+      </div>
     );
   }
 
   return (
-    <Stack spacing={2}>
-      <Typography variant="h6" sx={{ fontWeight: 700 }}>
+    <div className="grid gap-4">
+      <h3 className="text-lg font-bold text-[var(--foreground)]">
         {t("title", { count: properties.length })}
-      </Typography>
+      </h3>
 
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            sm: "repeat(2, 1fr)",
-            md: "repeat(3, 1fr)",
-          },
-          gap: 2,
-        }}
-      >
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {properties.map((property) => {
-        const result = resultsByPropertyId?.[property.id];
-        const totalRenovation = property.renovationWorkItems.reduce(
-          (sum, item) => sum + item.cost,
-          0
-        );
+          const result = resultsByPropertyId?.[property.id];
+          const totalRenovation = property.renovationWorkItems.reduce(
+            (sum, item) => sum + item.cost,
+            0
+          );
 
-        return (
-          <Card key={property.id}>
-            <CardContent>
-              <Stack spacing={1.5}>
-                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, flex: 1 }}>
+          return (
+            <Card key={property.id} className="flex flex-col">
+              <div className="flex flex-1 flex-col gap-4 p-4">
+                <div className="flex items-start gap-2">
+                  <h4 className="flex-1 text-base font-bold text-[var(--foreground)]">
                     {property.addressOrSector}
-                  </Typography>
-                  <Chip
-                    label={property.status === "wanted" ? t("status.wanted") : t("status.visited")}
-                    size="small"
-                    color={property.status === "wanted" ? "default" : "primary"}
-                  />
-                </Box>
+                  </h4>
+                  <Badge
+                    variant={property.status === "wanted" ? "default" : "accent"}
+                  >
+                    {property.status === "wanted"
+                      ? t("status.wanted")
+                      : t("status.visited")}
+                  </Badge>
+                </div>
 
                 {result && (
-                  <Stack
-                    direction={{ xs: "column", sm: "row" }}
-                    spacing={1}
-                    alignItems={{ xs: "flex-start", sm: "center" }}
-                    useFlexGap
-                    flexWrap="wrap"
-                  >
-                    <Chip
-                      label={t("chip.monthlyCredit", { amount: formatEuros(result.monthlyCreditPayment) })}
-                      color="default"
-                      size="small"
-                      sx={{ alignSelf: "flex-start" }}
-                    />
-                    <Chip
-                      label={t("chip.debtRatio", { ratio: result.debtRatioPercent.toFixed(1) })}
-                      color={
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="default" className="w-fit">
+                      {t("chip.monthlyCredit", {
+                        amount: formatEuros(result.monthlyCreditPayment),
+                      })}
+                    </Badge>
+                    <Badge
+                      variant={
                         result.debtRatioLevel === "LOW"
-                          ? "success"
+                          ? "accent"
                           : result.debtRatioLevel === "OK"
-                            ? "warning"
-                            : "error"
+                            ? "default"
+                            : "outline"
                       }
-                      size="small"
-                      sx={{ alignSelf: "flex-start" }}
-                    />
-                    <Chip
-                      label={t("chip.monthlyWithCharges", { amount: formatEuros(result.monthlyPaymentWithCharges) })}
-                      color="primary"
-                      size="small"
-                      sx={{ alignSelf: "flex-start" }}
-                    />
-                  </Stack>
+                      className={
+                        result.debtRatioLevel === "HIGH"
+                          ? "border-red-200 bg-red-50 text-red-700"
+                          : "w-fit"
+                      }
+                    >
+                      {t("chip.debtRatio", {
+                        ratio: result.debtRatioPercent.toFixed(1),
+                      })}
+                    </Badge>
+                    <Badge variant="accent" className="w-fit">
+                      {t("chip.monthlyWithCharges", {
+                        amount: formatEuros(result.monthlyPaymentWithCharges),
+                      })}
+                    </Badge>
+                  </div>
                 )}
 
-                <Typography variant="body2" color="text.secondary">
-                  {property.propertyType === "NEW" ? t("propertyType.new") : t("propertyType.old")}
+                <p className="text-sm text-[var(--muted-foreground)]">
+                  {property.propertyType === "NEW"
+                    ? t("propertyType.new")
+                    : t("propertyType.old")}
                   {property.departmentCode && ` • ${property.departmentCode}`}
-                </Typography>
+                </p>
 
                 {property.listingUrl && (
-                  <Link
+                  <a
                     href={property.listingUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    variant="body2"
+                    className="inline-flex items-center gap-1 text-sm text-[var(--accent)] hover:underline"
                   >
                     {t("viewListing")}
-                  </Link>
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
                 )}
 
-                <Divider sx={{ my: 1 }} />
+                <hr className="border-[var(--border)]" />
 
-                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1 }}>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-[var(--muted-foreground)]">
                       {t("label.purchasePrice")}
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    </p>
+                    <p className="text-sm font-semibold text-[var(--foreground)]">
                       {formatEuros(property.price)}
-                    </Typography>
-                  </Box>
+                    </p>
+                  </div>
 
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
+                  <div>
+                    <p className="text-xs text-[var(--muted-foreground)]">
                       {t("label.annualTaxes")}
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    </p>
+                    <p className="text-sm font-semibold text-[var(--foreground)]">
                       {formatEuros(property.propertyTaxAnnual)}
-                    </Typography>
-                  </Box>
+                    </p>
+                  </div>
 
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
+                  <div>
+                    <p className="text-xs text-[var(--muted-foreground)]">
                       {t("label.coOwnershipFees")}
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    </p>
+                    <p className="text-sm font-semibold text-[var(--foreground)]">
                       {formatEuros(property.coOwnershipFeesAnnual)}
-                    </Typography>
-                  </Box>
+                    </p>
+                  </div>
 
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
+                  <div>
+                    <p className="text-xs text-[var(--muted-foreground)]">
                       {t("label.renovations")}
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    </p>
+                    <p className="text-sm font-semibold text-[var(--foreground)]">
                       {formatEuros(totalRenovation)}
-                    </Typography>
-                  </Box>
+                    </p>
+                  </div>
 
                   {result && (
                     <>
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
+                      <div>
+                        <p className="text-xs text-[var(--muted-foreground)]">
                           {t("label.requiredLoan")}
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        </p>
+                        <p className="text-sm font-semibold text-[var(--foreground)]">
                           {formatEuros(result.requiredLoanAmount)}
-                        </Typography>
-                      </Box>
+                        </p>
+                      </div>
 
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
+                      <div>
+                        <p className="text-xs text-[var(--muted-foreground)]">
                           {t("label.notaryFees")}
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        </p>
+                        <p className="text-sm font-semibold text-[var(--foreground)]">
                           {formatEuros(result.notaryFees)}
-                        </Typography>
-                      </Box>
+                        </p>
+                      </div>
                     </>
                   )}
-                </Box>
+                </div>
 
                 {property.renovationWorkItems.length > 0 && (
                   <>
-                    <Divider sx={{ my: 1 }} />
-                    <Box>
-                      <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                    <hr className="border-[var(--border)]" />
+                    <div>
+                      <p className="text-xs font-semibold text-[var(--foreground)]">
                         {t("label.works")}
-                      </Typography>
-                      <Stack spacing={0.5} sx={{ mt: 0.5 }}>
+                      </p>
+                      <div className="mt-1 grid gap-1">
                         {property.renovationWorkItems.map((item, idx) => (
-                          <Typography key={idx} variant="body2" color="text.secondary">
+                          <p
+                            key={idx}
+                            className="text-sm text-[var(--muted-foreground)]"
+                          >
                             • {item.name}
-                            {item.details && ` - ${item.details}`}
-                            : {formatEuros(item.cost)}
-                          </Typography>
+                            {item.details && ` - ${item.details}`}:{" "}
+                            {formatEuros(item.cost)}
+                          </p>
                         ))}
-                      </Stack>
-                    </Box>
+                      </div>
+                    </div>
                   </>
                 )}
-              </Stack>
-            </CardContent>
+              </div>
 
-            <Divider />
+              <hr className="border-[var(--border)]" />
 
-            <CardActions>
-              <Button
-                size="small"
-                onClick={() => onEdit(property)}
-                startIcon={<EditIcon />}
-              >
-                {t("action.edit")}
-              </Button>
-              <Button
-                size="small"
-                color="error"
-                onClick={() => onDelete(property.id)}
-                startIcon={<DeleteIcon />}
-                disabled={loading}
-              >
-                {t("action.delete")}
-              </Button>
-            </CardActions>
-          </Card>
-        );
-      })}
-      </Box>
-    </Stack>
+              <div className="flex gap-2 p-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onEdit(property)}
+                  className="flex-1"
+                >
+                  <Pencil className="mr-1.5 h-3.5 w-3.5" />
+                  {t("action.edit")}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onDelete(property.id)}
+                  disabled={loading}
+                  className="flex-1 text-red-600 hover:bg-red-50 hover:text-red-700"
+                >
+                  <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                  {t("action.delete")}
+                </Button>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+    </div>
   );
 }

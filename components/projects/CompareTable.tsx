@@ -1,26 +1,14 @@
-// filepath: components/projects/CompareTable.tsx
 "use client";
 
-import Box from "@mui/material/Box";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
-import Chip from "@mui/material/Chip";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import Stack from "@mui/material/Stack";
+import { ArrowUp, ArrowDown } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 
 import type {
   ScenarioComparisonRow,
   ScenarioDelta,
   CompareScenariosInsight,
-} from '@/types/project';
+} from "@/types/project";
+import Badge from "@/components/ui/Badge";
 
 interface CompareTableProps {
   scenarios: ScenarioComparisonRow[];
@@ -28,20 +16,16 @@ interface CompareTableProps {
   insights: CompareScenariosInsight;
 }
 
-function DeltaChip({ value, locale }: { value: number; locale: string }) {
+function DeltaBadge({ value, locale }: { value: number; locale: string }) {
   if (value === 0) return null;
   const isPositive = value > 0;
   const fmt = (n: number) =>
     new Intl.NumberFormat(locale, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
   return (
-    <Chip
-      icon={isPositive ? <ArrowUpwardIcon sx={{ fontSize: 12 }} /> : <ArrowDownwardIcon sx={{ fontSize: 12 }} />}
-      label={fmt(Math.abs(value))}
-      size="small"
-      color={isPositive ? "success" : "error"}
-      variant="outlined"
-      sx={{ ml: 0.5, height: 20, fontSize: "0.7rem" }}
-    />
+    <Badge variant={isPositive ? "accent" : "outline"} className="ml-1 text-[0.65rem]">
+      {isPositive ? <ArrowUp className="mr-0.5 h-3 w-3" /> : <ArrowDown className="mr-0.5 h-3 w-3" />}
+      {fmt(Math.abs(value))}
+    </Badge>
   );
 }
 
@@ -57,129 +41,123 @@ export default function CompareTable({
   const fmtYears = (months: number) => t("years", { years: months / 12 });
 
   return (
-    <TableContainer component={Paper} variant="outlined">
-      <Table size="small">
-        <TableHead>
-          <TableRow sx={{ "& th": { bgcolor: "grey.50", fontWeight: 600 } }}>
-            <TableCell sx={{ minWidth: 140 }}>{t("table.parameter")}</TableCell>
+    <div className="overflow-x-auto rounded-[var(--radius)] border border-[var(--border)]">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-[var(--border)] bg-[var(--background)]">
+            <th className="px-4 py-3 text-left font-semibold text-[var(--foreground)]">{t("table.parameter")}</th>
             {scenarios.map((s) => (
-              <TableCell key={s.scenarioId} align="center" sx={{ minWidth: 140 }}>
-                <Stack alignItems="center" gap={0.5}>
-                  <Typography variant="body2" fontWeight={600}>
-                    {s.scenarioName}
-                  </Typography>
-                </Stack>
-              </TableCell>
+              <th key={s.scenarioId} className="px-4 py-3 text-center font-semibold text-[var(--foreground)]">
+                {s.scenarioName}
+              </th>
             ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {/* ── Inputs ── */}
-          <TableRow>
-            <TableCell colSpan={scenarios.length + 1} sx={{ py: 0.5, bgcolor: "grey.100", fontWeight: 700, fontSize: "0.75rem" }}>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-[var(--border)]">
+          <tr className="bg-[var(--foreground)]/[0.03]">
+            <td colSpan={scenarios.length + 1} className="px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[var(--foreground)]/70">
               {t("table.inputsHeader")}
-            </TableCell>
-          </TableRow>
-          <TableRow sx={{ "& td": { borderRight: "1px solid", borderColor: "divider" } }}>
-            <TableCell sx={{ fontWeight: 500 }}>{t("table.annualIncome")}</TableCell>
+            </td>
+          </tr>
+          <tr className="even:bg-[var(--background)]">
+            <td className="px-4 py-2.5 font-medium text-[var(--foreground)]">{t("table.annualIncome")}</td>
             {scenarios.map((s) => (
-              <TableCell key={s.scenarioId} align="center">
+              <td key={s.scenarioId} className="px-4 py-2.5 text-center text-[var(--foreground)]/80">
                 {fmt(s.annualHouseholdIncome)}
-              </TableCell>
+              </td>
             ))}
-          </TableRow>
-          <TableRow sx={{ "& td": { borderRight: "1px solid", borderColor: "divider" } }}>
-            <TableCell sx={{ fontWeight: 500 }}>{t("table.duration")}</TableCell>
+          </tr>
+          <tr className="even:bg-[var(--background)]">
+            <td className="px-4 py-2.5 font-medium text-[var(--foreground)]">{t("table.duration")}</td>
             {scenarios.map((s) => (
-              <TableCell key={s.scenarioId} align="center">
+              <td key={s.scenarioId} className="px-4 py-2.5 text-center text-[var(--foreground)]/80">
                 {fmtYears(s.durationMonths)}
-              </TableCell>
+              </td>
             ))}
-          </TableRow>
-          <TableRow sx={{ "& td": { borderRight: "1px solid", borderColor: "divider" } }}>
-            <TableCell sx={{ fontWeight: 500 }}>{t("table.annualRate")}</TableCell>
+          </tr>
+          <tr className="even:bg-[var(--background)]">
+            <td className="px-4 py-2.5 font-medium text-[var(--foreground)]">{t("table.annualRate")}</td>
             {scenarios.map((s) => (
-              <TableCell key={s.scenarioId} align="center">
+              <td key={s.scenarioId} className="px-4 py-2.5 text-center text-[var(--foreground)]/80">
                 {s.annualRatePercent.toFixed(2)}%
-              </TableCell>
+              </td>
             ))}
-          </TableRow>
-          <TableRow sx={{ "& td": { borderRight: "1px solid", borderColor: "divider" } }}>
-            <TableCell sx={{ fontWeight: 500 }}>{t("table.downPayment")}</TableCell>
+          </tr>
+          <tr className="even:bg-[var(--background)]">
+            <td className="px-4 py-2.5 font-medium text-[var(--foreground)]">{t("table.downPayment")}</td>
             {scenarios.map((s) => (
-              <TableCell key={s.scenarioId} align="center">
+              <td key={s.scenarioId} className="px-4 py-2.5 text-center text-[var(--foreground)]/80">
                 {fmt(s.downPayment)}
-              </TableCell>
+              </td>
             ))}
-          </TableRow>
+          </tr>
 
-          {/* ── Outputs ── */}
-          <TableRow>
-            <TableCell colSpan={scenarios.length + 1} sx={{ py: 0.5, bgcolor: "grey.100", fontWeight: 700, fontSize: "0.75rem" }}>
+          <tr className="bg-[var(--foreground)]/[0.03]">
+            <td colSpan={scenarios.length + 1} className="px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[var(--foreground)]/70">
               {t("table.outputsHeader")}
-            </TableCell>
-          </TableRow>
-          <TableRow sx={{ "& td": { borderRight: "1px solid", borderColor: "divider" } }}>
-            <TableCell sx={{ fontWeight: 500 }}>{t("table.borrowingCapacity")}</TableCell>
+            </td>
+          </tr>
+          <tr className="even:bg-[var(--background)]">
+            <td className="px-4 py-2.5 font-medium text-[var(--foreground)]">{t("table.borrowingCapacity")}</td>
             {scenarios.map((s) => {
               const isBest = s.scenarioId === insights.highestBorrowingCapacity.scenarioId;
               const delta = deltas[s.scenarioId];
               return (
-                <TableCell key={s.scenarioId} align="center">
-                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Typography variant="body2" fontWeight={isBest ? 700 : 400}>
+                <td key={s.scenarioId} className="px-4 py-2.5 text-center">
+                  <div className="flex items-center justify-center gap-1">
+                    <span className={`text-[var(--foreground)] ${isBest ? "font-bold" : ""}`}>
                       {fmt(s.borrowingCapacity)}
-                    </Typography>
-                    {delta && !s.isBaseline && <DeltaChip value={delta.borrowingCapacityDelta} locale={locale} />}
-                  </Box>
-                </TableCell>
+                    </span>
+                    {delta && !s.isBaseline && <DeltaBadge value={delta.borrowingCapacityDelta} locale={locale} />}
+                  </div>
+                </td>
               );
             })}
-          </TableRow>
-          <TableRow sx={{ "& td": { borderRight: "1px solid", borderColor: "divider" } }}>
-            <TableCell sx={{ fontWeight: 500 }}>{t("table.monthlyPayment")}</TableCell>
+          </tr>
+          <tr className="even:bg-[var(--background)]">
+            <td className="px-4 py-2.5 font-medium text-[var(--foreground)]">{t("table.monthlyPayment")}</td>
             {scenarios.map((s) => {
               const isBest = s.scenarioId === insights.bestMonthlyPayment.scenarioId;
               const delta = deltas[s.scenarioId];
               return (
-                <TableCell key={s.scenarioId} align="center">
-                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Typography variant="body2" fontWeight={isBest ? 700 : 400}>
+                <td key={s.scenarioId} className="px-4 py-2.5 text-center">
+                  <div className="flex items-center justify-center gap-1">
+                    <span className={`text-[var(--foreground)] ${isBest ? "font-bold" : ""}`}>
                       {fmt(s.monthlyCreditPayment)}
-                    </Typography>
-                    {delta && !s.isBaseline && <DeltaChip value={delta.monthlyPaymentDelta} locale={locale} />}
-                  </Box>
-                </TableCell>
+                    </span>
+                    {delta && !s.isBaseline && <DeltaBadge value={delta.monthlyPaymentDelta} locale={locale} />}
+                  </div>
+                </td>
               );
             })}
-          </TableRow>
-          <TableRow sx={{ "& td": { borderRight: "1px solid", borderColor: "divider" } }}>
-            <TableCell sx={{ fontWeight: 500 }}>{t("table.totalBudget")}</TableCell>
+          </tr>
+          <tr className="even:bg-[var(--background)]">
+            <td className="px-4 py-2.5 font-medium text-[var(--foreground)]">{t("table.totalBudget")}</td>
             {scenarios.map((s) => {
               const isBest = s.scenarioId === insights.highestTotalBudget.scenarioId;
               const delta = deltas[s.scenarioId];
               return (
-                <TableCell key={s.scenarioId} align="center">
-                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Typography variant="body2" fontWeight={isBest ? 700 : 400}>
+                <td key={s.scenarioId} className="px-4 py-2.5 text-center">
+                  <div className="flex items-center justify-center gap-1">
+                    <span className={`text-[var(--foreground)] ${isBest ? "font-bold" : ""}`}>
                       {fmt(s.totalBudget)}
-                    </Typography>
-                    {delta && !s.isBaseline && <DeltaChip value={delta.totalBudgetDelta} locale={locale} />}
-                  </Box>
-                </TableCell>
+                    </span>
+                    {delta && !s.isBaseline && <DeltaBadge value={delta.totalBudgetDelta} locale={locale} />}
+                  </div>
+                </td>
               );
             })}
-          </TableRow>
-          <TableRow sx={{ "& td": { borderRight: "1px solid", borderColor: "divider" } }}>
-            <TableCell sx={{ fontWeight: 500 }}>{t("table.notaryFees")}</TableCell>
+          </tr>
+          <tr className="even:bg-[var(--background)]">
+            <td className="px-4 py-2.5 font-medium text-[var(--foreground)]">{t("table.notaryFees")}</td>
             {scenarios.map((s) => (
-              <TableCell key={s.scenarioId} align="center">
+              <td key={s.scenarioId} className="px-4 py-2.5 text-center text-[var(--foreground)]/80">
                 {fmt(s.notaryFees)}
-              </TableCell>
+              </td>
             ))}
-          </TableRow>
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   );
 }

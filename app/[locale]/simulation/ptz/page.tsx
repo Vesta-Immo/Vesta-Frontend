@@ -1,20 +1,12 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import Container from "@mui/material/Container";
-import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
-import MenuItem from "@mui/material/MenuItem";
-import InputAdornment from "@mui/material/InputAdornment";
-import Button from "@mui/material/Button";
-import Alert from "@mui/material/Alert";
-import Paper from "@mui/material/Paper";
-import Stack from "@mui/material/Stack";
-import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
-import ResultBadge from "@/components/ui/ResultBadge";
-import MuiLink from "@mui/material/Link";
 import { Link } from "@/i18n/navigation";
+import { Loader2 } from "lucide-react";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import ResultBadge from "@/components/ui/ResultBadge";
 import {
   checkPtzEligibility,
   computePtzAmount,
@@ -73,7 +65,7 @@ export default function PtzSimulateurPage() {
   const [error, setError] = useState<string | null>(null);
 
   function field(key: keyof typeof form) {
-    return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       const value = e.target.value;
       setForm((prev) => ({ ...prev, [key]: value }));
     };
@@ -131,142 +123,122 @@ export default function PtzSimulateurPage() {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 6 }}>
-      <Box sx={{ mb: 5 }}>
-        <Typography
-          variant="overline"
-          color="primary"
-          sx={{ fontWeight: 700, letterSpacing: "0.12em" }}
-        >
+    <div className="mx-auto max-w-3xl px-4 py-12">
+      <div className="mb-8">
+        <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
           {t("overline")}
-        </Typography>
-        <Typography
-          variant="h3"
-          sx={{ mt: 1, fontSize: { xs: "2rem", sm: "2.5rem" } }}
-        >
+        </p>
+        <h1 className="mt-1 text-3xl font-bold tracking-tight text-[var(--foreground)] sm:text-4xl">
           {t("title")}
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 1.5 }}>
+        </h1>
+        <p className="mt-3 text-base text-[var(--muted-foreground)]">
           {t("description")}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        </p>
+        <p className="mt-2 text-sm text-[var(--muted-foreground)]">
           {t("helperText")}{" "}
-          <MuiLink
-            component={Link}
+          <Link
             href="/simulation/ptz/conditions"
-            color="primary"
-            underline="always"
-            sx={{ fontWeight: 600 }}
+            className="font-semibold text-[var(--accent)] underline underline-offset-2"
           >
             {t("helperLink")}
-          </MuiLink>
-        </Typography>
-      </Box>
+          </Link>
+        </p>
+      </div>
 
-      <Box
-        component="form"
+      <form
         onSubmit={handleCalculate}
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "minmax(0, 1fr)", sm: "minmax(0, 1fr) minmax(0, 1fr)" },
-          gap: 2,
-          width: "100%",
-          maxWidth: 800,
-        }}
+        className="grid w-full max-w-[800px] grid-cols-1 gap-4 sm:grid-cols-2"
       >
-        <Box sx={{ gridColumn: { xs: "1", sm: "span 2" } }}>
-          <Typography variant="overline" color="primary" sx={{ fontWeight: 700, letterSpacing: "0.12em" }}>
+        <div className="sm:col-span-2">
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
             {t("sections.property")}
-          </Typography>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            label={t("fields.propertyPrice.label")}
-            helperText={t("fields.propertyPrice.helperText")}
-            type="number"
-            required
-            placeholder="250 000"
-            value={form.propertyPrice || ""}
-            onChange={field("propertyPrice")}
-            slotProps={{
-              input: {
-                endAdornment: <InputAdornment position="end">€</InputAdornment>,
-              },
-              htmlInput: { min: 0, step: 1000 },
-            }}
-          />
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            select
-            label={t("fields.propertyZone.label")}
+          </p>
+        </div>
+        <Input
+          label={t("fields.propertyPrice.label")}
+          hint={t("fields.propertyPrice.helperText")}
+          type="number"
+          required
+          placeholder="250 000"
+          value={form.propertyPrice || ""}
+          onChange={field("propertyPrice")}
+          unit="€"
+          min={0}
+          step={1000}
+        />
+        <div className="grid gap-1.5">
+          <label className="text-sm font-medium text-[var(--foreground)]">
+            {t("fields.propertyZone.label")}
+          </label>
+          <span className="text-xs text-[var(--muted)]">
+            {t("fields.propertyZone.helperText")}
+          </span>
+          <select
+            className="w-full rounded-[var(--radius)] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
             value={form.propertyZone}
             onChange={field("propertyZone")}
-            helperText={t("fields.propertyZone.helperText")}
           >
             {ZONE_OPTIONS.map((value) => (
-              <MenuItem key={value} value={value}>
+              <option key={value} value={value}>
                 {t(`fields.propertyZone.options.${value}`)}
-              </MenuItem>
+              </option>
             ))}
-          </TextField>
-        </Box>
+          </select>
+        </div>
 
-        <Box sx={{ gridColumn: { xs: "1", sm: "span 2" } }}>
-          <Typography variant="overline" color="primary" sx={{ fontWeight: 700, letterSpacing: "0.12em" }}>
+        <div className="sm:col-span-2">
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
             {t("sections.household")}
-          </Typography>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            select
-            label={t("fields.householdSize.label")}
+          </p>
+        </div>
+        <div className="grid gap-1.5">
+          <label className="text-sm font-medium text-[var(--foreground)]">
+            {t("fields.householdSize.label")}
+          </label>
+          <span className="text-xs text-[var(--muted)]">
+            {t("fields.householdSize.helperText")}
+          </span>
+          <select
+            className="w-full rounded-[var(--radius)] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
             value={form.householdSize}
             onChange={field("householdSize")}
-            helperText={t("fields.householdSize.helperText")}
           >
             {HOUSEHOLD_SIZES.map((value) => (
-              <MenuItem key={value} value={value}>
+              <option key={value} value={value}>
                 {value === 8
                   ? t("fields.householdSize.options.8plus")
                   : t("fields.householdSize.options.n", { count: value })}
-              </MenuItem>
+              </option>
             ))}
-          </TextField>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            label={t("fields.annualIncome.label")}
-            helperText={t("fields.annualIncome.helperText")}
-            type="number"
-            required
-            placeholder="45 000"
-            value={form.annualIncome || ""}
-            onChange={field("annualIncome")}
-            slotProps={{
-              input: {
-                endAdornment: <InputAdornment position="end">€ / an</InputAdornment>,
-              },
-              htmlInput: { min: 0, step: 1000 },
-            }}
-          />
-        </Box>
+          </select>
+        </div>
+        <Input
+          label={t("fields.annualIncome.label")}
+          hint={t("fields.annualIncome.helperText")}
+          type="number"
+          required
+          placeholder="45 000"
+          value={form.annualIncome || ""}
+          onChange={field("annualIncome")}
+          unit="€ / an"
+          min={0}
+          step={1000}
+        />
 
-        <Box sx={{ gridColumn: { xs: "1", sm: "span 2" } }}>
-          <Typography variant="overline" color="primary" sx={{ fontWeight: 700, letterSpacing: "0.12em" }}>
+        <div className="sm:col-span-2">
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
             {t("sections.buyerStatus")}
-          </Typography>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            select
-            label={t("fields.isPrimoAccedant.label")}
-            helperText={t("fields.isPrimoAccedant.helperText")}
+          </p>
+        </div>
+        <div className="grid gap-1.5">
+          <label className="text-sm font-medium text-[var(--foreground)]">
+            {t("fields.isPrimoAccedant.label")}
+          </label>
+          <span className="text-xs text-[var(--muted)]">
+            {t("fields.isPrimoAccedant.helperText")}
+          </span>
+          <select
+            className="w-full rounded-[var(--radius)] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
             value={form.isPrimoAccedant ? "yes" : "no"}
             onChange={(e) =>
               setForm((prev) => ({
@@ -275,16 +247,20 @@ export default function PtzSimulateurPage() {
               }))
             }
           >
-            <MenuItem value="yes">{t("yes")}</MenuItem>
-            <MenuItem value="no">{t("no")}</MenuItem>
-          </TextField>
-        </Box>
-        <Box>
-          {!form.isPrimoAccedant && (
-            <TextField
-              fullWidth
-              select
-              label={t("fields.primoAccedantException.label")}
+            <option value="yes">{t("yes")}</option>
+            <option value="no">{t("no")}</option>
+          </select>
+        </div>
+        {!form.isPrimoAccedant && (
+          <div className="grid gap-1.5">
+            <label className="text-sm font-medium text-[var(--foreground)]">
+              {t("fields.primoAccedantException.label")}
+            </label>
+            <span className="text-xs text-[var(--muted)]">
+              {t("fields.primoAccedantException.helperText")}
+            </span>
+            <select
+              className="w-full rounded-[var(--radius)] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
               value={form.primoAccedantException || ""}
               onChange={(e) =>
                 setForm((prev) => ({
@@ -292,27 +268,30 @@ export default function PtzSimulateurPage() {
                   primoAccedantException: e.target.value as PrimoAccedantException,
                 }))
               }
-              helperText={t("fields.primoAccedantException.helperText")}
             >
               {PRIMO_EXCEPTION_OPTIONS.map((value) => (
-                <MenuItem key={value} value={value}>
+                <option key={value} value={value}>
                   {t(`fields.primoAccedantException.options.${value}`)}
-                </MenuItem>
+                </option>
               ))}
-            </TextField>
-          )}
-        </Box>
+            </select>
+          </div>
+        )}
 
-        <Box sx={{ gridColumn: { xs: "1", sm: "span 2" } }}>
-          <Typography variant="overline" color="primary" sx={{ fontWeight: 700, letterSpacing: "0.12em" }}>
+        <div className="sm:col-span-2">
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
             {t("sections.project")}
-          </Typography>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            select
-            label={t("fields.propertyType.label")}
+          </p>
+        </div>
+        <div className="grid gap-1.5">
+          <label className="text-sm font-medium text-[var(--foreground)]">
+            {t("fields.propertyType.label")}
+          </label>
+          <span className="text-xs text-[var(--muted)]">
+            {t("fields.propertyType.helperText")}
+          </span>
+          <select
+            className="w-full rounded-[var(--radius)] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
             value={form.propertyType || "COLLECTIF"}
             onChange={(e) =>
               setForm((prev) => ({
@@ -320,20 +299,23 @@ export default function PtzSimulateurPage() {
                 propertyType: e.target.value as PtzPropertyType,
               }))
             }
-            helperText={t("fields.propertyType.helperText")}
           >
             {PROPERTY_TYPE_OPTIONS.map((value) => (
-              <MenuItem key={value} value={value}>
+              <option key={value} value={value}>
                 {t(`fields.propertyType.options.${value}`)}
-              </MenuItem>
+              </option>
             ))}
-          </TextField>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            select
-            label={t("fields.operationType.label")}
+          </select>
+        </div>
+        <div className="grid gap-1.5">
+          <label className="text-sm font-medium text-[var(--foreground)]">
+            {t("fields.operationType.label")}
+          </label>
+          <span className="text-xs text-[var(--muted)]">
+            {t("fields.operationType.helperText")}
+          </span>
+          <select
+            className="w-full rounded-[var(--radius)] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
             value={form.operationType || "NEUF"}
             onChange={(e) =>
               setForm((prev) => ({
@@ -342,43 +324,41 @@ export default function PtzSimulateurPage() {
                 isOldProperty: e.target.value === "ANCIEN_AVEC_TRAVAUX",
               }))
             }
-            helperText={t("fields.operationType.helperText")}
           >
             {OPERATION_TYPE_OPTIONS.map((value) => (
-              <MenuItem key={value} value={value}>
+              <option key={value} value={value}>
                 {t(`fields.operationType.options.${value}`)}
-              </MenuItem>
+              </option>
             ))}
-          </TextField>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            label={t("fields.workPercentage.label")}
-            helperText={t("fields.workPercentage.helperText")}
-            type="number"
-            placeholder="25"
-            value={form.workPercentage || ""}
-            onChange={field("workPercentage")}
-            slotProps={{
-              input: {
-                endAdornment: <InputAdornment position="end">%</InputAdornment>,
-              },
-              htmlInput: { min: 0, max: 100, step: 1 },
-            }}
-          />
-        </Box>
+          </select>
+        </div>
+        <Input
+          label={t("fields.workPercentage.label")}
+          hint={t("fields.workPercentage.helperText")}
+          type="number"
+          placeholder="25"
+          value={form.workPercentage || ""}
+          onChange={field("workPercentage")}
+          unit="%"
+          min={0}
+          max={100}
+          step={1}
+        />
 
-        <Box sx={{ gridColumn: { xs: "1", sm: "span 2" } }}>
-          <Typography variant="overline" color="primary" sx={{ fontWeight: 700, letterSpacing: "0.12em" }}>
+        <div className="sm:col-span-2">
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
             {t("sections.financing")}
-          </Typography>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            select
-            label={t("fields.hasComplementaryLoan.label")}
+          </p>
+        </div>
+        <div className="grid gap-1.5">
+          <label className="text-sm font-medium text-[var(--foreground)]">
+            {t("fields.hasComplementaryLoan.label")}
+          </label>
+          <span className="text-xs text-[var(--muted)]">
+            {t("fields.hasComplementaryLoan.helperText")}
+          </span>
+          <select
+            className="w-full rounded-[var(--radius)] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
             value={form.hasComplementaryLoan ? "yes" : "no"}
             onChange={(e) =>
               setForm((prev) => ({
@@ -386,18 +366,21 @@ export default function PtzSimulateurPage() {
                 hasComplementaryLoan: e.target.value === "yes",
               }))
             }
-            helperText={t("fields.hasComplementaryLoan.helperText")}
           >
-            <MenuItem value="yes">{t("yes")}</MenuItem>
-            <MenuItem value="no">{t("no")}</MenuItem>
-          </TextField>
-        </Box>
-        <Box>
-          {form.hasComplementaryLoan && (
-            <TextField
-              fullWidth
-              select
-              label={t("fields.complementaryLoanType.label")}
+            <option value="yes">{t("yes")}</option>
+            <option value="no">{t("no")}</option>
+          </select>
+        </div>
+        {form.hasComplementaryLoan && (
+          <div className="grid gap-1.5">
+            <label className="text-sm font-medium text-[var(--foreground)]">
+              {t("fields.complementaryLoanType.label")}
+            </label>
+            <span className="text-xs text-[var(--muted)]">
+              {t("fields.complementaryLoanType.helperText")}
+            </span>
+            <select
+              className="w-full rounded-[var(--radius)] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
               value={form.complementaryLoanType || ""}
               onChange={(e) =>
                 setForm((prev) => ({
@@ -405,27 +388,30 @@ export default function PtzSimulateurPage() {
                   complementaryLoanType: e.target.value as ComplementaryLoanType,
                 }))
               }
-              helperText={t("fields.complementaryLoanType.helperText")}
             >
               {COMPLEMENTARY_LOAN_OPTIONS.map((value) => (
-                <MenuItem key={value} value={value}>
+                <option key={value} value={value}>
                   {t(`fields.complementaryLoanType.options.${value}`)}
-                </MenuItem>
+                </option>
               ))}
-            </TextField>
-          )}
-        </Box>
+            </select>
+          </div>
+        )}
 
-        <Box sx={{ gridColumn: { xs: "1", sm: "span 2" } }}>
-          <Typography variant="overline" color="primary" sx={{ fontWeight: 700, letterSpacing: "0.12em" }}>
+        <div className="sm:col-span-2">
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
             {t("sections.metadata")}
-          </Typography>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            select
-            label={t("fields.hasDependencies.label")}
+          </p>
+        </div>
+        <div className="grid gap-1.5">
+          <label className="text-sm font-medium text-[var(--foreground)]">
+            {t("fields.hasDependencies.label")}
+          </label>
+          <span className="text-xs text-[var(--muted)]">
+            {t("fields.hasDependencies.helperText")}
+          </span>
+          <select
+            className="w-full rounded-[var(--radius)] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
             value={form.hasDependencies ? "yes" : "no"}
             onChange={(e) =>
               setForm((prev) => ({
@@ -433,67 +419,46 @@ export default function PtzSimulateurPage() {
                 hasDependencies: e.target.value === "yes",
               }))
             }
-            helperText={t("fields.hasDependencies.helperText")}
           >
-            <MenuItem value="yes">{t("yes")}</MenuItem>
-            <MenuItem value="no">{t("no")}</MenuItem>
-          </TextField>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            label={t("fields.operationId.label")}
-            helperText={t("fields.operationId.helperText")}
-            type="text"
-            placeholder="OP-2024-001"
-            value={form.operationId || ""}
-            onChange={field("operationId")}
-          />
-        </Box>
+            <option value="yes">{t("yes")}</option>
+            <option value="no">{t("no")}</option>
+          </select>
+        </div>
+        <Input
+          label={t("fields.operationId.label")}
+          hint={t("fields.operationId.helperText")}
+          type="text"
+          placeholder="OP-2024-001"
+          value={form.operationId || ""}
+          onChange={field("operationId")}
+        />
 
-        <Box sx={{ gridColumn: { xs: "1", sm: "span 2" } }}>
-          <Stack direction="row" spacing={2} sx={{ mt: 1, width: "100%" }}>
-          <Button
-            type="submit"
-            variant="contained"
-            size="large"
-            disabled={loading}
-            sx={{ flex: 1 }}
-          >
-            {loading ? t("button.loading") : t("button.submit")}
+        <div className="sm:col-span-2 mt-1">
+          <Button type="submit" size="lg" disabled={loading} className="w-full">
+            {loading ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {t("button.loading")}
+              </span>
+            ) : (
+              t("button.submit")
+            )}
           </Button>
-          </Stack>
-        </Box>
-      </Box>
+        </div>
+      </form>
 
       {error && (
-        <Alert severity="error" sx={{ mt: 4 }}>
+        <div className="mt-8 rounded-[var(--radius)] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
-        </Alert>
+        </div>
       )}
 
       {(eligibilityResult || computeResult) && (
-        <Paper
-          component="section"
-          aria-live="polite"
-          variant="outlined"
-          sx={{ mt: 5, p: 3, width: "100%" }}
-        >
-          <Typography
-            variant="overline"
-            color="primary"
-            sx={{ fontWeight: 700, letterSpacing: "0.12em" }}
-          >
+        <Card className="mt-10 p-6" aria-live="polite">
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
             {t("result.title")}
-          </Typography>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-              gap: 2,
-              mt: 2,
-            }}
-          >
+          </p>
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {(() => {
               const isEligible = computeResult?.isEligible ?? eligibilityResult?.isEligible ?? false;
               const maxPtzAmount = computeResult?.maxPtzAmount ?? eligibilityResult?.maxPtzAmount;
@@ -548,20 +513,16 @@ export default function PtzSimulateurPage() {
                     </>
                   )}
                   {reasons && reasons.length > 0 && (
-                    <Box sx={{ gridColumn: { xs: "1", sm: "span 2" } }}>
-                      <Alert severity="info" variant="outlined">
-                        <Typography variant="body2">
-                          {reasons.join(" • ")}
-                        </Typography>
-                      </Alert>
-                    </Box>
+                    <div className="sm:col-span-2 rounded-[var(--radius)] border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+                      {reasons.join(" • ")}
+                    </div>
                   )}
                 </>
               );
             })()}
-          </Box>
-        </Paper>
+          </div>
+        </Card>
       )}
-    </Container>
+    </div>
   );
 }

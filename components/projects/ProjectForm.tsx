@@ -2,18 +2,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
-import CircularProgress from "@mui/material/CircularProgress";
 import { useTranslations } from "next-intl";
+import { Loader2 } from "lucide-react";
 
 import { useCreateProject, useUpdateProject } from "@/lib/projects";
-import type { CreateProjectInput } from '@/types/project';
+import type { CreateProjectInput } from "@/types/project";
+import Button from "@/components/ui/Button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/Dialog";
 
 interface ProjectFormProps {
   open: boolean;
@@ -27,7 +29,6 @@ export default function ProjectForm({ open, onClose, initialValues }: ProjectFor
   const [location, setLocation] = useState(initialValues?.location ?? "");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  // Re-sync state when initialValues changes (e.g., switching between edit targets)
   useEffect(() => {
     setName(initialValues?.name ?? "");
     setLocation(initialValues?.location ?? "");
@@ -37,13 +38,15 @@ export default function ProjectForm({ open, onClose, initialValues }: ProjectFor
   const createMutation = useCreateProject();
   const updateMutation = useUpdateProject();
   const isEdit = Boolean(initialValues?.id);
-
   const isLoading = createMutation.isPending || updateMutation.isPending;
+
+  const inputClass = `w-full rounded-[var(--radius)] border bg-white px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-colors focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] disabled:opacity-50`;
+  const labelClass = "mb-1 block text-sm font-medium text-[var(--foreground)]";
+  const errorClass = "mt-1 text-xs text-red-600";
 
   const handleSubmit = async () => {
     const payload: CreateProjectInput = { name: name.trim(), location: location.trim() || undefined };
 
-    // Basic validation
     const errors: Record<string, string> = {};
     if (!payload.name) errors.name = t("validation.nameRequired");
     setFieldErrors(errors);
@@ -76,42 +79,57 @@ export default function ProjectForm({ open, onClose, initialValues }: ProjectFor
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-    >
-      <DialogTitle>{isEdit ? t("dialog.editTitle") : t("dialog.newTitle")}</DialogTitle>
+    <Dialog open={open} onOpenChange={(val) => !val && handleClose()}>
       <DialogContent>
-        <Stack spacing={2} sx={{ pt: 1 }}>
-          <TextField
-            label={t("field.name")}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            error={Boolean(fieldErrors.name)}
-            helperText={fieldErrors.name}
-            fullWidth
-            autoFocus
-          />
-          <TextField
-            label={t("field.location")}
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            error={Boolean(fieldErrors.location)}
-            helperText={fieldErrors.location}
-            fullWidth
-          />
-        </Stack>
+        <DialogHeader>
+          <DialogTitle>
+            {isEdit ? t("dialog.editTitle") : t("dialog.newTitle")}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4 py-2">
+          <div>
+            <label className={labelClass}>{t("field.name")}</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={isLoading}
+              autoFocus
+              className={`${inputClass} ${fieldErrors.name ? "border-red-300" : "border-[var(--border-strong)]"}`}
+            />
+            {fieldErrors.name && <p className={errorClass}>{fieldErrors.name}</p>}
+          </div>
+          <div>
+            <label className={labelClass}>{t("field.location")}</label>
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              disabled={isLoading}
+              className={`${inputClass} ${fieldErrors.location ? "border-red-300" : "border-[var(--border-strong)]"}`}
+            />
+            {fieldErrors.location && <p className={errorClass}>{fieldErrors.location}</p>}
+          </div>
+        </div>
+
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="ghost" onClick={handleClose} disabled={isLoading}>
+              {t("action.cancel")}
+            </Button>
+          </DialogClose>
+          <Button variant="primary" onClick={handleSubmit} disabled={isLoading}>
+            {isLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : isEdit ? (
+              t("action.save")
+            ) : (
+              t("action.create")
+            )}
+          </Button>
+        </DialogFooter>
       </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={handleClose} disabled={isLoading}>
-          {t("action.cancel")}
-        </Button>
-        <Button variant="contained" onClick={handleSubmit} disabled={isLoading}>
-          {isLoading ? <CircularProgress size={20} /> : isEdit ? t("action.save") : t("action.create")}
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 }

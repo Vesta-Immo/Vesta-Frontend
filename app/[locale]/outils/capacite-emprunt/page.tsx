@@ -1,19 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import Typography from "@mui/material/Typography";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
-import MenuItem from "@mui/material/MenuItem";
-import InputAdornment from "@mui/material/InputAdornment";
-import Button from "@mui/material/Button";
-import Alert from "@mui/material/Alert";
-import CircularProgress from "@mui/material/CircularProgress";
+import { Loader2 } from "lucide-react";
 import AppNav from "@/components/AppNav";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
 import { computeBorrowingCapacity } from "@/lib/simulate";
 import { useFormat } from "@/lib/format";
 import type { BorrowingCapacityResult } from "@/types/simulation";
@@ -35,7 +27,7 @@ export default function CapaciteEmpruntPage() {
   const [error, setError] = useState<string | null>(null);
 
   function field(key: keyof typeof form) {
-    return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
       setForm((prev) => ({ ...prev, [key]: e.target.value }));
   }
 
@@ -75,199 +67,134 @@ export default function CapaciteEmpruntPage() {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        bgcolor: "background.default",
-      }}
-    >
+    <div className="flex min-h-screen flex-col bg-[var(--background)]">
       <AppNav />
 
-      <Container maxWidth="lg" sx={{ flex: 1, py: { xs: 4, md: 6 } }}>
-        <Stack spacing={4}>
-          <Box>
-            <Typography
-              variant="h1"
-              sx={{
-                fontSize: { xs: "1.8rem", sm: "2.4rem", md: "3rem" },
-                lineHeight: 1.1,
-                letterSpacing: "-0.02em",
-                fontWeight: 700,
-              }}
-            >
+      <div className="mx-auto max-w-5xl flex-1 px-4 py-8 md:py-12">
+        <div className="flex flex-col gap-8">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)] md:text-5xl">
               {t("title")}
-            </Typography>
-            <Typography
-              variant="body1"
-              color="text.secondary"
-              sx={{ mt: 1.5, fontSize: "1.08rem", lineHeight: 1.75 }}
-            >
+            </h1>
+            <p className="mt-3 text-base leading-relaxed text-[var(--muted-foreground)]">
               {t("description")}
-            </Typography>
-          </Box>
+            </p>
+          </div>
 
-          <Card
-            elevation={0}
-            sx={{
-              borderRadius: 4,
-              border: "1px solid",
-              borderColor: "divider",
-            }}
-          >
-            <CardContent sx={{ p: { xs: 3, sm: 4, md: 5 } }}>
-              <Stack spacing={3}>
-                {error && <Alert severity="error">{error}</Alert>}
+          <Card className="p-6 md:p-10">
+            <div className="flex flex-col gap-6">
+              {error && (
+                <div className="rounded-[var(--radius)] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {error}
+                </div>
+              )}
 
-                <Stack
-                  direction={{ xs: "column", sm: "row" }}
-                  spacing={2}
-                  sx={{ width: "100%" }}
-                >
-                  <TextField
-                    label={t("fields.annualHouseholdIncome.label")}
-                    helperText={t("fields.annualHouseholdIncome.helperText")}
-                    type="number"
-                    required
-                    placeholder="60 000"
-                    value={form.annualHouseholdIncome}
-                    onChange={field("annualHouseholdIncome")}
-                    fullWidth
-                    slotProps={{
-                      input: {
-                        endAdornment: (
-                          <InputAdornment position="end">€ / an</InputAdornment>
-                        ),
-                      },
-                      htmlInput: { min: 0, step: 1000 },
-                    }}
-                  />
-                  <TextField
-                    label={t("fields.monthlyDebtPayments.label")}
-                    helperText={t("fields.monthlyDebtPayments.helperText")}
-                    type="number"
-                    required
-                    placeholder="0"
-                    value={form.monthlyDebtPayments}
-                    onChange={field("monthlyDebtPayments")}
-                    fullWidth
-                    slotProps={{
-                      input: {
-                        endAdornment: (
-                          <InputAdornment position="end">€ / mois</InputAdornment>
-                        ),
-                      },
-                      htmlInput: { min: 0, step: 50 },
-                    }}
-                  />
-                </Stack>
+              <div className="flex flex-col gap-4 sm:flex-row">
+                <Input
+                  label={t("fields.annualHouseholdIncome.label")}
+                  hint={t("fields.annualHouseholdIncome.helperText")}
+                  type="number"
+                  required
+                  placeholder="60 000"
+                  value={form.annualHouseholdIncome}
+                  onChange={field("annualHouseholdIncome")}
+                  unit="€ / an"
+                  min={0}
+                  step={1000}
+                />
+                <Input
+                  label={t("fields.monthlyDebtPayments.label")}
+                  hint={t("fields.monthlyDebtPayments.helperText")}
+                  type="number"
+                  required
+                  placeholder="0"
+                  value={form.monthlyDebtPayments}
+                  onChange={field("monthlyDebtPayments")}
+                  unit="€ / mois"
+                  min={0}
+                  step={50}
+                />
+              </div>
 
-                <Stack
-                  direction={{ xs: "column", sm: "row" }}
-                  spacing={2}
-                  sx={{ width: "100%" }}
-                >
-                  <TextField
-                    select
-                    label={t("fields.durationMonths.label")}
+              <div className="flex flex-col gap-4 sm:flex-row">
+                <div className="grid gap-1.5 flex-1">
+                  <label className="text-sm font-medium text-[var(--foreground)]">
+                    {t("fields.durationMonths.label")}
+                  </label>
+                  <select
+                    className="w-full rounded-[var(--radius)] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
                     value={form.durationMonths}
                     onChange={field("durationMonths")}
-                    fullWidth
                   >
                     {DURATION_VALUES.map((value) => (
-                      <MenuItem key={value} value={value}>
+                      <option key={value} value={value}>
                         {t(`fields.durationMonths.options.${value}`)}
-                      </MenuItem>
+                      </option>
                     ))}
-                  </TextField>
-                  <TextField
-                    label={t("fields.annualRatePercent.label")}
-                    helperText={t("fields.annualRatePercent.helperText")}
-                    type="number"
-                    required
-                    placeholder="3.6"
-                    value={form.annualRatePercent}
-                    onChange={field("annualRatePercent")}
-                    fullWidth
-                    slotProps={{
-                      input: {
-                        endAdornment: (
-                          <InputAdornment position="end">%</InputAdornment>
-                        ),
-                      },
-                      htmlInput: { min: 0, max: 20, step: 0.01 },
-                    }}
-                  />
-                </Stack>
+                  </select>
+                </div>
+                <Input
+                  label={t("fields.annualRatePercent.label")}
+                  hint={t("fields.annualRatePercent.helperText")}
+                  type="number"
+                  required
+                  placeholder="3.6"
+                  value={form.annualRatePercent}
+                  onChange={field("annualRatePercent")}
+                  unit="%"
+                  min={0}
+                  max={20}
+                  step={0.01}
+                />
+              </div>
 
-                <Button
-                  variant="contained"
-                  size="large"
-                  onClick={handleSimulate}
-                  disabled={loading}
-                  startIcon={
-                    loading ? <CircularProgress size={16} color="inherit" /> : null
-                  }
-                  sx={{ alignSelf: "flex-start" }}
-                >
-                  {loading ? t("button.loading") : t("button.submit")}
-                </Button>
-
-                {result && (
-                  <Box
-                    sx={{
-                      mt: 3,
-                      p: 3,
-                      bgcolor: "success.main",
-                      borderRadius: 2,
-                      border: "2px solid",
-                      borderColor: "success.dark",
-                      boxShadow: 2,
-                    }}
-                  >
-                    <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, color: "white" }}>
-                      {t("result.title")}
-                    </Typography>
-                    <Stack spacing={3}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Typography sx={{ color: "white", fontWeight: 500 }}>
-                          {t("result.monthlyPaymentLabel")}
-                        </Typography>
-                        <Typography variant="h5" sx={{ fontWeight: 700, color: "white" }}>
-                          {t("result.monthlyPaymentValue", {
-                            value: formatEuros(result.monthlyPaymentCapacity),
-                          })}
-                        </Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Typography sx={{ color: "white", fontWeight: 500 }}>
-                          {t("result.borrowingCapacityLabel")}
-                        </Typography>
-                        <Typography variant="h5" sx={{ fontWeight: 700, color: "white" }}>
-                          {formatEuros(result.borrowingCapacity)}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </Box>
+              <Button
+                size="lg"
+                onClick={handleSimulate}
+                disabled={loading}
+                className="self-start"
+              >
+                {loading ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {t("button.loading")}
+                  </span>
+                ) : (
+                  t("button.submit")
                 )}
-              </Stack>
-            </CardContent>
+              </Button>
+
+              {result && (
+                <div className="mt-3 rounded-[var(--radius)] border-2 border-[#1a3d2f] bg-[var(--accent)] p-6 text-white">
+                  <h3 className="mb-4 text-lg font-bold">
+                    {t("result.title")}
+                  </h3>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-white/90">
+                        {t("result.monthlyPaymentLabel")}
+                      </span>
+                      <span className="text-xl font-bold">
+                        {t("result.monthlyPaymentValue", {
+                          value: formatEuros(result.monthlyPaymentCapacity),
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-white/90">
+                        {t("result.borrowingCapacityLabel")}
+                      </span>
+                      <span className="text-xl font-bold">
+                        {formatEuros(result.borrowingCapacity)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </Card>
-        </Stack>
-      </Container>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 }

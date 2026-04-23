@@ -2,21 +2,19 @@
 
 import { useState } from "react";
 import { usePathname } from "@/i18n/navigation";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Paper from "@mui/material/Paper";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
+import { LogIn } from "lucide-react";
 import { useAuth } from "./AuthProvider";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
 
 interface AuthPromptProps {
   title: string;
   description: string;
-  sx?: object;
+  className?: string;
 }
 
-export default function AuthPrompt({ title, description, sx = {} }: AuthPromptProps) {
+export default function AuthPrompt({ title, description, className = "" }: AuthPromptProps) {
   const t = useTranslations("authComp");
   const pathname = usePathname();
   const { signInWithGoogle } = useAuth();
@@ -39,25 +37,26 @@ export default function AuthPrompt({ title, description, sx = {} }: AuthPromptPr
   }
 
   return (
-    <Paper sx={{ p: { xs: 3, sm: 4 }, ...sx }}>
-      <Stack spacing={2.5} alignItems="flex-start">
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+    <Card className={`p-6 sm:p-8 ${className}`}>
+      <div className="flex flex-col items-start gap-5">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold mb-2 text-[var(--foreground)]">
             {title}
-          </Typography>
-          <Typography color="text.secondary">{description}</Typography>
-        </Box>
+          </h2>
+          <p className="text-[var(--foreground)]/60">{description}</p>
+        </div>
 
         {authError && (
-          <Typography color="error" variant="body2">
+          <p className="text-sm text-red-600">
             {authError}
-          </Typography>
+          </p>
         )}
 
-        <Button variant="contained" onClick={handleSignIn} disabled={authBusy}>
+        <Button variant="primary" onClick={handleSignIn} disabled={authBusy}>
+          <LogIn className="w-4 h-4 mr-2" />
           {authBusy ? t("action.signingIn") : t("action.signInWithGoogle")}
         </Button>
-      </Stack>
-    </Paper>
+      </div>
+    </Card>
   );
 }

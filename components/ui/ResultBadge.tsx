@@ -1,6 +1,3 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-
 interface ResultBadgeProps {
   label: string;
   value: string;
@@ -10,40 +7,25 @@ interface ResultBadgeProps {
 
 export default function ResultBadge({ label, value, prominent }: ResultBadgeProps) {
   return (
-    <Box
-      sx={{
-        p: 3,
-        borderRadius: 3,
-        bgcolor: prominent ? "primary.main" : "background.paper",
-        border: prominent ? "none" : "1px solid",
-        borderColor: "divider",
-        color: prominent ? "common.white" : "text.primary",
-      }}
+    <div
+      className={`rounded-[var(--radius)] p-6 ${
+        prominent
+          ? "bg-[var(--accent)] text-white"
+          : "border border-[var(--border)] bg-white text-[var(--foreground)]"
+      }`}
     >
-      <Typography
-        variant="body2"
-        sx={{
-          fontWeight: 700,
-          textTransform: "uppercase",
-          letterSpacing: "0.08em",
-          fontSize: "0.68rem",
-          color: prominent ? "rgba(255,255,255,0.7)" : "text.secondary",
-          mb: 0.75,
-        }}
+      <p
+        className={`mb-1.5 text-[0.68rem] font-bold uppercase tracking-[0.08em] ${
+          prominent ? "text-white/70" : "text-[var(--muted-foreground)]"
+        }`}
       >
         {label}
-      </Typography>
-      <Typography
-        variant="h5"
-        sx={{
-          fontFamily: "var(--font-fraunces)",
-          fontWeight: 600,
-          color: "inherit",
-          lineHeight: 1.2,
-        }}
+      </p>
+      <p
+        className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold leading-tight"
       >
         {value}
-      </Typography>
-    </Box>
+      </p>
+    </div>
   );
 }

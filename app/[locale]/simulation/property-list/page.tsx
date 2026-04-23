@@ -1,26 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Container from "@mui/material/Container";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Stack from "@mui/material/Stack";
-import Paper from "@mui/material/Paper";
-import Alert from "@mui/material/Alert";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import Chip from "@mui/material/Chip";
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import * as Accordion from "@radix-ui/react-accordion";
+import { ChevronDown } from "lucide-react";
 import dynamic from "next/dynamic";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { usePropertyListStore } from "@/lib/usePropertyListStore";
+import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/Dialog";
 import PropertyForm from "@/components/property-list/PropertyForm";
 import PropertyListView from "@/components/property-list/PropertyListView";
 import type { PropertyItem, PropertyWithResults } from "@/types/simulation";
@@ -113,211 +108,188 @@ export default function PropertyListPage() {
   ).length;
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }}>
-      {/* Header */}
-      <Paper
-        elevation={0}
-        sx={{
-          mb: 4,
-          p: { xs: 2.5, sm: 3.5 },
-          borderRadius: 3,
-          border: "1px solid",
-          borderColor: "divider",
-          background:
-            "linear-gradient(120deg, rgba(245,124,0,0.10) 0%, rgba(25,118,210,0.08) 100%)",
-        }}
-      >
-        <Stack spacing={1.25}>
-          <Typography variant="overline" sx={{ fontWeight: 700, letterSpacing: "0.1em" }}>
+    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mb-8 rounded-[var(--radius)] border border-[var(--border)] bg-white p-6 sm:p-8">
+        <div className="grid gap-3">
+          <span className="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">
             {t("header.overline")}
-          </Typography>
+          </span>
 
-          <Typography
-            variant="h3"
-            sx={{ fontSize: { xs: "2rem", sm: "2.6rem" }, lineHeight: 1.1 }}
-          >
+          <h1 className="text-3xl font-bold leading-tight text-[var(--foreground)] sm:text-4xl">
             {t("title", { count: properties.length })}
-          </Typography>
+          </h1>
 
-          <Typography variant="body1" color="text.secondary">
+          <p className="text-[var(--muted-foreground)]">
             {t("header.description")}
-          </Typography>
+          </p>
 
-          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ pt: 0.5 }}>
+          <div className="flex flex-wrap gap-2 pt-1">
             {user ? (
               <>
-                <Chip label={t("chip.propertiesCount", { count: properties.length })} variant="outlined" />
-                <Chip
-                  label={t("chip.riskyPropertiesCount", { count: riskyPropertiesCount })}
-                  color={riskyPropertiesCount > 0 ? "error" : "success"}
-                  variant="outlined"
-                />
+                <Badge variant="outline">
+                  {t("chip.propertiesCount", { count: properties.length })}
+                </Badge>
+                <Badge
+                  variant={riskyPropertiesCount > 0 ? "outline" : "accent"}
+                  className={
+                    riskyPropertiesCount > 0
+                      ? "border-red-200 bg-red-50 text-red-700"
+                      : ""
+                  }
+                >
+                  {t("chip.riskyPropertiesCount", { count: riskyPropertiesCount })}
+                </Badge>
               </>
             ) : null}
-          </Stack>
+          </div>
 
-          <Button
-            component={Link}
+          <Link
             href="/#mes-pistes-dachat"
-            variant="text"
-            color="primary"
-            size="small"
-            sx={{
-              alignSelf: "flex-end",
-              mt: 0.5,
-              px: 1.5,
-              py: 0.6,
-              minHeight: 36,
-              borderRadius: 999,
-              fontSize: "0.84rem",
-              fontWeight: 600,
-              textTransform: "none",
-              color: "text.secondary",
-              bgcolor: "transparent",
-              boxShadow: "none",
-              "&:hover": {
-                bgcolor: "rgba(25, 118, 210, 0.05)",
-                boxShadow: "none",
-              },
-            }}
+            className="self-end rounded-full px-4 py-2 text-xs font-semibold text-[var(--muted-foreground)] transition-colors hover:bg-[var(--foreground)]/5"
           >
             {t("whyThisTool")}
-          </Button>
-        </Stack>
-      </Paper>
+          </Link>
+        </div>
+      </div>
 
-      <Stack spacing={3}>
-        {authError && <Alert severity="error">{authError}</Alert>}
+      <div className="grid gap-6">
+        {authError && (
+          <div className="rounded-[var(--radius)] border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+            {authError}
+          </div>
+        )}
 
         {mounted && authLoading ? (
-          <Paper sx={{ p: 3.5 }}>
-            <Typography color="text.secondary">{t("auth.loading")}</Typography>
-          </Paper>
+          <div className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-6">
+            <p className="text-[var(--muted-foreground)]">{t("auth.loading")}</p>
+          </div>
         ) : mounted && !user ? (
-          <Paper sx={{ p: { xs: 3, sm: 4 } }}>
-            <Stack spacing={2.5} alignItems="flex-start">
-              <Box>
-                <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+          <div className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-6 sm:p-8">
+            <div className="grid gap-4">
+              <div>
+                <h2 className="text-xl font-bold text-[var(--foreground)]">
                   {t("authPrompt.title")}
-                </Typography>
-                <Typography color="text.secondary">
+                </h2>
+                <p className="text-[var(--muted-foreground)]">
                   {t("authPrompt.description")}
-                </Typography>
-              </Box>
+                </p>
+              </div>
 
-              <Button
-                variant="contained"
-                onClick={handleSignIn}
-                disabled={authBusy}
-              >
+              <Button onClick={handleSignIn} disabled={authBusy}>
                 {authBusy ? t("auth.signingIn") : t("auth.signInWithGoogle")}
               </Button>
-            </Stack>
-          </Paper>
+            </div>
+          </div>
         ) : (
           <>
-        {settingsSuccess && (
-          <Alert severity="success">
-            {t("settingsSaved")}
-          </Alert>
-        )}
+            {settingsSuccess && (
+              <div className="rounded-[var(--radius)] border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+                {t("settingsSaved")}
+              </div>
+            )}
 
-        <Accordion
-          expanded={showFinancingProfile}
-          onChange={(_, expanded) => setShowFinancingProfile(expanded)}
-        >
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={{ xs: 0.5, sm: 1.5 }}
-              alignItems={{ xs: "flex-start", sm: "center" }}
+            <Accordion.Root
+              type="single"
+              collapsible
+              value={showFinancingProfile ? "financing" : ""}
+              onValueChange={(val) => setShowFinancingProfile(val === "financing")}
             >
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                {t("financingProfile")}
-              </Typography>
-              {financingSettings && (
-                <Chip
-                  size="small"
-                  variant="outlined"
-                  label={`${financingSettings.annualRatePercent}% • ${financingSettings.durationMonths} ${t("unit.months")}`}
-                />
-              )}
-            </Stack>
-          </AccordionSummary>
-          <AccordionDetails>
-            <FinancingSettingsForm
-              initialValues={financingSettings || undefined}
-              onSubmit={handleSaveSettings}
-              loading={loading}
-              error={error}
-            />
-          </AccordionDetails>
-        </Accordion>
-
-        <Paper sx={{ p: 3 }}>
-          <Stack spacing={2.5}>
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              justifyContent="space-between"
-              alignItems={{ xs: "stretch", sm: "center" }}
-              spacing={2}
-            >
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                  {t("overview.title")}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {t("overview.description")}
-                </Typography>
-              </Box>
-              <Button
-                variant="contained"
-                onClick={() => {
-                  setEditingProperty(null);
-                  setShowAddDialog(true);
-                }}
+              <Accordion.Item
+                value="financing"
+                className="rounded-[var(--radius)] border border-[var(--border)] bg-white"
               >
-                {t("action.addTrack")}
-              </Button>
-            </Stack>
+                <Accordion.Trigger className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-[var(--foreground)]/5 [&[data-state=open]>svg]:rotate-180">
+                  <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3">
+                    <h2 className="text-lg font-bold text-[var(--foreground)]">
+                      {t("financingProfile")}
+                    </h2>
+                    {financingSettings && (
+                      <Badge variant="outline">
+                        {`${financingSettings.annualRatePercent}% • ${financingSettings.durationMonths} ${t("unit.months")}`}
+                      </Badge>
+                    )}
+                  </div>
+                  <ChevronDown className="h-5 w-5 shrink-0 text-[var(--muted-foreground)] transition-transform duration-200" />
+                </Accordion.Trigger>
+                <Accordion.Content className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                  <div className="border-t border-[var(--border)] p-4">
+                    <FinancingSettingsForm
+                      initialValues={financingSettings || undefined}
+                      onSubmit={handleSaveSettings}
+                      loading={loading}
+                      error={error}
+                    />
+                  </div>
+                </Accordion.Content>
+              </Accordion.Item>
+            </Accordion.Root>
 
-            {error && <Alert severity="error">{error}</Alert>}
+            <div className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-6">
+              <div className="grid gap-5">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-lg font-bold text-[var(--foreground)]">
+                      {t("overview.title")}
+                    </h2>
+                    <p className="text-sm text-[var(--muted-foreground)]">
+                      {t("overview.description")}
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      setEditingProperty(null);
+                      setShowAddDialog(true);
+                    }}
+                  >
+                    {t("action.addTrack")}
+                  </Button>
+                </div>
 
-            {!financingSettings && (
-              <Alert severity="info">
-                {t("info.configureFinancing")}
-              </Alert>
-            )}
+                {error && (
+                  <div className="rounded-[var(--radius)] border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+                    {error}
+                  </div>
+                )}
 
-            {financingSettings && !results && (
-              <Alert severity="info">
-                {t("info.addOrEditTrack")}
-              </Alert>
-            )}
+                {!financingSettings && (
+                  <div className="rounded-[var(--radius)] border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
+                    {t("info.configureFinancing")}
+                  </div>
+                )}
 
-            {loading ? (
-              <Typography color="text.secondary">{t("loading")}</Typography>
-            ) : (
-              <PropertyListView
-                properties={properties}
-                resultsByPropertyId={resultsByPropertyId}
-                onEdit={handleEditProperty}
-                onDelete={removeProperty}
-                loading={loading}
-              />
-            )}
-          </Stack>
-        </Paper>
+                {financingSettings && !results && (
+                  <div className="rounded-[var(--radius)] border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
+                    {t("info.addOrEditTrack")}
+                  </div>
+                )}
+
+                {loading ? (
+                  <p className="text-[var(--muted-foreground)]">{t("loading")}</p>
+                ) : (
+                  <PropertyListView
+                    properties={properties}
+                    resultsByPropertyId={resultsByPropertyId}
+                    onEdit={handleEditProperty}
+                    onDelete={removeProperty}
+                    loading={loading}
+                  />
+                )}
+              </div>
+            </div>
           </>
         )}
-      </Stack>
+      </div>
 
-      {/* Add/Edit Property Dialog */}
-      <Dialog open={user ? showAddDialog : false} onClose={() => setShowAddDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {editingProperty ? t("dialog.editTrack") : t("dialog.addTrack")}
-        </DialogTitle>
-        <DialogContent sx={{ pt: 2 }}>
+      <Dialog
+        open={user ? showAddDialog : false}
+        onOpenChange={setShowAddDialog}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {editingProperty ? t("dialog.editTrack") : t("dialog.addTrack")}
+            </DialogTitle>
+          </DialogHeader>
           <PropertyForm
             initialValues={editingProperty || undefined}
             onSubmit={handleAddProperty}
@@ -326,6 +298,6 @@ export default function PropertyListPage() {
           />
         </DialogContent>
       </Dialog>
-    </Container>
+    </div>
   );
 }

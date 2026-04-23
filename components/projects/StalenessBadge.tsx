@@ -1,11 +1,8 @@
-// filepath: components/projects/StalenessBadge.tsx
 "use client";
 
-import Chip from "@mui/material/Chip";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import CircularProgress from "@mui/material/CircularProgress";
-import Tooltip from "@mui/material/Tooltip";
+import { RefreshCw, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Badge from "@/components/ui/Badge";
 
 interface StalenessBadgeProps {
   onRecalculate: () => void;
@@ -17,30 +14,27 @@ export default function StalenessBadge({ onRecalculate, isRecomputing }: Stalene
 
   if (isRecomputing) {
     return (
-      <Chip
-        icon={<CircularProgress size={12} />}
-        label={t("badge.recalculating")}
-        size="small"
-        color="warning"
-        variant="outlined"
-      />
+      <Badge variant="outline" className="cursor-default">
+        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+        {t("badge.recalculating")}
+      </Badge>
     );
   }
 
   return (
-    <Tooltip title={t("badge.tooltip")}>
-      <Chip
-        icon={<RefreshIcon sx={{ fontSize: 14 }} />}
-        label={t("badge.stale")}
-        size="small"
-        color="warning"
-        variant="outlined"
-        onClick={(e) => {
-          e.stopPropagation();
-          onRecalculate();
-        }}
-        sx={{ cursor: "pointer" }}
-      />
-    </Tooltip>
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        onRecalculate();
+      }}
+      title={t("badge.tooltip")}
+      className="inline-flex cursor-pointer items-center border-0 bg-transparent p-0"
+    >
+      <Badge variant="outline" className="hover:bg-[var(--background)]">
+        <RefreshCw className="mr-1 h-3 w-3" />
+        {t("badge.stale")}
+      </Badge>
+    </button>
   );
 }

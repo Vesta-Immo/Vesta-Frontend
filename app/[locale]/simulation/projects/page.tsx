@@ -1,18 +1,8 @@
-// filepath: app/simulation/projects/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
-import Container from "@mui/material/Container";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
-import Paper from "@mui/material/Paper";
-import Alert from "@mui/material/Alert";
-import AddIcon from "@mui/icons-material/Add";
-import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
-import Skeleton from "@mui/material/Skeleton";
-
+import { Plus, ArrowLeftRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -22,6 +12,9 @@ import { useScenarios } from "@/lib/projects";
 import ScenarioCard from "@/components/projects/ScenarioCard";
 import ScenarioForm from "@/components/projects/ScenarioForm";
 import EmptyState from "@/components/projects/EmptyState";
+import ProjectsSkeleton from "@/components/projects/ProjectsSkeleton";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
 
 export default function ProjectsPage() {
   const t = useTranslations("projects");
@@ -45,49 +38,35 @@ export default function ProjectsPage() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }}>
-      {authError && <Alert severity="error" sx={{ mb: 3 }}>{authError}</Alert>}
+    <div className="max-w-5xl mx-auto px-6 pt-20 pb-12">
+      {authError && (
+        <div className="mb-6 rounded-[var(--radius)] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          {authError}
+        </div>
+      )}
 
-      {/* Header */}
-      <Paper
-        elevation={0}
-        sx={{
-          mb: 4,
-          p: { xs: 2.5, sm: 3.5 },
-          borderRadius: 3,
-          border: "1px solid",
-          borderColor: "divider",
-          background:
-            "linear-gradient(120deg, rgba(245,124,0,0.10) 0%, rgba(25,118,210,0.08) 100%)",
-        }}
-      >
-        <Stack spacing={1.25}>
-          <Typography variant="overline" sx={{ fontWeight: 700, letterSpacing: "0.1em" }}>
+      <Card className="mb-8 p-6 sm:p-8">
+        <div className="space-y-3">
+          <span className="text-xs font-bold uppercase tracking-[0.1em] text-[var(--accent)]">
             {t("header.overline")}
-          </Typography>
-
-          <Typography
-            variant="h3"
-            sx={{ fontSize: { xs: "2rem", sm: "2.6rem" }, lineHeight: 1.1 }}
-          >
+          </span>
+          <h1 className="text-[2rem] sm:text-[2.6rem] font-bold leading-tight text-[var(--foreground)]">
             {t("header.title")}
-          </Typography>
-
-          <Typography variant="body1" color="text.secondary">
+          </h1>
+          <p className="text-[var(--foreground)]/70">
             {t("header.description")}
-          </Typography>
-
-          <Typography variant="body2" color="text.secondary">
+          </p>
+          <p className="text-sm text-[var(--foreground)]/60">
             {t("header.helper")}
-          </Typography>
-        </Stack>
-      </Paper>
+          </p>
+        </div>
+      </Card>
 
-      <Stack spacing={3}>
+      <div className="space-y-6">
         {mounted && authLoading ? (
-          <Paper sx={{ p: 3.5 }}>
-            <Typography color="text.secondary">{t("authLoading")}</Typography>
-          </Paper>
+          <Card className="p-6">
+            <p className="text-[var(--foreground)]/60">{t("authLoading")}</p>
+          </Card>
         ) : mounted && !user ? (
           <AuthPrompt
             title={t("authPrompt.title")}
@@ -95,34 +74,30 @@ export default function ProjectsPage() {
           />
         ) : (
           <>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" useFlexGap flexWrap="wrap" spacing={1}>
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <Button
-                variant="outlined"
-                startIcon={<CompareArrowsIcon />}
+                variant="outline"
+                size="sm"
                 disabled={selectedScenarioIds.length < 2}
                 onClick={() => {
                   const ids = selectedScenarioIds.join(",");
                   router.push(`/simulation/projects/compare?ids=${ids}`);
                 }}
               >
+                <ArrowLeftRight className="mr-2 h-4 w-4" />
                 {t("compare")} ({selectedScenarioIds.length})
               </Button>
               <Button
-                variant="contained"
-                startIcon={<AddIcon />}
+                variant="primary"
+                size="sm"
                 onClick={() => setScenarioFormOpen(true)}
               >
+                <Plus className="mr-2 h-4 w-4" />
                 {t("newScenario")}
               </Button>
-            </Stack>
+            </div>
 
-            {scenariosLoading && (
-              <Stack spacing={2}>
-                {[1, 2, 3].map((index) => (
-                  <Skeleton key={index} variant="rectangular" height={140} sx={{ borderRadius: 2 }} />
-                ))}
-              </Stack>
-            )}
+            {scenariosLoading && <ProjectsSkeleton />}
 
             {!scenariosLoading && scenarios?.length === 0 && (
               <EmptyState
@@ -136,7 +111,7 @@ export default function ProjectsPage() {
             )}
 
             {!scenariosLoading && scenarios && scenarios.length > 0 && (
-              <Stack spacing={2}>
+              <div className="space-y-5">
                 {scenarios.map((scenario) => (
                   <ScenarioCard
                     key={scenario.id}
@@ -149,11 +124,11 @@ export default function ProjectsPage() {
                     }}
                   />
                 ))}
-              </Stack>
+              </div>
             )}
           </>
         )}
-      </Stack>
+      </div>
 
       <ScenarioForm
         key={editingScenario?.id ?? "new"}
@@ -172,6 +147,6 @@ export default function ProjectsPage() {
             : undefined
         }
       />
-    </Container>
+    </div>
   );
 }

@@ -4,9 +4,6 @@
 import { useEffect } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import Container from "@mui/material/Container";
-import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
 
 export default function ProjectDashboardPage() {
   const router = useRouter();
@@ -17,12 +14,12 @@ export default function ProjectDashboardPage() {
   }, [router]);
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Paper sx={{ p: 3.5 }}>
-        <Typography color="text.secondary">
+    <div className="mx-auto max-w-3xl px-6 pt-20 pb-12">
+      <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-6">
+        <p className="text-sm text-[var(--muted-foreground)]">
           {t("redirecting")}
-        </Typography>
-      </Paper>
-    </Container>
+        </p>
+      </div>
+    </div>
   );
 }

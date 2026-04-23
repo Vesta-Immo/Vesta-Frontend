@@ -1,21 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Container from "@mui/material/Container";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
-import Stack from "@mui/material/Stack";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import CircularProgress from "@mui/material/CircularProgress";
-import Alert from "@mui/material/Alert";
-import MuiLink from "@mui/material/Link";
 import { Link } from "@/i18n/navigation";
+import { Loader2 } from "lucide-react";
+import Card from "@/components/ui/Card";
 import { getPtzConditions } from "@/lib/simulate";
 import { useFormat } from "@/lib/format";
 import type { GetPtzConditionsResult, PtzZone } from "@/types/simulation";
@@ -46,17 +34,19 @@ export default function PtzConditionsPage() {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 6, textAlign: "center" }}>
-        <CircularProgress />
-      </Container>
+      <div className="mx-auto max-w-5xl px-4 py-12 text-center">
+        <Loader2 className="mx-auto h-8 w-8 animate-spin text-[var(--accent)]" />
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Container maxWidth="lg" sx={{ py: 6 }}>
-        <Alert severity="error">{error}</Alert>
-      </Container>
+      <div className="mx-auto max-w-5xl px-4 py-12">
+        <div className="rounded-[var(--radius)] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      </div>
     );
   }
 
@@ -69,173 +59,160 @@ export default function PtzConditionsPage() {
   const loanItems = ["pas", "conventionne", "classique", "pel"] as const;
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }}>
-      <Box sx={{ mb: 5 }}>
-        <Typography
-          variant="overline"
-          color="primary"
-          sx={{ fontWeight: 700, letterSpacing: "0.12em" }}
-        >
+    <div className="mx-auto max-w-5xl px-4 py-12">
+      <div className="mb-8">
+        <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
           {t("overline")}
-        </Typography>
-        <Typography
-          variant="h3"
-          sx={{ mt: 1, fontSize: { xs: "2rem", sm: "2.5rem" } }}
-        >
+        </p>
+        <h1 className="mt-1 text-3xl font-bold tracking-tight text-[var(--foreground)] sm:text-4xl">
           {t("title")}
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 1.5 }}>
+        </h1>
+        <p className="mt-3 text-base text-[var(--muted-foreground)]">
           {t("description")}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        </p>
+        <p className="mt-2 text-sm text-[var(--muted-foreground)]">
           {t("helperText")}{" "}
-          <MuiLink
-            component={Link}
+          <Link
             href="/simulation/ptz"
-            color="primary"
-            underline="always"
-            sx={{ fontWeight: 600 }}
+            className="font-semibold text-[var(--accent)] underline underline-offset-2"
           >
             {t("helperLink")}
-          </MuiLink>
-        </Typography>
-      </Box>
+          </Link>
+        </p>
+      </div>
 
-      <Stack spacing={4}>
-        <Paper variant="outlined" sx={{ p: 3 }}>
-          <Typography
-            variant="h6"
-            sx={{ mb: 2, fontWeight: 700, color: "primary.main" }}
-          >
+      <div className="flex flex-col gap-6">
+        <Card className="p-6">
+          <h2 className="mb-4 text-lg font-bold text-[var(--accent)]">
             {t("characteristics.title")}
-          </Typography>
-          <Stack spacing={2}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", py: 1 }}>
-              <Typography variant="body1" color="text.secondary">
+          </h2>
+          <div className="flex flex-col gap-3">
+            <div className="flex justify-between py-2">
+              <span className="text-[var(--muted-foreground)]">
                 {t("characteristics.interestRate")}
-              </Typography>
-              <Typography variant="body1" fontWeight={600}>
+              </span>
+              <span className="font-semibold text-[var(--foreground)]">
                 {conditions.ptzRate === 0
                   ? t("characteristics.interestRateZero")
                   : t("characteristics.interestRateValue", { value: (conditions.ptzRate / 100).toFixed(2) })}
-              </Typography>
-            </Box>
-            <Box sx={{ display: "flex", justifyContent: "space-between", py: 1, borderTop: "1px solid", borderColor: "divider" }}>
-              <Typography variant="body1" color="text.secondary">
+              </span>
+            </div>
+            <hr className="border-[var(--border)]" />
+            <div className="flex justify-between py-2">
+              <span className="text-[var(--muted-foreground)]">
                 {t("characteristics.maxDuration")}
-              </Typography>
-              <Typography variant="body1" fontWeight={600}>
+              </span>
+              <span className="font-semibold text-[var(--foreground)]">
                 {t("characteristics.maxDurationValue", { months: conditions.maxDurationMonths, years: conditions.maxDurationMonths / 12 })}
-              </Typography>
-            </Box>
-            <Box sx={{ display: "flex", justifyContent: "space-between", py: 1, borderTop: "1px solid", borderColor: "divider" }}>
-              <Typography variant="body1" color="text.secondary">
+              </span>
+            </div>
+            <hr className="border-[var(--border)]" />
+            <div className="flex justify-between py-2">
+              <span className="text-[var(--muted-foreground)]">
                 {t("characteristics.minWork")}
-              </Typography>
-              <Typography variant="body1" fontWeight={600}>
+              </span>
+              <span className="font-semibold text-[var(--foreground)]">
                 {t("characteristics.minWorkValue", { percentage: conditions.minWorkPercentage })}
-              </Typography>
-            </Box>
-          </Stack>
-        </Paper>
+              </span>
+            </div>
+          </div>
+        </Card>
 
-        <Paper variant="outlined" sx={{ p: 3 }}>
-          <Typography
-            variant="h6"
-            sx={{ mb: 2, fontWeight: 700, color: "primary.main" }}
-          >
+        <Card className="p-6">
+          <h2 className="mb-4 text-lg font-bold text-[var(--accent)]">
             {t("exceptions.title")}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          </h2>
+          <p className="mb-4 text-sm text-[var(--muted-foreground)]">
             {t("exceptions.description")}
-          </Typography>
-          <Stack spacing={2}>
+          </p>
+          <div className="flex flex-col gap-3">
             {exceptionItems.map((key) => (
-              <Box key={key} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                <Typography variant="body1" fontWeight={600}>
+              <div key={key} className="flex items-start gap-2">
+                <span className="font-semibold text-[var(--foreground)]">
                   • {t(`exceptions.${key}.title`)}
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
+                </span>
+                <span className="text-[var(--muted-foreground)]">
                   {t(`exceptions.${key}.description`)}
-                </Typography>
-              </Box>
+                </span>
+              </div>
             ))}
-          </Stack>
-        </Paper>
+          </div>
+        </Card>
 
-        <Paper variant="outlined" sx={{ p: 3 }}>
-          <Typography
-            variant="h6"
-            sx={{ mb: 2, fontWeight: 700, color: "primary.main" }}
-          >
+        <Card className="p-6">
+          <h2 className="mb-4 text-lg font-bold text-[var(--accent)]">
             {t("duration.title")}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          </h2>
+          <p className="mb-4 text-sm text-[var(--muted-foreground)]">
             {t("duration.description")}
-          </Typography>
-          <Stack spacing={2}>
+          </p>
+          <div className="flex flex-col gap-3">
             {durationItems.map((key) => (
-              <Box key={key} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                <Typography variant="body1" fontWeight={600}>
+              <div key={key} className="flex items-start gap-2">
+                <span className="font-semibold text-[var(--foreground)]">
                   • {t(`duration.${key}.title`)}
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
+                </span>
+                <span className="text-[var(--muted-foreground)]">
                   {t(`duration.${key}.description`)}
-                </Typography>
-              </Box>
+                </span>
+              </div>
             ))}
-          </Stack>
-        </Paper>
+          </div>
+        </Card>
 
-        <Paper variant="outlined" sx={{ p: 3 }}>
-          <Typography
-            variant="h6"
-            sx={{ mb: 2, fontWeight: 700, color: "primary.main" }}
-          >
+        <Card className="p-6">
+          <h2 className="mb-4 text-lg font-bold text-[var(--accent)]">
             {t("loans.title")}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          </h2>
+          <p className="mb-4 text-sm text-[var(--muted-foreground)]">
             {t("loans.description")}
-          </Typography>
-          <Stack spacing={2}>
+          </p>
+          <div className="flex flex-col gap-3">
             {loanItems.map((key) => (
-              <Box key={key} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                <Typography variant="body1" fontWeight={600}>
+              <div key={key} className="flex items-start gap-2">
+                <span className="font-semibold text-[var(--foreground)]">
                   • {t(`loans.${key}.title`)}
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
+                </span>
+                <span className="text-[var(--muted-foreground)]">
                   {t(`loans.${key}.description`)}
-                </Typography>
-              </Box>
+                </span>
+              </div>
             ))}
-          </Stack>
-          <Alert severity="info" variant="outlined" sx={{ mt: 2 }}>
-            <Typography variant="body2">
-              {t("loans.alert")}
-            </Typography>
-          </Alert>
-        </Paper>
+          </div>
+          <div className="mt-4 rounded-[var(--radius)] border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+            {t("loans.alert")}
+          </div>
+        </Card>
 
-        <Paper variant="outlined" sx={{ p: 3 }}>
-          <Typography
-            variant="h6"
-            sx={{ mb: 2, fontWeight: 700, color: "primary.main" }}
-          >
+        <Card className="p-6">
+          <h2 className="mb-4 text-lg font-bold text-[var(--accent)]">
             {t("tables.priceCeilings.title")}
-          </Typography>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 700 }}>{t("tables.headers.zone")}</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }} align="right">{t("tables.headers.person1")}</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }} align="right">{t("tables.headers.person2")}</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }} align="right">{t("tables.headers.person3")}</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }} align="right">{t("tables.headers.person4")}</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }} align="right">{t("tables.headers.person5plus")}</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
+          </h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[var(--border)]">
+                  <th className="py-2 pr-4 text-left font-bold text-[var(--foreground)]">
+                    {t("tables.headers.zone")}
+                  </th>
+                  <th className="py-2 px-4 text-right font-bold text-[var(--foreground)]">
+                    {t("tables.headers.person1")}
+                  </th>
+                  <th className="py-2 px-4 text-right font-bold text-[var(--foreground)]">
+                    {t("tables.headers.person2")}
+                  </th>
+                  <th className="py-2 px-4 text-right font-bold text-[var(--foreground)]">
+                    {t("tables.headers.person3")}
+                  </th>
+                  <th className="py-2 px-4 text-right font-bold text-[var(--foreground)]">
+                    {t("tables.headers.person4")}
+                  </th>
+                  <th className="py-2 pl-4 text-right font-bold text-[var(--foreground)]">
+                    {t("tables.headers.person5plus")}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
                 {ZONES.map((zone) => {
                   const zonePlafonds = conditions.plafonds.filter(
                     (p) => p.zone === zone
@@ -247,43 +224,48 @@ export default function PtzConditionsPage() {
                     return plafond ? formatEuros(plafond.maxPropertyPrice) : "-";
                   };
                   return (
-                    <TableRow key={zone} hover>
-                      <TableCell>
-                        <Typography variant="body2" fontWeight={600}>
+                    <tr key={zone} className="border-b border-[var(--border)] hover:bg-gray-50">
+                      <td className="py-2 pr-4">
+                        <span className="text-sm font-semibold text-[var(--foreground)]">
                           {t(`zoneLabels.${zone}`)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">{getPrice(1)}</TableCell>
-                      <TableCell align="right">{getPrice(2)}</TableCell>
-                      <TableCell align="right">{getPrice(3)}</TableCell>
-                      <TableCell align="right">{getPrice(4)}</TableCell>
-                      <TableCell align="right">{getPrice(5)}</TableCell>
-                    </TableRow>
+                        </span>
+                      </td>
+                      <td className="py-2 px-4 text-right">{getPrice(1)}</td>
+                      <td className="py-2 px-4 text-right">{getPrice(2)}</td>
+                      <td className="py-2 px-4 text-right">{getPrice(3)}</td>
+                      <td className="py-2 px-4 text-right">{getPrice(4)}</td>
+                      <td className="py-2 pl-4 text-right">{getPrice(5)}</td>
+                    </tr>
                   );
                 })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Paper>
+              </tbody>
+            </table>
+          </div>
+        </Card>
 
-        <Paper variant="outlined" sx={{ p: 3 }}>
-          <Typography
-            variant="h6"
-            sx={{ mb: 2, fontWeight: 700, color: "primary.main" }}
-          >
+        <Card className="p-6">
+          <h2 className="mb-4 text-lg font-bold text-[var(--accent)]">
             {t("tables.financingCeilings.title")}
-          </Typography>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 700 }}>{t("tables.headers.zone")}</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }} align="right">{t("tables.headers.person12")}</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }} align="right">{t("tables.headers.person3")}</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }} align="right">{t("tables.headers.person4plus")}</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
+          </h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[var(--border)]">
+                  <th className="py-2 pr-4 text-left font-bold text-[var(--foreground)]">
+                    {t("tables.headers.zone")}
+                  </th>
+                  <th className="py-2 px-4 text-right font-bold text-[var(--foreground)]">
+                    {t("tables.headers.person12")}
+                  </th>
+                  <th className="py-2 px-4 text-right font-bold text-[var(--foreground)]">
+                    {t("tables.headers.person3")}
+                  </th>
+                  <th className="py-2 pl-4 text-right font-bold text-[var(--foreground)]">
+                    {t("tables.headers.person4plus")}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
                 {ZONES.map((zone) => {
                   const zonePlafonds = conditions.plafonds.filter(
                     (p) => p.zone === zone
@@ -295,43 +277,52 @@ export default function PtzConditionsPage() {
                     return plafond ? `${plafond.maxLoanPercentage} %` : "-";
                   };
                   return (
-                    <TableRow key={zone} hover>
-                      <TableCell>
-                        <Typography variant="body2" fontWeight={600}>
+                    <tr key={zone} className="border-b border-[var(--border)] hover:bg-gray-50">
+                      <td className="py-2 pr-4">
+                        <span className="text-sm font-semibold text-[var(--foreground)]">
                           {t(`zoneLabels.${zone}`)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">{getPercentage(2)}</TableCell>
-                      <TableCell align="right">{getPercentage(3)}</TableCell>
-                      <TableCell align="right">{getPercentage(4)}</TableCell>
-                    </TableRow>
+                        </span>
+                      </td>
+                      <td className="py-2 px-4 text-right">{getPercentage(2)}</td>
+                      <td className="py-2 px-4 text-right">{getPercentage(3)}</td>
+                      <td className="py-2 pl-4 text-right">{getPercentage(4)}</td>
+                    </tr>
                   );
                 })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Paper>
+              </tbody>
+            </table>
+          </div>
+        </Card>
 
-        <Paper variant="outlined" sx={{ p: 3 }}>
-          <Typography
-            variant="h6"
-            sx={{ mb: 2, fontWeight: 700, color: "primary.main" }}
-          >
+        <Card className="p-6">
+          <h2 className="mb-4 text-lg font-bold text-[var(--accent)]">
             {t("tables.incomeCeilings.title")}
-          </Typography>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 700 }}>{t("tables.headers.zone")}</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }} align="right">{t("tables.headers.person1")}</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }} align="right">{t("tables.headers.person2")}</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }} align="right">{t("tables.headers.person3")}</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }} align="right">{t("tables.headers.person4")}</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }} align="right">{t("tables.headers.person5plus")}</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
+          </h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[var(--border)]">
+                  <th className="py-2 pr-4 text-left font-bold text-[var(--foreground)]">
+                    {t("tables.headers.zone")}
+                  </th>
+                  <th className="py-2 px-4 text-right font-bold text-[var(--foreground)]">
+                    {t("tables.headers.person1")}
+                  </th>
+                  <th className="py-2 px-4 text-right font-bold text-[var(--foreground)]">
+                    {t("tables.headers.person2")}
+                  </th>
+                  <th className="py-2 px-4 text-right font-bold text-[var(--foreground)]">
+                    {t("tables.headers.person3")}
+                  </th>
+                  <th className="py-2 px-4 text-right font-bold text-[var(--foreground)]">
+                    {t("tables.headers.person4")}
+                  </th>
+                  <th className="py-2 pl-4 text-right font-bold text-[var(--foreground)]">
+                    {t("tables.headers.person5plus")}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
                 {ZONES.map((zone) => {
                   const zonePlafonds = conditions.plafonds.filter(
                     (p) => p.zone === zone
@@ -343,25 +334,25 @@ export default function PtzConditionsPage() {
                     return plafond ? formatEuros(plafond.maxRfr) : "-";
                   };
                   return (
-                    <TableRow key={zone} hover>
-                      <TableCell>
-                        <Typography variant="body2" fontWeight={600}>
+                    <tr key={zone} className="border-b border-[var(--border)] hover:bg-gray-50">
+                      <td className="py-2 pr-4">
+                        <span className="text-sm font-semibold text-[var(--foreground)]">
                           {t(`zoneLabels.${zone}`)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">{getRfr(1)}</TableCell>
-                      <TableCell align="right">{getRfr(2)}</TableCell>
-                      <TableCell align="right">{getRfr(3)}</TableCell>
-                      <TableCell align="right">{getRfr(4)}</TableCell>
-                      <TableCell align="right">{getRfr(5)}</TableCell>
-                    </TableRow>
+                        </span>
+                      </td>
+                      <td className="py-2 px-4 text-right">{getRfr(1)}</td>
+                      <td className="py-2 px-4 text-right">{getRfr(2)}</td>
+                      <td className="py-2 px-4 text-right">{getRfr(3)}</td>
+                      <td className="py-2 px-4 text-right">{getRfr(4)}</td>
+                      <td className="py-2 pl-4 text-right">{getRfr(5)}</td>
+                    </tr>
                   );
                 })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Paper>
-      </Stack>
-    </Container>
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </div>
+    </div>
   );
 }

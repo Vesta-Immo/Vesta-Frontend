@@ -3,54 +3,59 @@
 import { useLocale } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
-import Button from "@mui/material/Button";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { Globe, ChevronDown } from "lucide-react";
 
 export default function LocaleSwitcher() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   function handleSwitch(nextLocale: string) {
     router.replace(pathname, { locale: nextLocale });
-    setAnchorEl(null);
+    setOpen(false);
   }
 
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <>
-      <Button
-        size="small"
-        onClick={(e) => setAnchorEl(e.currentTarget)}
-        sx={{
-          minWidth: 36,
-          px: 1,
-          fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "0.05em",
-          fontSize: "0.75rem",
-          color: "text.secondary",
-        }}
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((prev) => !prev)}
+        className="inline-flex items-center gap-1 min-w-[36px] px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]/60 hover:text-[var(--foreground)] transition-colors rounded-[var(--radius)] hover:bg-[var(--foreground)]/5"
       >
+        <Globe className="w-4 h-4" />
         {locale}
-      </Button>
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={() => setAnchorEl(null)}
-      >
-        {routing.locales.map((l) => (
-          <MenuItem
-            key={l}
-            selected={l === locale}
-            onClick={() => handleSwitch(l)}
-          >
-            {l === "fr" ? "Français" : "English"}
-          </MenuItem>
-        ))}
-      </Menu>
-    </>
+        <ChevronDown className="w-3 h-3" />
+      </button>
+
+      {open && (
+        <div className="absolute right-0 mt-1.5 w-40 rounded-[var(--radius)] border border-[var(--border)] bg-white shadow-lg py-1 z-50">
+          {routing.locales.map((l) => (
+            <button
+              key={l}
+              onClick={() => handleSwitch(l)}
+              className={`w-full text-left px-3 py-2 text-sm transition-colors ${
+                l === locale
+                  ? "bg-[var(--accent)]/10 text-[var(--accent)] font-medium"
+                  : "text-[var(--foreground)] hover:bg-[var(--foreground)]/5"
+              }`}
+            >
+              {l === "fr" ? "Fran\u00e7ais" : "English"}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
