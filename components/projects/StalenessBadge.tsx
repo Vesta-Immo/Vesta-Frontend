@@ -5,6 +5,7 @@ import Chip from "@mui/material/Chip";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import CircularProgress from "@mui/material/CircularProgress";
 import Tooltip from "@mui/material/Tooltip";
+import { useTranslations } from "next-intl";
 
 interface StalenessBadgeProps {
   onRecalculate: () => void;
@@ -12,11 +13,13 @@ interface StalenessBadgeProps {
 }
 
 export default function StalenessBadge({ onRecalculate, isRecomputing }: StalenessBadgeProps) {
+  const t = useTranslations("projectsComp");
+
   if (isRecomputing) {
     return (
       <Chip
         icon={<CircularProgress size={12} />}
-        label="Recalcul..."
+        label={t("badge.recalculating")}
         size="small"
         color="warning"
         variant="outlined"
@@ -25,10 +28,10 @@ export default function StalenessBadge({ onRecalculate, isRecomputing }: Stalene
   }
 
   return (
-    <Tooltip title="Les règles de calcul ont peut-être changé. Cliquez pour recalculer.">
+    <Tooltip title={t("badge.tooltip")}>
       <Chip
         icon={<RefreshIcon sx={{ fontSize: 14 }} />}
-        label="Stale"
+        label={t("badge.stale")}
         size="small"
         color="warning"
         variant="outlined"

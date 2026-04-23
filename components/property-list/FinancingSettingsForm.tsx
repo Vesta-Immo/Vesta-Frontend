@@ -5,9 +5,9 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
 import InputAdornment from "@mui/material/InputAdornment";
+import { useTranslations } from "next-intl";
 import type { FinancingSettings } from "@/types/simulation";
 
 interface FinancingSettingsFormProps {
@@ -63,6 +63,7 @@ export default function FinancingSettingsForm({
   loading,
   error,
 }: FinancingSettingsFormProps) {
+  const t = useTranslations("propertyList");
   const [form, setForm] = useState<FinancingSettingsFormState>(
     normalizeSettings(initialValues)
   );
@@ -98,7 +99,7 @@ export default function FinancingSettingsForm({
 
       <Stack spacing={2.5}>
         <TextField
-          label="Taux annuel"
+          label={t("field.annualRate")}
           type="number"
           inputProps={{ min: 0, max: 30, step: 0.01 }}
           value={form.annualRatePercent}
@@ -110,19 +111,19 @@ export default function FinancingSettingsForm({
         />
 
         <TextField
-          label="Durée du prêt"
+          label={t("field.loanDuration")}
           type="number"
           inputProps={{ min: 12, max: 480, step: 1 }}
           value={form.durationMonths}
           onChange={field("durationMonths")}
           slotProps={{
-            input: { endAdornment: <InputAdornment position="end">mois</InputAdornment> },
+            input: { endAdornment: <InputAdornment position="end">{t("unit.months")}</InputAdornment> },
           }}
           fullWidth
         />
 
         <TextField
-          label="Apport personnel"
+          label={t("field.downPayment")}
           type="number"
           inputProps={{ min: 0, step: 1000 }}
           value={form.downPayment}
@@ -134,7 +135,7 @@ export default function FinancingSettingsForm({
         />
 
         <TextField
-          label="Revenus annuels du foyer"
+          label={t("field.annualIncome")}
           type="number"
           inputProps={{ min: 0, step: 1000 }}
           value={form.annualHouseholdIncome}
@@ -146,7 +147,7 @@ export default function FinancingSettingsForm({
         />
 
         <TextField
-          label="Charges mensuelles actuelles"
+          label={t("field.monthlyDebt")}
           type="number"
           inputProps={{ min: 0, step: 50 }}
           value={form.monthlyCurrentDebtPayments}
@@ -163,7 +164,7 @@ export default function FinancingSettingsForm({
           fullWidth
           disabled={loading}
         >
-          {loading ? "Enregistrement..." : "Enregistrer les paramètres"}
+          {loading ? t("action.saving") : t("action.saveSettings")}
         </Button>
       </Stack>
     </Box>

@@ -10,6 +10,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import CircularProgress from "@mui/material/CircularProgress";
+import { useTranslations } from "next-intl";
 
 import { useCreateScenario, useUpdateScenario } from "@/lib/projects";
 import ScenarioFormFields from "./ScenarioFormFields";
@@ -26,6 +27,7 @@ export default function ScenarioForm({
   onClose,
   initialValues,
 }: ScenarioFormProps) {
+  const t = useTranslations("projectsComp");
   const [name, setName] = useState(initialValues?.name ?? "");
   const [inputParams, setInputParams] = useState<Partial<ScenarioInput>>(
     initialValues ?? {
@@ -59,9 +61,9 @@ export default function ScenarioForm({
 
   const handleSubmit = async () => {
     const errors: Record<string, string> = {};
-    if (!name.trim()) errors.name = "Le nom du scénario est requis";
-    if (!inputParams.annualHouseholdIncome) errors.annualHouseholdIncome = "Requis";
-    if (!inputParams.downPayment && inputParams.downPayment !== 0) errors.downPayment = "Requis";
+    if (!name.trim()) errors.name = t("validation.nameRequired");
+    if (!inputParams.annualHouseholdIncome) errors.annualHouseholdIncome = t("validation.required");
+    if (!inputParams.downPayment && inputParams.downPayment !== 0) errors.downPayment = t("validation.required");
 
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
@@ -97,7 +99,7 @@ export default function ScenarioForm({
         });
         setFieldErrors(mapped);
       } else {
-        setFieldErrors({ _form: "Erreur lors de la sauvegarde. Réessayez." });
+        setFieldErrors({ _form: t("error.saveFailed") });
       }
     }
   };
@@ -110,15 +112,15 @@ export default function ScenarioForm({
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{isEdit ? "Modifier le scénario" : "Nouveau scénario"}</DialogTitle>
+      <DialogTitle>{isEdit ? t("dialog.editScenarioTitle") : t("dialog.newScenarioTitle")}</DialogTitle>
       <DialogContent>
         <Stack spacing={3} sx={{ pt: 1 }}>
           <TextField
-            label="Nom du scénario"
+            label={t("field.scenarioName")}
             value={name}
             onChange={(e) => setName(e.target.value)}
             error={Boolean(fieldErrors.name)}
-            helperText={fieldErrors.name ?? "Ex: 20 ans à 3.5%"}
+            helperText={fieldErrors.name ?? t("field.scenarioNamePlaceholder")}
             fullWidth
             autoFocus
             disabled={isLoading}
@@ -133,15 +135,15 @@ export default function ScenarioForm({
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={handleClose} disabled={isLoading}>
-          Annuler
+          {t("action.cancel")}
         </Button>
         <Button variant="contained" onClick={handleSubmit} disabled={isLoading}>
           {isLoading ? (
             <CircularProgress size={20} />
           ) : isEdit ? (
-            "Enregistrer"
+            t("action.save")
           ) : (
-            "Créer et calculer"
+            t("action.createAndCalculate")
           )}
         </Button>
       </DialogActions>

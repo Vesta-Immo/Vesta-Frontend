@@ -15,12 +15,12 @@ import EditIcon from "@mui/icons-material/Edit";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
 import StarIcon from "@mui/icons-material/Star";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
 import Stack from "@mui/material/Stack";
 import Chip from "@mui/material/Chip";
 import { useState } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import type { Scenario } from '@/types/project';
-import { isStale, formatComputedAt } from '@/types/project';
+import { isStale } from '@/types/project';
 import { useDeleteScenario, useCopyScenario, useRecomputeScenario } from "@/lib/projects";
 import StalenessBadge from "./StalenessBadge";
 
@@ -29,6 +29,23 @@ interface ScenarioCardProps {
   isSelected: boolean;
   onToggleSelect: () => void;
   onEdit: () => void;
+}
+
+function useFormatComputedAt() {
+  const t = useTranslations("projectsComp");
+  const locale = useLocale();
+
+  return (computedAt: string | null): string => {
+    if (!computedAt) return t("notComputed");
+    const date = new Date(computedAt);
+    const diffMs = Date.now() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return t("computedToday");
+    if (diffDays === 1) return t("computedYesterday");
+    if (diffDays < 7) return t("computedDaysAgo", { days: diffDays });
+    if (diffDays < 30) return t("computedWeeksAgo", { weeks: Math.floor(diffDays / 7) });
+    return t("computedOnDate", { date: date.toLocaleDateString(locale) });
+  };
 }
 
 export default function ScenarioCard({
@@ -41,12 +58,15 @@ export default function ScenarioCard({
   const deleteMutation = useDeleteScenario();
   const copyMutation = useCopyScenario();
   const recomputeMutation = useRecomputeScenario();
+  const t = useTranslations("projectsComp");
+  const locale = useLocale();
+  const formatComputedAt = useFormatComputedAt();
 
   const hasResult = Boolean(scenario.outputResult);
   const stale = isStale(scenario.computedAt);
 
   const fmt = (n: number) =>
-    new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
+    new Intl.NumberFormat(locale, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
 
   return (
     <>
@@ -74,7 +94,7 @@ export default function ScenarioCard({
                 {scenario.isBaseline && (
                   <Chip
                     icon={<StarIcon sx={{ fontSize: 14 }} />}
-                    label="Baseline"
+                    label={t("baseline")}
                     size="small"
                     color="primary"
                     variant="outlined"
@@ -89,15 +109,18 @@ export default function ScenarioCard({
               </Stack>
 
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                {scenario.inputParams.durationMonths / 12} ans · {scenario.inputParams.annualRatePercent}% ·{" "}
-                {fmt(scenario.inputParams.downPayment)} d'apport
+                {t("scenarioSubtitle", {
+                  years: scenario.inputParams.durationMonths / 12,
+                  rate: scenario.inputParams.annualRatePercent,
+                  downPayment: fmt(scenario.inputParams.downPayment),
+                })}
               </Typography>
 
               {hasResult && scenario.outputResult && (
                 <Stack direction="row" gap={3} sx={{ mt: 1.5 }} flexWrap="wrap">
                   <Box>
                     <Typography variant="caption" color="text.secondary">
-                      Capacité d&apos;emprunt
+                      {t("table.borrowingCapacity")}
                     </Typography>
                     <Typography variant="body2" fontWeight={600}>
                       {fmt(scenario.outputResult.borrowingCapacity)}
@@ -105,7 +128,7 @@ export default function ScenarioCard({
                   </Box>
                   <Box>
                     <Typography variant="caption" color="text.secondary">
-                      Mensualité
+                      {t("table.monthlyPayment")}
                     </Typography>
                     <Typography variant="body2" fontWeight={600}>
                       {fmt(scenario.outputResult.monthlyCreditPayment)}
@@ -113,7 +136,7 @@ export default function ScenarioCard({
                   </Box>
                   <Box>
                     <Typography variant="caption" color="text.secondary">
-                      Budget total
+                      {t("table.totalBudget")}
                     </Typography>
                     <Typography variant="body2" fontWeight={600}>
                       {fmt(scenario.outputResult.totalBudget)}
@@ -121,7 +144,7 @@ export default function ScenarioCard({
                   </Box>
                   <Box>
                     <Typography variant="caption" color="text.secondary">
-                      Calculé
+                      {t("computed")}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       {formatComputedAt(scenario.computedAt)}
@@ -132,7 +155,7 @@ export default function ScenarioCard({
 
               {!hasResult && (
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  Non calculé — ouvrez pour calculer
+                  {t("notComputed")}
                 </Typography>
               )}
             </Box>
@@ -165,7 +188,7 @@ export default function ScenarioCard({
           <ListItemIcon>
             <EditIcon fontSize="small" />
           </ListItemIcon>
-          Modifier
+          {t("action.edit")}
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -176,12 +199,12 @@ export default function ScenarioCard({
           <ListItemIcon>
             <ContentCopyIcon fontSize="small" />
           </ListItemIcon>
-          Dupliquer
+          {t("action.duplicate")}
         </MenuItem>
         <MenuItem
           onClick={() => {
             setAnchorEl(null);
-            if (confirm(`Supprimer "${scenario.name}" ?`)) {
+            if (confirm(t("confirmDelete", { name: scenario.name }))) {
               deleteMutation.mutate(scenario.id);
             }
           }}
@@ -190,7 +213,7 @@ export default function ScenarioCard({
           <ListItemIcon>
             <DeleteIcon fontSize="small" color="error" />
           </ListItemIcon>
-          Supprimer
+          {t("action.delete")}
         </MenuItem>
       </Menu>
     </>

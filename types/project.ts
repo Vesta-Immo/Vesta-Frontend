@@ -126,14 +126,4 @@ export function isStale(computedAt: string | null): boolean {
   return Date.now() - new Date(computedAt).getTime() > sevenDaysMs;
 }
 
-export function formatComputedAt(computedAt: string | null): string {
-  if (!computedAt) return 'Non calculé';
-  const date = new Date(computedAt);
-  const diffMs = Date.now() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return "Aujourd'hui";
-  if (diffDays === 1) return 'Hier';
-  if (diffDays < 7) return `Il y a ${diffDays} jours`;
-  if (diffDays < 30) return `Il y a ${Math.floor(diffDays / 7)} semaines`;
-  return `Le ${date.toLocaleDateString('fr-FR')}`;
-}
+

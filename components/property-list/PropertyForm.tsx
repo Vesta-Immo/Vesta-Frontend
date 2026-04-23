@@ -16,6 +16,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
+import { useTranslations } from "next-intl";
 import type { PropertyItem, PropertyStatus, PropertyType } from "@/types/simulation";
 
 export function isValidListingUrl(value: string): boolean {
@@ -40,6 +41,7 @@ export default function PropertyForm({
   loading,
   error,
 }: PropertyFormProps) {
+  const t = useTranslations("propertyList");
   const [validationError, setValidationError] = useState<string | null>(null);
   const [form, setForm] = useState<PropertyItem>(
     initialValues || {
@@ -61,7 +63,7 @@ export default function PropertyForm({
       const trimmedListingUrl = form.listingUrl?.trim() || "";
 
       if (trimmedListingUrl && !isValidListingUrl(trimmedListingUrl)) {
-        setValidationError("Le lien d'annonce doit etre une URL valide (http:// ou https://).");
+        setValidationError(t("validation.invalidUrl"));
         return;
       }
 
@@ -127,32 +129,32 @@ export default function PropertyForm({
       <Stack spacing={2.5} sx={{ pt: 1 }}>
         {/* Core property fields */}
         <FormControl fullWidth>
-          <InputLabel>Statut</InputLabel>
+          <InputLabel>{t("field.status.label")}</InputLabel>
           <Select
             value={form.status}
             onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value as PropertyStatus }))}
-            label="Statut"
+            label={t("field.status.label")}
           >
-            <MenuItem value="wanted">Convoitée</MenuItem>
-            <MenuItem value="visited">Visitée</MenuItem>
+            <MenuItem value="wanted">{t("field.status.wanted")}</MenuItem>
+            <MenuItem value="visited">{t("field.status.visited")}</MenuItem>
           </Select>
         </FormControl>
 
         <FormControl fullWidth>
-          <InputLabel>Type de propriété</InputLabel>
+          <InputLabel>{t("field.propertyType.label")}</InputLabel>
           <Select
             value={form.propertyType}
             onChange={(e) => setForm((prev) => ({ ...prev, propertyType: e.target.value as PropertyType }))}
-            label="Type de propriété"
+            label={t("field.propertyType.label")}
           >
-            <MenuItem value="NEW">Neuf</MenuItem>
-            <MenuItem value="OLD">Ancien</MenuItem>
+            <MenuItem value="NEW">{t("field.propertyType.new")}</MenuItem>
+            <MenuItem value="OLD">{t("field.propertyType.old")}</MenuItem>
           </Select>
         </FormControl>
 
         <TextField
-          label="Titre du bien"
-          placeholder="Exemple: Lyon 7e - Gerland"
+          label={t("field.title")}
+          placeholder={t("field.titlePlaceholder")}
           value={form.addressOrSector}
           onChange={field("addressOrSector")}
           required
@@ -160,16 +162,16 @@ export default function PropertyForm({
         />
 
         <TextField
-          label="Code département"
-          placeholder="69"
+          label={t("field.departmentCode")}
+          placeholder={t("field.departmentCodePlaceholder")}
           value={form.departmentCode || ""}
           onChange={(e) => setForm((prev) => ({ ...prev, departmentCode: e.target.value || undefined }))}
           fullWidth
         />
 
         <TextField
-          label="Lien d'annonce"
-          placeholder="https://..."
+          label={t("field.listingUrl")}
+          placeholder={t("field.listingUrlPlaceholder")}
           type="url"
           value={form.listingUrl || ""}
           onChange={(e) => {
@@ -181,7 +183,7 @@ export default function PropertyForm({
         />
 
         <TextField
-          label="Prix d'achat"
+          label={t("field.purchasePrice")}
           type="number"
           inputProps={{ min: 0, step: 1000 }}
           value={form.price}
@@ -194,7 +196,7 @@ export default function PropertyForm({
         />
 
         <TextField
-          label="Impôts fonciers annuels"
+          label={t("field.propertyTax")}
           type="number"
           inputProps={{ min: 0, step: 100 }}
           value={form.propertyTaxAnnual}
@@ -206,7 +208,7 @@ export default function PropertyForm({
         />
 
         <TextField
-          label="Charges copropriété annuelles"
+          label={t("field.coOwnershipFees")}
           type="number"
           inputProps={{ min: 0, step: 100 }}
           value={form.coOwnershipFeesAnnual}
@@ -220,7 +222,7 @@ export default function PropertyForm({
         {/* Renovation work items */}
         <Box>
           <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-            Travaux de rénovation
+            {t("section.renovation")}
           </Typography>
           <Stack spacing={1.5}>
             {form.renovationWorkItems.map((item, idx) => (
@@ -231,23 +233,23 @@ export default function PropertyForm({
               >
                 <Stack spacing={1.5} direction={{ xs: "column", sm: "row" }}>
                   <TextField
-                    label="Nom"
-                    placeholder="Cuisine, Salle de bain..."
+                    label={t("field.renovationName")}
+                    placeholder={t("field.renovationNamePlaceholder")}
                     value={item.name}
                     onChange={(e) => updateRenovationItem(idx, "name", e.target.value)}
                     size="small"
                     sx={{ flex: 1 }}
                   />
                   <TextField
-                    label="Détails (optionnel)"
-                    placeholder="Précisions"
+                    label={t("field.renovationDetails")}
+                    placeholder={t("field.renovationDetailsPlaceholder")}
                     value={item.details || ""}
                     onChange={(e) => updateRenovationItem(idx, "details", e.target.value)}
                     size="small"
                     sx={{ flex: 1 }}
                   />
                   <TextField
-                    label="Coût"
+                    label={t("field.renovationCost")}
                     type="number"
                     inputProps={{ min: 0, step: 500 }}
                     value={item.cost}
@@ -273,7 +275,7 @@ export default function PropertyForm({
               startIcon={<AddIcon />}
               variant="outlined"
             >
-              Ajouter un travail
+              {t("action.addWork")}
             </Button>
           </Stack>
         </Box>
@@ -284,7 +286,7 @@ export default function PropertyForm({
           fullWidth
           disabled={loading}
         >
-          {loading ? "Enregistrement..." : initialValues ? "Mettre à jour" : "Ajouter la propriété"}
+          {loading ? t("action.saving") : initialValues ? t("action.update") : t("action.addProperty")}
         </Button>
       </Stack>
     </Box>

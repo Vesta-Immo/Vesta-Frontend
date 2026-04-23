@@ -12,6 +12,7 @@ import {
 import type { Session, User } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { useSessionReset } from "@/lib/SessionResetContext";
+import { useTranslations } from "next-intl";
 
 interface AuthContextValue {
   accessToken: string | null;
@@ -41,6 +42,7 @@ function buildRedirectTo(returnTo?: string) {
 }
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
+  const t = useTranslations("authComp");
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const sessionReset = useSessionReset();
@@ -117,7 +119,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
             error:
               error instanceof Error
                 ? error.message
-                : "Connexion Google impossible pour le moment.",
+                : t("error.googleSignInFailed"),
           };
         }
       },
@@ -131,17 +133,18 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       },
       user: session?.user ?? null,
     }),
-    [authLoading, session]
+    [authLoading, session, t]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
+  const t = useTranslations("authComp");
   const context = useContext(AuthContext);
 
   if (!context) {
-    throw new Error("useAuth doit etre utilise dans AuthProvider.");
+    throw new Error(t("error.useAuthHook"));
   }
 
   return context;

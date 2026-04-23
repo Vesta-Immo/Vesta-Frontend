@@ -14,6 +14,7 @@ import Chip from "@mui/material/Chip";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import Stack from "@mui/material/Stack";
+import { useTranslations, useLocale } from "next-intl";
 
 import type {
   ScenarioComparisonRow,
@@ -27,17 +28,11 @@ interface CompareTableProps {
   insights: CompareScenariosInsight;
 }
 
-function fmt(n: number) {
-  return new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(n);
-}
-
-function DeltaChip({ value }: { value: number }) {
+function DeltaChip({ value, locale }: { value: number; locale: string }) {
   if (value === 0) return null;
   const isPositive = value > 0;
+  const fmt = (n: number) =>
+    new Intl.NumberFormat(locale, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
   return (
     <Chip
       icon={isPositive ? <ArrowUpwardIcon sx={{ fontSize: 12 }} /> : <ArrowDownwardIcon sx={{ fontSize: 12 }} />}
@@ -55,14 +50,18 @@ export default function CompareTable({
   deltas,
   insights,
 }: CompareTableProps) {
-  const fmtYears = (months: number) => `${months / 12} ans`;
+  const t = useTranslations("projectsComp");
+  const locale = useLocale();
+  const fmt = (n: number) =>
+    new Intl.NumberFormat(locale, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
+  const fmtYears = (months: number) => t("years", { years: months / 12 });
 
   return (
     <TableContainer component={Paper} variant="outlined">
       <Table size="small">
         <TableHead>
           <TableRow sx={{ "& th": { bgcolor: "grey.50", fontWeight: 600 } }}>
-            <TableCell sx={{ minWidth: 140 }}>Paramètre</TableCell>
+            <TableCell sx={{ minWidth: 140 }}>{t("table.parameter")}</TableCell>
             {scenarios.map((s) => (
               <TableCell key={s.scenarioId} align="center" sx={{ minWidth: 140 }}>
                 <Stack alignItems="center" gap={0.5}>
@@ -78,11 +77,11 @@ export default function CompareTable({
           {/* ── Inputs ── */}
           <TableRow>
             <TableCell colSpan={scenarios.length + 1} sx={{ py: 0.5, bgcolor: "grey.100", fontWeight: 700, fontSize: "0.75rem" }}>
-              ENTRÉES
+              {t("table.inputsHeader")}
             </TableCell>
           </TableRow>
           <TableRow sx={{ "& td": { borderRight: "1px solid", borderColor: "divider" } }}>
-            <TableCell sx={{ fontWeight: 500 }}>Revenus annuels</TableCell>
+            <TableCell sx={{ fontWeight: 500 }}>{t("table.annualIncome")}</TableCell>
             {scenarios.map((s) => (
               <TableCell key={s.scenarioId} align="center">
                 {fmt(s.annualHouseholdIncome)}
@@ -90,7 +89,7 @@ export default function CompareTable({
             ))}
           </TableRow>
           <TableRow sx={{ "& td": { borderRight: "1px solid", borderColor: "divider" } }}>
-            <TableCell sx={{ fontWeight: 500 }}>Durée</TableCell>
+            <TableCell sx={{ fontWeight: 500 }}>{t("table.duration")}</TableCell>
             {scenarios.map((s) => (
               <TableCell key={s.scenarioId} align="center">
                 {fmtYears(s.durationMonths)}
@@ -98,7 +97,7 @@ export default function CompareTable({
             ))}
           </TableRow>
           <TableRow sx={{ "& td": { borderRight: "1px solid", borderColor: "divider" } }}>
-            <TableCell sx={{ fontWeight: 500 }}>Taux annuel</TableCell>
+            <TableCell sx={{ fontWeight: 500 }}>{t("table.annualRate")}</TableCell>
             {scenarios.map((s) => (
               <TableCell key={s.scenarioId} align="center">
                 {s.annualRatePercent.toFixed(2)}%
@@ -106,7 +105,7 @@ export default function CompareTable({
             ))}
           </TableRow>
           <TableRow sx={{ "& td": { borderRight: "1px solid", borderColor: "divider" } }}>
-            <TableCell sx={{ fontWeight: 500 }}>Apport</TableCell>
+            <TableCell sx={{ fontWeight: 500 }}>{t("table.downPayment")}</TableCell>
             {scenarios.map((s) => (
               <TableCell key={s.scenarioId} align="center">
                 {fmt(s.downPayment)}
@@ -117,11 +116,11 @@ export default function CompareTable({
           {/* ── Outputs ── */}
           <TableRow>
             <TableCell colSpan={scenarios.length + 1} sx={{ py: 0.5, bgcolor: "grey.100", fontWeight: 700, fontSize: "0.75rem" }}>
-              RÉSULTATS
+              {t("table.outputsHeader")}
             </TableCell>
           </TableRow>
           <TableRow sx={{ "& td": { borderRight: "1px solid", borderColor: "divider" } }}>
-            <TableCell sx={{ fontWeight: 500 }}>Capacité d&apos;emprunt</TableCell>
+            <TableCell sx={{ fontWeight: 500 }}>{t("table.borrowingCapacity")}</TableCell>
             {scenarios.map((s) => {
               const isBest = s.scenarioId === insights.highestBorrowingCapacity.scenarioId;
               const delta = deltas[s.scenarioId];
@@ -131,14 +130,14 @@ export default function CompareTable({
                     <Typography variant="body2" fontWeight={isBest ? 700 : 400}>
                       {fmt(s.borrowingCapacity)}
                     </Typography>
-                    {delta && !s.isBaseline && <DeltaChip value={delta.borrowingCapacityDelta} />}
+                    {delta && !s.isBaseline && <DeltaChip value={delta.borrowingCapacityDelta} locale={locale} />}
                   </Box>
                 </TableCell>
               );
             })}
           </TableRow>
           <TableRow sx={{ "& td": { borderRight: "1px solid", borderColor: "divider" } }}>
-            <TableCell sx={{ fontWeight: 500 }}>Mensualité</TableCell>
+            <TableCell sx={{ fontWeight: 500 }}>{t("table.monthlyPayment")}</TableCell>
             {scenarios.map((s) => {
               const isBest = s.scenarioId === insights.bestMonthlyPayment.scenarioId;
               const delta = deltas[s.scenarioId];
@@ -148,14 +147,14 @@ export default function CompareTable({
                     <Typography variant="body2" fontWeight={isBest ? 700 : 400}>
                       {fmt(s.monthlyCreditPayment)}
                     </Typography>
-                    {delta && !s.isBaseline && <DeltaChip value={delta.monthlyPaymentDelta} />}
+                    {delta && !s.isBaseline && <DeltaChip value={delta.monthlyPaymentDelta} locale={locale} />}
                   </Box>
                 </TableCell>
               );
             })}
           </TableRow>
           <TableRow sx={{ "& td": { borderRight: "1px solid", borderColor: "divider" } }}>
-            <TableCell sx={{ fontWeight: 500 }}>Budget achat</TableCell>
+            <TableCell sx={{ fontWeight: 500 }}>{t("table.totalBudget")}</TableCell>
             {scenarios.map((s) => {
               const isBest = s.scenarioId === insights.highestTotalBudget.scenarioId;
               const delta = deltas[s.scenarioId];
@@ -165,14 +164,14 @@ export default function CompareTable({
                     <Typography variant="body2" fontWeight={isBest ? 700 : 400}>
                       {fmt(s.totalBudget)}
                     </Typography>
-                    {delta && !s.isBaseline && <DeltaChip value={delta.totalBudgetDelta} />}
+                    {delta && !s.isBaseline && <DeltaChip value={delta.totalBudgetDelta} locale={locale} />}
                   </Box>
                 </TableCell>
               );
             })}
           </TableRow>
           <TableRow sx={{ "& td": { borderRight: "1px solid", borderColor: "divider" } }}>
-            <TableCell sx={{ fontWeight: 500 }}>Frais de notaire</TableCell>
+            <TableCell sx={{ fontWeight: 500 }}>{t("table.notaryFees")}</TableCell>
             {scenarios.map((s) => (
               <TableCell key={s.scenarioId} align="center">
                 {fmt(s.notaryFees)}
