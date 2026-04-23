@@ -12,8 +12,9 @@ import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import Divider from "@mui/material/Divider";
 import Link from "@mui/material/Link";
+import { useTranslations } from "next-intl";
 import type { PropertyItem, PropertyWithResults } from "@/types/simulation";
-import { formatEuros } from "@/lib/format";
+import { useFormat } from "@/lib/format";
 
 interface PropertyListViewProps {
   properties: PropertyItem[];
@@ -30,11 +31,14 @@ export default function PropertyListView({
   onDelete,
   loading,
 }: PropertyListViewProps) {
+  const t = useTranslations("propertyList");
+  const { formatEuros } = useFormat();
+
   if (properties.length === 0) {
     return (
       <Box sx={{ textAlign: "center", py: 4 }}>
         <Typography color="text.secondary">
-          Aucune piste d'achat ajoutee. Commencez a ajouter vos pistes.
+          {t("noProperties")}
         </Typography>
       </Box>
     );
@@ -43,7 +47,7 @@ export default function PropertyListView({
   return (
     <Stack spacing={2}>
       <Typography variant="h6" sx={{ fontWeight: 700 }}>
-        Pistes d'achat ({properties.length})
+        {t("title", { count: properties.length })}
       </Typography>
 
       <Box
@@ -73,7 +77,7 @@ export default function PropertyListView({
                     {property.addressOrSector}
                   </Typography>
                   <Chip
-                    label={property.status === "wanted" ? "Convoitée" : "Visitée"}
+                    label={property.status === "wanted" ? t("status.wanted") : t("status.visited")}
                     size="small"
                     color={property.status === "wanted" ? "default" : "primary"}
                   />
@@ -88,13 +92,13 @@ export default function PropertyListView({
                     flexWrap="wrap"
                   >
                     <Chip
-                      label={`Mensualite credit: ${formatEuros(result.monthlyCreditPayment)}`}
+                      label={t("chip.monthlyCredit", { amount: formatEuros(result.monthlyCreditPayment) })}
                       color="default"
                       size="small"
                       sx={{ alignSelf: "flex-start" }}
                     />
                     <Chip
-                      label={`Endettement: ${result.debtRatioPercent.toFixed(1)}%`}
+                      label={t("chip.debtRatio", { ratio: result.debtRatioPercent.toFixed(1) })}
                       color={
                         result.debtRatioLevel === "LOW"
                           ? "success"
@@ -106,7 +110,7 @@ export default function PropertyListView({
                       sx={{ alignSelf: "flex-start" }}
                     />
                     <Chip
-                      label={`Mensualite + charges: ${formatEuros(result.monthlyPaymentWithCharges)}`}
+                      label={t("chip.monthlyWithCharges", { amount: formatEuros(result.monthlyPaymentWithCharges) })}
                       color="primary"
                       size="small"
                       sx={{ alignSelf: "flex-start" }}
@@ -115,7 +119,7 @@ export default function PropertyListView({
                 )}
 
                 <Typography variant="body2" color="text.secondary">
-                  {property.propertyType === "NEW" ? "Neuf" : "Ancien"}
+                  {property.propertyType === "NEW" ? t("propertyType.new") : t("propertyType.old")}
                   {property.departmentCode && ` • ${property.departmentCode}`}
                 </Typography>
 
@@ -126,7 +130,7 @@ export default function PropertyListView({
                     rel="noopener noreferrer"
                     variant="body2"
                   >
-                    Voir l'annonce
+                    {t("viewListing")}
                   </Link>
                 )}
 
@@ -135,7 +139,7 @@ export default function PropertyListView({
                 <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1 }}>
                   <Box>
                     <Typography variant="caption" color="text.secondary">
-                      Prix d'achat
+                      {t("label.purchasePrice")}
                     </Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {formatEuros(property.price)}
@@ -144,7 +148,7 @@ export default function PropertyListView({
 
                   <Box>
                     <Typography variant="caption" color="text.secondary">
-                      Impôts annuels
+                      {t("label.annualTaxes")}
                     </Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {formatEuros(property.propertyTaxAnnual)}
@@ -153,7 +157,7 @@ export default function PropertyListView({
 
                   <Box>
                     <Typography variant="caption" color="text.secondary">
-                      Charges copropriété
+                      {t("label.coOwnershipFees")}
                     </Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {formatEuros(property.coOwnershipFeesAnnual)}
@@ -162,7 +166,7 @@ export default function PropertyListView({
 
                   <Box>
                     <Typography variant="caption" color="text.secondary">
-                      Rénovations
+                      {t("label.renovations")}
                     </Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {formatEuros(totalRenovation)}
@@ -173,7 +177,7 @@ export default function PropertyListView({
                     <>
                       <Box>
                         <Typography variant="caption" color="text.secondary">
-                          Prêt requis
+                          {t("label.requiredLoan")}
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
                           {formatEuros(result.requiredLoanAmount)}
@@ -182,7 +186,7 @@ export default function PropertyListView({
 
                       <Box>
                         <Typography variant="caption" color="text.secondary">
-                          Frais de notaire
+                          {t("label.notaryFees")}
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
                           {formatEuros(result.notaryFees)}
@@ -197,7 +201,7 @@ export default function PropertyListView({
                     <Divider sx={{ my: 1 }} />
                     <Box>
                       <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                        Travaux:
+                        {t("label.works")}
                       </Typography>
                       <Stack spacing={0.5} sx={{ mt: 0.5 }}>
                         {property.renovationWorkItems.map((item, idx) => (
@@ -222,7 +226,7 @@ export default function PropertyListView({
                 onClick={() => onEdit(property)}
                 startIcon={<EditIcon />}
               >
-                Edit
+                {t("action.edit")}
               </Button>
               <Button
                 size="small"
@@ -231,7 +235,7 @@ export default function PropertyListView({
                 startIcon={<DeleteIcon />}
                 disabled={loading}
               >
-                Supprimer
+                {t("action.delete")}
               </Button>
             </CardActions>
           </Card>

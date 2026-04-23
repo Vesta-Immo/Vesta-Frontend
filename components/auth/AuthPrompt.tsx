@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { useTranslations } from "next-intl";
 import { useAuth } from "./AuthProvider";
 
 interface AuthPromptProps {
@@ -16,6 +17,7 @@ interface AuthPromptProps {
 }
 
 export default function AuthPrompt({ title, description, sx = {} }: AuthPromptProps) {
+  const t = useTranslations("authComp");
   const pathname = usePathname();
   const { signInWithGoogle } = useAuth();
   const [authBusy, setAuthBusy] = useState(false);
@@ -53,7 +55,7 @@ export default function AuthPrompt({ title, description, sx = {} }: AuthPromptPr
         )}
 
         <Button variant="contained" onClick={handleSignIn} disabled={authBusy}>
-          {authBusy ? "Connexion..." : "Se connecter avec Google"}
+          {authBusy ? t("action.signingIn") : t("action.signInWithGoogle")}
         </Button>
       </Stack>
     </Paper>

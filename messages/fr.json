@@ -1,0 +1,722 @@
+{
+  "metadata": {
+    "title": "Vesta Immo",
+    "description": "Frontend de simulation immobiliere pour particuliers."
+  },
+  "nav": {
+    "buyingTrack": "Mes pistes d'achat",
+    "financingScenarios": "Mes scénarios",
+    "tools": "Outils complémentaires",
+    "borrowingCapacity": "Capacité d'emprunt",
+    "propertyPrice": "Prix immobilier",
+    "ptzSimulator": "Simulateur PTZ"
+  },
+  "home": {
+    "hero": {
+      "title": "Pilotez tout votre projet avec Mes pistes d'achat.",
+      "description": "Mes pistes d'achat aide un particulier a garder la main sur plusieurs biens en parallele, a verifier rapidement la faisabilite financiere, et a arbitrer sur des bases concretes plutot que sur l'intuition seule.",
+      "cta": "Mes pistes d'achat"
+    },
+    "buyingTrack": {
+      "items": [
+        {
+          "title": "Centraliser les biens qui comptent vraiment",
+          "description": "Rassemblez au meme endroit les biens qui meritent d'etre suivis dans un projet d'achat, pour comparer les opportunites sans vous perdre dans des notes eparses."
+        },
+        {
+          "title": "Cadrer la faisabilite financiere",
+          "description": "Visualisez rapidement si un dossier reste soutenable avec le taux d'endettement, la capacite d'emprunt et les autres indicateurs qui conditionnent la decision."
+        },
+        {
+          "title": "Traduire un bien en vrai cout mensuel",
+          "description": "Appuyez-vous sur une lecture plus juste du 'vrai' loyer TTC et des charges pour mesurer l'effort reel a financer, pas seulement le prix d'annonce."
+        }
+      ]
+    },
+    "scenarios": {
+      "title": "Affinez votre stratégie avec Scénarios financement.",
+      "description": "Scénarios financement vous permet de modéliser plusieurs hypothèses de crédit pour un même projet immobilier. Comparez les impacts de l'apport, de la durée et du taux pour choisir la configuration qui correspond le mieux à votre situation.",
+      "cta": "Scénarios financement",
+      "items": [
+        {
+          "title": "Structurer votre projet en scénarios",
+          "description": "Créez plusieurs configurations de financement pour un même projet : variez l'apport, la durée ou le taux pour comparer leurs impacts sur votre mensualité et votre budget total."
+        },
+        {
+          "title": "Comparer et arbitrer sereinement",
+          "description": "Visualisez côte à côte les résultats de vos scénarios : mensualité, capacité d'emprunt et budget maximal. Identifiez en un coup d'œil la configuration la plus adaptée."
+        },
+        {
+          "title": "Garder une trace évolutive",
+          "description": "Vos scénarios restent sauvegardés et peuvent être recalculés à tout moment. Suivez l'évolution de votre projet au fil du temps et des changements de taux."
+        }
+      ]
+    },
+    "tools": {
+      "title": "Outils complémentaires",
+      "description": "Des simulateurs rapides pour enrichir votre analyse.",
+      "simulate": "Simuler"
+    },
+    "supportTools": {
+      "borrowingCapacity": {
+        "step": "01",
+        "title": "Capacité d'emprunt",
+        "description": "Calculez le montant maximum que vous pouvez emprunter selon vos revenus, vos crédits en cours et la durée souhaitée.",
+        "fields": ["Revenus du foyer", "Crédits en cours", "Durée et taux"]
+      },
+      "propertyPrice": {
+        "step": "02",
+        "title": "Prix immobilier",
+        "description": "Consultez les prix moyens du mètre carré par département pour mieux évaluer le marché immobilier.",
+        "fields": ["Département", "Type de bien", "Prix m² moyen"]
+      }
+    }
+  },
+  "budgetCible": {
+    "overline": "Simulation",
+    "title": "Budget cible",
+    "description": "Calculez le budget disponible pour votre achat en combinant capacité d'emprunt et apport personnel.",
+    "helperText": "Vous ne connaissez pas encore votre capacité d'emprunt ?",
+    "helperLink": "Calculez-la d'abord",
+    "fields": {
+      "borrowingCapacity": {
+        "label": "Capacité d'emprunt",
+        "helperText": "Montant maximum que vous pouvez emprunter"
+      },
+      "downPayment": {
+        "label": "Apport personnel",
+        "helperText": "Somme disponible pour financer l'achat hors crédit"
+      },
+      "estimatedRenovationCosts": {
+        "label": "Budget de rénovation estimé",
+        "helperText": "Travaux envisagés, déduits du budget disponible pour l'achat"
+      }
+    },
+    "button": {
+      "loading": "Calcul en cours…",
+      "submit": "Calculer mon budget cible"
+    },
+    "errors": {
+      "generic": "Une erreur est survenue."
+    },
+    "result": {
+      "title": "Résultat",
+      "targetBudgetLabel": "Budget disponible pour l'achat",
+      "disclaimer": "Ce montant inclut votre apport et votre capacité d'emprunt, déduction faite du budget travaux."
+    }
+  },
+  "fraisNotaire": {
+    "overline": "Simulation",
+    "title": "Frais de notaire",
+    "description": "Estimez les frais annexes liés à votre acquisition selon le type et le prix du bien.",
+    "helperText": "Vous souhaitez partir du budget total ?",
+    "helperLink": "Calculez votre budget cible",
+    "fields": {
+      "propertyPrice": {
+        "label": "Prix du bien",
+        "helperText": "Prix de vente net vendeur"
+      },
+      "propertyType": {
+        "label": "Type de bien",
+        "options": {
+          "OLD": "Ancien",
+          "NEW": "Neuf"
+        }
+      },
+      "departmentCode": {
+        "label": "Code département (facultatif)",
+        "helperText": "Les taux varient selon les départements pour les biens anciens"
+      }
+    },
+    "button": {
+      "loading": "Calcul en cours…",
+      "submit": "Calculer les frais de notaire"
+    },
+    "errors": {
+      "generic": "Une erreur est survenue."
+    },
+    "result": {
+      "title": "Résultat",
+      "notaryFeesLabel": "Frais de notaire estimés",
+      "appliedRateLabel": "Taux appliqué",
+      "totalCostLabel": "Coût total",
+      "disclaimer": "Estimation indicative. Les frais réels peuvent légèrement varier selon le notaire et les émoluments annexes."
+    }
+  },
+  "ptz": {
+    "overline": "Simulation",
+    "title": "Prêt à Taux Zéro (PTZ)",
+    "description": "Vérifiez votre éligibilité au PTZ et calculez le montant dont vous pouvez bénéficier. Le PTZ est un prêt sans intérêts pour les primo-accédants.",
+    "helperText": "Vous voulez connaître les conditions et plafonds ?",
+    "helperLink": "Voir les conditions PTZ",
+    "yes": "Oui",
+    "no": "Non",
+    "sections": {
+      "property": "Caractéristiques du bien",
+      "household": "Foyer & Revenus",
+      "buyerStatus": "Statut acquéreur",
+      "project": "Projet immobilier",
+      "financing": "Financement",
+      "metadata": "Métadonnées"
+    },
+    "fields": {
+      "propertyPrice": {
+        "label": "Prix du logement",
+        "helperText": "Prix d'achat du bien immobilier"
+      },
+      "propertyZone": {
+        "label": "Zone géographique",
+        "helperText": "Zone où se situe le bien immobilier",
+        "options": {
+          "A_BIS": "Zone A bis - Paris et 29 communes de la petite couronne",
+          "A": "Zone A - Agglomération parisienne, Lyon, Marseille, Lille, Nice, Montpellier, Bordeaux...",
+          "B1": "Zone B1 - Grandes agglomérations",
+          "B2": "Zone B2 - Villes moyennes",
+          "C": "Zone C - Zones rurales"
+        }
+      },
+      "householdSize": {
+        "label": "Nombre de personnes dans le foyer",
+        "helperText": "Vous + personnes à charge",
+        "options": {
+          "n": "{count} personnes",
+          "8plus": "8 personnes ou plus"
+        }
+      },
+      "annualIncome": {
+        "label": "Revenus annuels du foyer",
+        "helperText": "Revenu fiscal de référence (N-2) de tous les membres du foyer"
+      },
+      "isPrimoAccedant": {
+        "label": "Êtes-vous primo-accédant ?",
+        "helperText": "Vous n'avez jamais été propriétaire de votre résidence principale"
+      },
+      "primoAccedantException": {
+        "label": "Exception primo-accédance",
+        "helperText": "Si vous n'êtes pas primo-accédant, une exception peut s'appliquer",
+        "options": {
+          "DIVORCE_SEPARATION": "Divorce ou séparation",
+          "CATASTROPHE_NATURELLE": "Catastrophe naturelle",
+          "CARTE_INVALIDITE": "Titulaire d'une carte d'invalidité"
+        }
+      },
+      "propertyType": {
+        "label": "Type de bien immobilier",
+        "helperText": "Logement collectif ou maison individuelle",
+        "options": {
+          "COLLECTIF": "Logement collectif (appartement)",
+          "MAISON_INDIVIDUELLE": "Maison individuelle"
+        }
+      },
+      "operationType": {
+        "label": "Type d'opération",
+        "helperText": "Neuf ou ancien avec travaux",
+        "options": {
+          "NEUF": "Neuf ou VEFA",
+          "ANCIEN_AVEC_TRAVAUX": "Ancien avec travaux (≥25%)"
+        }
+      },
+      "workPercentage": {
+        "label": "Pourcentage de travaux (optionnel)",
+        "helperText": "Pour un bien ancien, % du coût total représentant des travaux"
+      },
+      "hasComplementaryLoan": {
+        "label": "Avez-vous un prêt complémentaire ?",
+        "helperText": "Un prêt complémentaire peut influencer la durée du PTZ"
+      },
+      "complementaryLoanType": {
+        "label": "Type de prêt complémentaire",
+        "helperText": "Sélectionnez le type de prêt complémentaire",
+        "options": {
+          "PAS": "PAS (Prêt d'Accession Sociale)",
+          "CONVENTIONNE": "Prêt conventionné",
+          "CLASSIQUE": "Prêt classique",
+          "PEL": "PEL (Prêt Épargne Logement)",
+          "COMPLEMENTAIRE": "Autre prêt complémentaire"
+        }
+      },
+      "hasDependencies": {
+        "label": "L'opération inclut-elle des dépendances ?",
+        "helperText": "Garage, parking, cave, etc."
+      },
+      "operationId": {
+        "label": "Identifiant d'opération (optionnel)",
+        "helperText": "Identifiant unique pour l'unicité de l'opération"
+      }
+    },
+    "button": {
+      "loading": "Calcul…",
+      "submit": "Calculer le PTZ"
+    },
+    "errors": {
+      "generic": "Une erreur est survenue."
+    },
+    "result": {
+      "title": "Résultat de la simulation PTZ",
+      "eligibleLabel": "Éligible au PTZ",
+      "eligibleYes": "Oui",
+      "eligibleNo": "Non",
+      "amountLabel": "Montant PTZ",
+      "loanPercentageLabel": "Pourcentage de financement",
+      "loanPercentageValue": "{percentage} %",
+      "durationLabel": "Durée du PTZ",
+      "durationValue": "{months} mois",
+      "totalDurationLabel": "Durée totale",
+      "totalDurationValue": "{months} mois",
+      "deferredPeriodLabel": "Période de différé",
+      "deferredPeriodValue": "{months} mois",
+      "repaymentPeriodLabel": "Période de remboursement",
+      "repaymentPeriodValue": "{months} mois",
+      "rfrPercentageLabel": "Pourcentage RFR",
+      "rfrPercentageValue": "{value} %"
+    }
+  },
+  "ptzConditions": {
+    "overline": "Conditions",
+    "title": "Conditions et plafonds du PTZ",
+    "description": "Le Prêt à Taux Zéro (PTZ) est un prêt sans intérêts destiné aux primo-accédants pour l'achat de leur résidence principale.",
+    "helperText": "Vous souhaitez vérifier votre éligibilité ou calculer votre PTZ ?",
+    "helperLink": "Accéder au simulateur",
+    "characteristics": {
+      "title": "Caractéristiques du PTZ",
+      "interestRate": "Taux d'intérêt",
+      "interestRateZero": "0 % (taux zéro)",
+      "interestRateValue": "{value} %",
+      "maxDuration": "Durée maximale",
+      "maxDurationValue": "{months} mois ({years} ans)",
+      "minWork": "Travaux minimum (bien ancien)",
+      "minWorkValue": "{percentage} % du coût total"
+    },
+    "exceptions": {
+      "title": "Exceptions à la primo-accédance",
+      "description": "Vous n'êtes pas considéré comme primo-accédant si vous avez déjà été propriétaire de votre résidence principale. Cependant, certaines exceptions permettent de bénéficier du PTZ :",
+      "divorce": {
+        "title": "Divorce ou séparation :",
+        "description": "Vous avez divorcé ou vous êtes séparé(e) et vous n'avez plus de droits sur le logement que vous occupiez précédemment."
+      },
+      "catastrophe": {
+        "title": "Catastrophe naturelle :",
+        "description": "Votre précédent logement a été rendu inhabitable suite à une catastrophe naturelle reconnue par arrêté ministériel."
+      },
+      "invalidite": {
+        "title": "Titulaire d'une carte d'invalidité :",
+        "description": "Vous êtes titulaire d'une carte d'invalidité (taux d'incapacité d'au moins 80 %)."
+      }
+    },
+    "duration": {
+      "title": "Durée et différé selon le RFR",
+      "description": "La durée du PTZ et la période de différé dépendent de votre revenu fiscal de référence (RFR) par rapport au plafond de la zone.",
+      "rfr75": {
+        "title": "RFR inférieur ou égal à 75 % du plafond :",
+        "description": "Durée totale de 30 ans (360 mois) avec différé de 15 ans (180 mois)."
+      },
+      "rfr75to100": {
+        "title": "RFR entre 75 % et 100 % du plafond :",
+        "description": "Durée totale de 25 ans (300 mois) avec différé de 10 ans (120 mois)."
+      },
+      "rfr100plus": {
+        "title": "RFR supérieur à 100 % du plafond :",
+        "description": "Durée totale de 20 ans (240 mois) avec différé de 7 ans (84 mois)."
+      }
+    },
+    "loans": {
+      "title": "Prêts complémentaires",
+      "description": "Le PTZ peut être complété par d'autres prêts pour financer votre acquisition. Les prêts complémentaires suivants sont possibles :",
+      "pas": {
+        "title": "PAS (Prêt d'Accession Sociale) :",
+        "description": "Prêt aidé avec des conditions avantageuses, soumis à des plafonds de ressources."
+      },
+      "conventionne": {
+        "title": "Prêt conventionné :",
+        "description": "Prêt sans plafond de ressources, pouvant bénéficier de l'aide personnalisée au logement (APL)."
+      },
+      "classique": {
+        "title": "Prêt classique :",
+        "description": "Prêt bancaire classique proposé par les établissements de crédit."
+      },
+      "pel": {
+        "title": "PEL (Prêt Épargne Logement) :",
+        "description": "Prêt issu d'un Plan Épargne Logement, avec un taux déterminé à l'ouverture du plan."
+      },
+      "alert": "La présence d'un prêt complémentaire peut influencer la durée du PTZ et les conditions de remboursement."
+    },
+    "tables": {
+      "priceCeilings": {
+        "title": "Plafonds de prix du logement par zone"
+      },
+      "financingCeilings": {
+        "title": "Plafonds de financement (pourcentage du prix)"
+      },
+      "incomeCeilings": {
+        "title": "Plafonds de revenus fiscaux de référence (RFR)"
+      },
+      "headers": {
+        "zone": "Zone",
+        "person1": "1 personne",
+        "person2": "2 personnes",
+        "person3": "3 personnes",
+        "person4": "4 personnes",
+        "person5plus": "5+ personnes",
+        "person12": "1-2 personnes",
+        "person4plus": "4+ personnes"
+      }
+    },
+    "zoneLabels": {
+      "A": "Zone A - Paris et petite couronne",
+      "A_BIS": "Zone A bis - Paris et petite couronne (renforcée)",
+      "B1": "Zone B1 - Grandes agglomérations",
+      "B2": "Zone B2 - Villes moyennes",
+      "C": "Zone C - Zones rurales"
+    },
+    "errors": {
+      "generic": "Une erreur est survenue."
+    }
+  },
+  "capaciteEmprunt": {
+    "overline": "Simulation",
+    "title": "Capacité d'emprunt",
+    "description": "Estimez le montant maximum que vous pouvez emprunter selon vos revenus et votre situation.",
+    "fields": {
+      "annualHouseholdIncome": {
+        "label": "Revenus annuels du foyer",
+        "helperText": "Revenus nets annuels de tous les membres du foyer"
+      },
+      "monthlyDebtPayments": {
+        "label": "Mensualités de crédits en cours",
+        "helperText": "Total des remboursements de crédits existants"
+      },
+      "annualRatePercent": {
+        "label": "Taux d'intérêt annuel",
+        "helperText": "Taux proposé par votre établissement bancaire"
+      },
+      "durationMonths": {
+        "label": "Durée de l'emprunt",
+        "options": {
+          "84": "7 ans",
+          "120": "10 ans",
+          "180": "15 ans",
+          "240": "20 ans",
+          "300": "25 ans",
+          "360": "30 ans"
+        }
+      },
+      "maxDebtRatioPercent": {
+        "label": "Taux d'endettement maximum",
+        "helperText": "35 % est la limite recommandée par le HCSF"
+      }
+    },
+    "button": {
+      "loading": "Calcul en cours…",
+      "submit": "Calculer ma capacité d'emprunt"
+    },
+    "errors": {
+      "generic": "Une erreur est survenue."
+    },
+    "result": {
+      "title": "Résultat",
+      "borrowingCapacityLabel": "Capacité d'emprunt",
+      "monthlyPaymentLabel": "Mensualité maximale",
+      "monthlyPaymentValue": "{value} / mois"
+    }
+  },
+  "prixImmobilier": {
+    "title": "Prix immobilier",
+    "description": "Consultez les prix moyens du mètre carré par département pour mieux évaluer le marché immobilier.",
+    "searchPlaceholder": "Rechercher une région...",
+    "propertyTypeLabel": "Type de bien",
+    "propertyTypeAll": "Tous",
+    "propertyTypeApartment": "Appartement",
+    "propertyTypeHouse": "Maison",
+    "yearLabel": "Année",
+    "table": {
+      "region": "Région",
+      "propertyType": "Type de bien",
+      "medianPrice": "Prix m² médian",
+      "evolution1y": "Évolution 1 an"
+    },
+    "noRegionsFound": "Aucune région trouvée",
+    "medianPrice": "Prix médian au m²",
+    "evolution1y": "Évolution sur 1 an",
+    "transactions": "Nombre de transactions",
+    "propertyType": "Type de bien",
+    "year": "Année",
+    "departments": "Départements ({count})",
+    "footer": "Données indicatives basées sur les transactions récentes. Cliquez sur une ligne pour voir les détails d'une région.",
+    "errorLoad": "Impossible de charger les données",
+    "na": "N/A"
+  },
+  "projects": {
+    "header": {
+      "overline": "Simulation financement",
+      "title": "Scénarios financement",
+      "description": "Créez, ajustez et comparez vos scénarios de financement pour identifier la meilleure configuration selon vos mensualités, votre apport et votre budget global.",
+      "helper": "Sélectionnez au moins deux scénarios pour lancer une comparaison détaillée."
+    },
+    "authLoading": "Vérification de votre session...",
+    "authPrompt": {
+      "title": "Connectez-vous pour accéder à vos scénarios",
+      "description": "Vos scénarios de financement sont disponibles après connexion."
+    },
+    "compare": "Comparer",
+    "newScenario": "Nouveau scénario",
+    "emptyState": {
+      "title": "Aucun scénario",
+      "description": "Créez votre premier scénario pour commencer vos comparaisons de financement.",
+      "action": "Créer un scénario"
+    },
+    "redirecting": "Redirection vers vos scénarios de financement..."
+  },
+  "compare": {
+    "errors": {
+      "comparison": "Erreur lors de la comparaison"
+    },
+    "selectAtLeastTwo": "Sélectionnez au moins 2 scénarios à comparer.",
+    "backToScenarios": "Scénarios",
+    "title": "Comparaison de scénarios",
+    "redirecting": "Redirection vers la comparaison de scénarios..."
+  },
+  "auth": {
+    "title": "Connexion en cours",
+    "description": "Nous finalisons votre session Google et vous redirigeons vers Vesta.",
+    "validating": "Validation du compte...",
+    "errors": {
+      "invalidSession": "Connexion invalide ou expiree.",
+      "googleConnection": "Connexion Google impossible pour le moment."
+    }
+  },
+  "propertyList": {
+    "header": {
+      "overline": "Pilotage immobilier",
+      "description": "L'espace central pour comparer vos opportunites, suivre les risques et decider plus vite avec une vision financement claire."
+    },
+    "noProperties": "Aucune piste d'achat ajoutee. Commencez a ajouter vos pistes.",
+    "title": "Mes pistes d'achat ({count})",
+    "status": {
+      "wanted": "Convoitée",
+      "visited": "Visitée"
+    },
+    "chip": {
+      "monthlyCredit": "Mensualite credit: {amount}",
+      "debtRatio": "Endettement: {ratio}%",
+      "monthlyWithCharges": "Mensualite + charges: {amount}",
+      "propertiesCount": "Biens: {count}",
+      "riskyPropertiesCount": "Biens a risque: {count}"
+    },
+    "propertyType": {
+      "new": "Neuf",
+      "old": "Ancien"
+    },
+    "viewListing": "Voir l'annonce",
+    "whyThisTool": "Pourquoi cet outil ?",
+    "auth": {
+      "loading": "Verification de votre session...",
+      "signingIn": "Connexion...",
+      "signInWithGoogle": "Se connecter avec Google"
+    },
+    "authPrompt": {
+      "title": "Connectez-vous pour retrouver vos pistes d'achat",
+      "description": "Vos biens suivis, votre profil de financement et vos resultats consolides sont disponibles apres connexion."
+    },
+    "settingsSaved": "Parametres enregistres avec succes",
+    "financingProfile": "Profil financement",
+    "overview": {
+      "title": "Vue d'ensemble de vos pistes",
+      "description": "Consultez chaque piste d'achat avec ses chiffres cles de financement."
+    },
+    "label": {
+      "purchasePrice": "Prix d'achat",
+      "annualTaxes": "Impôts annuels",
+      "coOwnershipFees": "Charges copropriété",
+      "renovations": "Rénovations",
+      "requiredLoan": "Prêt requis",
+      "notaryFees": "Frais de notaire",
+      "works": "Travaux:"
+    },
+    "action": {
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "addWork": "Ajouter un travail",
+      "saving": "Enregistrement...",
+      "update": "Mettre a jour",
+      "addProperty": "Ajouter la propriete",
+      "addTrack": "+ Ajouter une piste",
+      "saveSettings": "Enregistrer les parametres"
+    },
+    "noResults": "Aucun résultat. Configurez les paramètres et ajoutez des propriétés.",
+    "resultsTitle": "Résultats de financement",
+    "table": {
+      "property": "Propriété",
+      "purchasePrice": "Prix achat",
+      "notaryFees": "Frais notaires",
+      "renovations": "Rénovations",
+      "requiredLoan": "Prêt requis",
+      "monthlyCredit": "Mensualité crédit",
+      "monthlyWithCharges": "Mensualité + charges",
+      "debtRatio": "Taux d'endettement"
+    },
+    "validation": {
+      "invalidUrl": "Le lien d'annonce doit etre une URL valide (http:// ou https://)."
+    },
+    "field": {
+      "status": {
+        "label": "Statut",
+        "wanted": "Convoitée",
+        "visited": "Visitée"
+      },
+      "propertyType": {
+        "label": "Type de propriété",
+        "new": "Neuf",
+        "old": "Ancien"
+      },
+      "title": "Titre du bien",
+      "titlePlaceholder": "Exemple: Lyon 7e - Gerland",
+      "departmentCode": "Code département",
+      "departmentCodePlaceholder": "69",
+      "listingUrl": "Lien d'annonce",
+      "listingUrlPlaceholder": "https://...",
+      "purchasePrice": "Prix d'achat",
+      "propertyTax": "Impôts fonciers annuels",
+      "coOwnershipFees": "Charges copropriété annuelles",
+      "renovationName": "Nom",
+      "renovationNamePlaceholder": "Cuisine, Salle de bain...",
+      "renovationDetails": "Détails (optionnel)",
+      "renovationDetailsPlaceholder": "Précisions",
+      "renovationCost": "Coût",
+      "annualRate": "Taux annuel",
+      "loanDuration": "Durée du prêt",
+      "downPayment": "Apport personnel",
+      "annualIncome": "Revenus annuels du foyer",
+      "monthlyDebt": "Charges mensuelles actuelles"
+    },
+    "section": {
+      "renovation": "Travaux de renovation"
+    },
+    "info": {
+      "configureFinancing": "Renseignez d'abord votre profil financement pour voir les calculs consolides.",
+      "addOrEditTrack": "Ajoutez ou modifiez une piste d'achat pour afficher les resultats recalcules automatiquement."
+    },
+    "loading": "Chargement...",
+    "dialog": {
+      "editTrack": "Editer la piste",
+      "addTrack": "Ajouter une piste"
+    },
+    "unit": {
+      "months": "mois"
+    }
+  },
+  "projectsComp": {
+    "action": {
+      "open": "Ouvrir",
+      "rename": "Renommer",
+      "delete": "Supprimer",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "create": "Créer",
+      "createAndCalculate": "Créer et calculer",
+      "duplicate": "Dupliquer",
+      "edit": "Modifier"
+    },
+    "confirmDelete": "Supprimer \"{name}\" ? Cette action est irréversible.",
+    "validation": {
+      "nameRequired": "Le nom est requis",
+      "required": "Requis"
+    },
+    "dialog": {
+      "editTitle": "Modifier le projet",
+      "newTitle": "Nouveau projet",
+      "editScenarioTitle": "Modifier le scénario",
+      "newScenarioTitle": "Nouveau scénario"
+    },
+    "field": {
+      "name": "Nom du projet",
+      "location": "Localisation (optionnel)",
+      "scenarioName": "Nom du scénario",
+      "scenarioNamePlaceholder": "Ex: 20 ans à 3.5%",
+      "annualIncome": "Revenus annuels nets du ménage",
+      "annualIncomeHint": "Ex: 54 000 € pour 4 500 €/mois",
+      "monthlyDebt": "Charges de crédits existantes / mois",
+      "monthlyDebtHint": "Ex: 200 €",
+      "annualRate": "Taux d'intérêt annuel (%)",
+      "annualRateHint": "Ex: 3.5",
+      "loanDuration": "Durée du crédit",
+      "maxDebtRatio": "Taux d'endettement max",
+      "downPayment": "Apport personnel disponible",
+      "downPaymentHint": "Ex: 15 000 €",
+      "propertyType": "Type de bien",
+      "department": "Département (optionnel)",
+      "departmentParisHint": "Majoration Paris appliquée (+0.2%)",
+      "departmentHint": "Laisser vide si inconnu",
+      "departmentNone": "— Aucun —"
+    },
+    "section": {
+      "financialSituation": "Situation financière",
+      "credit": "Crédit",
+      "downPayment": "Apport",
+      "notaryFees": "Frais de notaire"
+    },
+    "debtRatio": {
+      "30": "30% — Saine",
+      "33": "33% — Classique",
+      "35": "35% — HCSF maximum recommandé",
+      "40": "40% — Élevée (à éviter)"
+    },
+    "duration": {
+      "120": "10 ans",
+      "180": "15 ans",
+      "240": "20 ans",
+      "300": "25 ans",
+      "360": "30 ans"
+    },
+    "propertyType": {
+      "old": "Ancien",
+      "new": "Neuf"
+    },
+    "error": {
+      "saveFailed": "Erreur lors de la sauvegarde. Réessayez."
+    },
+    "table": {
+      "parameter": "Paramètre",
+      "inputsHeader": "ENTRÉES",
+      "annualIncome": "Revenus annuels",
+      "duration": "Durée",
+      "annualRate": "Taux annuel",
+      "downPayment": "Apport",
+      "outputsHeader": "RÉSULTATS",
+      "borrowingCapacity": "Capacité d'emprunt",
+      "monthlyPayment": "Mensualité",
+      "totalBudget": "Budget achat",
+      "notaryFees": "Frais de notaire"
+    },
+    "years": "{years} ans",
+    "insight": {
+      "bestMonthlyPayment": "Mensualité la plus basse",
+      "highestBorrowingCapacity": "Capacité d'emprunt la plus haute",
+      "totalBudget": "Budget achat"
+    },
+    "badge": {
+      "recalculating": "Recalcul...",
+      "stale": "Obsolète",
+      "tooltip": "Les règles de calcul ont peut-être changé. Cliquez pour recalculer."
+    },
+    "baseline": "Référence",
+    "computed": "Calculé",
+    "scenarioSubtitle": "{years} ans · {rate}% · {downPayment} d'apport",
+    "notComputed": "Non calculé — ouvrez pour calculer",
+    "computedToday": "Aujourd'hui",
+    "computedYesterday": "Hier",
+    "computedDaysAgo": "Il y a {days} jours",
+    "computedWeeksAgo": "Il y a {weeks} semaines",
+    "computedOnDate": "Le {date}"
+  }
+  },
+  "authComp": {
+    "action": {
+      "signingIn": "Connexion...",
+      "signInWithGoogle": "Se connecter avec Google"
+    },
+    "error": {
+      "googleSignInFailed": "Connexion Google impossible pour le moment.",
+      "useAuthHook": "useAuth doit etre utilise dans AuthProvider."
+    }
+  }
+}

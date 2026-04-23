@@ -9,6 +9,7 @@ import Stack from "@mui/material/Stack";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import { useTranslations, useLocale } from "next-intl";
 
 import type { CompareScenariosInsight, ScenarioComparisonRow } from '@/types/project';
 
@@ -17,15 +18,11 @@ interface InsightsCardsProps {
   scenarios: ScenarioComparisonRow[];
 }
 
-function fmt(n: number) {
-  return new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(n);
-}
-
 export default function InsightsCards({ insights, scenarios }: InsightsCardsProps) {
+  const t = useTranslations("projectsComp");
+  const locale = useLocale();
+  const fmt = (n: number) =>
+    new Intl.NumberFormat(locale, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
   const findScenario = (id: string) => scenarios.find((s) => s.scenarioId === id);
 
   return (
@@ -36,7 +33,7 @@ export default function InsightsCards({ insights, scenarios }: InsightsCardsProp
           <Stack direction="row" alignItems="center" gap={1} sx={{ mb: 1 }}>
             <PaymentsIcon color="success" fontSize="small" />
             <Typography variant="caption" color="text.secondary">
-              Mensualité la plus basse
+              {t("insight.bestMonthlyPayment")}
             </Typography>
           </Stack>
           <Typography variant="h6" fontWeight={700}>
@@ -54,7 +51,7 @@ export default function InsightsCards({ insights, scenarios }: InsightsCardsProp
           <Stack direction="row" alignItems="center" gap={1} sx={{ mb: 1 }}>
             <AccountBalanceIcon color="primary" fontSize="small" />
             <Typography variant="caption" color="text.secondary">
-              Capacité d&apos;emprunt la plus haute
+              {t("insight.highestBorrowingCapacity")}
             </Typography>
           </Stack>
           <Typography variant="h6" fontWeight={700}>
@@ -73,7 +70,7 @@ export default function InsightsCards({ insights, scenarios }: InsightsCardsProp
             <Stack direction="row" alignItems="center" gap={1} sx={{ mb: 1 }}>
               <TrendingUpIcon color="success" fontSize="small" />
               <Typography variant="caption" color="text.secondary">
-                Budget achat
+                {t("insight.totalBudget")}
               </Typography>
             </Stack>
             <Typography variant="h6" fontWeight={700}>

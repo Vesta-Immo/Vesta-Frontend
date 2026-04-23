@@ -20,31 +20,36 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import { useTheme } from "@mui/material/styles";
 import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { useAuth } from "@/components/auth/AuthProvider";
+import LocaleSwitcher from "@/components/LocaleSwitcher";
 import vestaHouseLogo from "@/img/vesta-house-no-bg.png";
+import { useTranslations } from "next-intl";
 
 type NavLink = {
   href: string;
-  label: string;
+  labelKey: string;
   flagship?: boolean;
 };
 
-const NAV_LINKS: NavLink[] = [
-  { href: "/simulation/property-list", label: "Mes pistes d'achat" },
-  { href: "/simulation/projects", label: "Mes scénarios" },
-];
-
-const OUTILS_LINKS: NavLink[] = [
-  { href: "/outils/capacite-emprunt", label: "Capacité d'emprunt" },
-  { href: "/outils/prix-immobilier", label: "Prix immobilier" },
-  { href: "/simulation/ptz", label: "Simulateur PTZ", flagship: true },
-];
+function useNavLinks(): { nav: NavLink[]; outils: NavLink[] } {
+  const t = useTranslations("nav");
+  return {
+    nav: [
+      { href: "/simulation/property-list", labelKey: t("buyingTrack") },
+      { href: "/simulation/projects", labelKey: t("financingScenarios") },
+    ],
+    outils: [
+      { href: "/outils/capacite-emprunt", labelKey: t("borrowingCapacity") },
+      { href: "/outils/prix-immobilier", labelKey: t("propertyPrice") },
+      { href: "/simulation/ptz", labelKey: t("ptzSimulator"), flagship: true },
+    ],
+  };
+}
 
 export default function AppNav() {
   const pathname = usePathname();
@@ -60,6 +65,8 @@ export default function AppNav() {
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [outilMenuAnchor, setOutilMenuAnchor] = useState<null | HTMLElement>(null);
+  const { nav: NAV_LINKS, outils: OUTILS_LINKS } = useNavLinks();
+  const tNav = useTranslations("nav");
 
   useEffect(() => {
     setMounted(true);
@@ -121,7 +128,7 @@ export default function AppNav() {
 
   const navLinks = (
     <>
-      {NAV_LINKS.map(({ href, label, flagship }) => {
+      {NAV_LINKS.map(({ href, labelKey, flagship }) => {
         const active = pathname === href || pathname.startsWith(href);
         return (
           <Button
@@ -149,7 +156,7 @@ export default function AppNav() {
                 : { color: "text.secondary" }
             }
           >
-            {label}
+            {labelKey}
           </Button>
         );
       })}
@@ -218,7 +225,7 @@ export default function AppNav() {
               aria-haspopup="true"
               aria-expanded={Boolean(outilMenuAnchor)}
             >
-              Outils complémentaires
+              {tNav("tools")}
             </Button>
             <Menu
               anchorEl={outilMenuAnchor}
@@ -233,7 +240,7 @@ export default function AppNav() {
                 horizontal: "left",
               }}
             >
-              {OUTILS_LINKS.map(({ href, label }) => (
+              {OUTILS_LINKS.map(({ href, labelKey }) => (
                 <MenuItem
                   key={href}
                   component={Link}
@@ -241,7 +248,7 @@ export default function AppNav() {
                   onClick={handleOutilMenuClose}
                   selected={pathname === href || pathname.startsWith(href)}
                 >
-                  {label}
+                  {labelKey}
                 </MenuItem>
               ))}
             </Menu>
@@ -253,6 +260,8 @@ export default function AppNav() {
             alignItems="center"
             sx={{ ml: "auto", display: { xs: "none", md: "flex" } }}
           >
+            <LocaleSwitcher />
+
             {mounted && user?.email ? (
               <Typography
                 variant="body2"
@@ -356,7 +365,7 @@ export default function AppNav() {
         </Typography>
 
         <List disablePadding>
-          {NAV_LINKS.map(({ href, label }) => {
+          {NAV_LINKS.map(({ href, labelKey }) => {
             const active = pathname === href || pathname.startsWith(href);
             return (
               <ListItemButton
@@ -368,7 +377,7 @@ export default function AppNav() {
                 sx={{ borderRadius: 1.5, mb: 0.5 }}
               >
                 <ListItemText
-                  primary={label}
+                  primary={labelKey}
                   slotProps={{
                     primary: {
                       fontSize: "0.95rem",
@@ -385,11 +394,11 @@ export default function AppNav() {
           variant="subtitle2"
           sx={{ px: 1, pt: 2, pb: 1, fontWeight: 700, color: "text.secondary", textTransform: "uppercase" }}
         >
-          Outils complémentaires
+          {tNav("tools")}
         </Typography>
 
         <List disablePadding>
-          {OUTILS_LINKS.map(({ href, label }) => {
+          {OUTILS_LINKS.map(({ href, labelKey }) => {
             const active = pathname === href || pathname.startsWith(href);
             return (
               <ListItemButton
@@ -401,7 +410,7 @@ export default function AppNav() {
                 sx={{ borderRadius: 1.5, mb: 0.5 }}
               >
                 <ListItemText
-                  primary={label}
+                  primary={labelKey}
                   slotProps={{
                     primary: {
                       fontSize: "0.95rem",
@@ -437,6 +446,10 @@ export default function AppNav() {
             {authButtonLabel}
           </Button>
         ) : null}
+
+        <Box sx={{ mt: 1 }}>
+          <LocaleSwitcher />
+        </Box>
       </Drawer>
     </>
   );

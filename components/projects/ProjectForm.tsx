@@ -10,6 +10,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import CircularProgress from "@mui/material/CircularProgress";
+import { useTranslations } from "next-intl";
 
 import { useCreateProject, useUpdateProject } from "@/lib/projects";
 import type { CreateProjectInput } from '@/types/project';
@@ -21,6 +22,7 @@ interface ProjectFormProps {
 }
 
 export default function ProjectForm({ open, onClose, initialValues }: ProjectFormProps) {
+  const t = useTranslations("projectsComp");
   const [name, setName] = useState(initialValues?.name ?? "");
   const [location, setLocation] = useState(initialValues?.location ?? "");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -43,7 +45,7 @@ export default function ProjectForm({ open, onClose, initialValues }: ProjectFor
 
     // Basic validation
     const errors: Record<string, string> = {};
-    if (!payload.name) errors.name = "Le nom est requis";
+    if (!payload.name) errors.name = t("validation.nameRequired");
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
@@ -80,11 +82,11 @@ export default function ProjectForm({ open, onClose, initialValues }: ProjectFor
       maxWidth="sm"
       fullWidth
     >
-      <DialogTitle>{isEdit ? "Modifier le projet" : "Nouveau projet"}</DialogTitle>
+      <DialogTitle>{isEdit ? t("dialog.editTitle") : t("dialog.newTitle")}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ pt: 1 }}>
           <TextField
-            label="Nom du projet"
+            label={t("field.name")}
             value={name}
             onChange={(e) => setName(e.target.value)}
             error={Boolean(fieldErrors.name)}
@@ -93,7 +95,7 @@ export default function ProjectForm({ open, onClose, initialValues }: ProjectFor
             autoFocus
           />
           <TextField
-            label="Localisation (optionnel)"
+            label={t("field.location")}
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             error={Boolean(fieldErrors.location)}
@@ -104,10 +106,10 @@ export default function ProjectForm({ open, onClose, initialValues }: ProjectFor
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={handleClose} disabled={isLoading}>
-          Annuler
+          {t("action.cancel")}
         </Button>
         <Button variant="contained" onClick={handleSubmit} disabled={isLoading}>
-          {isLoading ? <CircularProgress size={20} /> : isEdit ? "Enregistrer" : "Créer"}
+          {isLoading ? <CircularProgress size={20} /> : isEdit ? t("action.save") : t("action.create")}
         </Button>
       </DialogActions>
     </Dialog>

@@ -1,6 +1,6 @@
 // filepath: lib/projects/useScenarios.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { queryKeys } from './queryKeys';
 import * as api from './api';
 import type { CreateScenarioInput, UpdateScenarioInput, Scenario } from '@/types/project';

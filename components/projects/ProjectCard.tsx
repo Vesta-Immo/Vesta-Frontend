@@ -1,7 +1,7 @@
 // filepath: components/projects/ProjectCard.tsx
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -15,6 +15,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import type { Project } from '@/types/project';
 import { useDeleteProject } from "@/lib/projects";
 
@@ -24,6 +25,7 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ project, onRename }: ProjectCardProps) {
+  const t = useTranslations("projectsComp");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const deleteMutation = useDeleteProject();
 
@@ -100,7 +102,7 @@ export default function ProjectCard({ project, onRename }: ProjectCardProps) {
           <ListItemIcon>
             <FolderOpenIcon fontSize="small" />
           </ListItemIcon>
-          Ouvrir
+          {t("action.open")}
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -111,12 +113,12 @@ export default function ProjectCard({ project, onRename }: ProjectCardProps) {
           <ListItemIcon>
             <EditIcon fontSize="small" />
           </ListItemIcon>
-          Renommer
+          {t("action.rename")}
         </MenuItem>
         <MenuItem
           onClick={() => {
             setAnchorEl(null);
-            if (confirm(`Supprimer "${project.name}" ? Cette action est irréversible.`)) {
+            if (confirm(t("confirmDelete", { name: project.name }))) {
               deleteMutation.mutate(project.id);
             }
           }}
@@ -125,7 +127,7 @@ export default function ProjectCard({ project, onRename }: ProjectCardProps) {
           <ListItemIcon>
             <DeleteIcon fontSize="small" color="error" />
           </ListItemIcon>
-          Supprimer
+          {t("action.delete")}
         </MenuItem>
       </Menu>
     </>

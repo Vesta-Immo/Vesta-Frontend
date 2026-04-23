@@ -12,14 +12,18 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Link from "@mui/material/Link";
+import { useTranslations } from "next-intl";
 import type { PropertyWithResults } from "@/types/simulation";
-import { formatEuros } from "@/lib/format";
+import { useFormat } from "@/lib/format";
 
 interface PropertyResultsProps {
   results: PropertyWithResults[];
 }
 
 export default function PropertyResults({ results }: PropertyResultsProps) {
+  const t = useTranslations("propertyList");
+  const { formatEuros } = useFormat();
+
   function debtLevelColor(level: PropertyWithResults["debtRatioLevel"]) {
     if (level === "LOW") {
       return "success";
@@ -34,7 +38,7 @@ export default function PropertyResults({ results }: PropertyResultsProps) {
     return (
       <Box sx={{ textAlign: "center", py: 4 }}>
         <Typography color="text.secondary">
-          Aucun résultat. Configurez les paramètres et ajoutez des propriétés.
+          {t("noResults")}
         </Typography>
       </Box>
     );
@@ -43,21 +47,21 @@ export default function PropertyResults({ results }: PropertyResultsProps) {
   return (
     <Stack spacing={2}>
       <Typography variant="h6" sx={{ fontWeight: 700 }}>
-        Résultats de financement
+        {t("resultsTitle")}
       </Typography>
 
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-              <TableCell>Propriété</TableCell>
-              <TableCell align="right">Prix achat</TableCell>
-              <TableCell align="right">Frais notaires</TableCell>
-              <TableCell align="right">Rénovations</TableCell>
-              <TableCell align="right">Prêt requis</TableCell>
-              <TableCell align="right">Mensualité crédit</TableCell>
-              <TableCell align="right">Mensualité + charges</TableCell>
-              <TableCell align="right">Taux d'endettement</TableCell>
+              <TableCell>{t("table.property")}</TableCell>
+              <TableCell align="right">{t("table.purchasePrice")}</TableCell>
+              <TableCell align="right">{t("table.notaryFees")}</TableCell>
+              <TableCell align="right">{t("table.renovations")}</TableCell>
+              <TableCell align="right">{t("table.requiredLoan")}</TableCell>
+              <TableCell align="right">{t("table.monthlyCredit")}</TableCell>
+              <TableCell align="right">{t("table.monthlyWithCharges")}</TableCell>
+              <TableCell align="right">{t("table.debtRatio")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -76,11 +80,11 @@ export default function PropertyResults({ results }: PropertyResultsProps) {
                         variant="caption"
                         sx={{ display: "inline-block", mt: 0.5 }}
                       >
-                        Voir l'annonce
+                        {t("viewListing")}
                       </Link>
                     )}
                     <Chip
-                      label={property.status === "wanted" ? "Convoitée" : "Visitée"}
+                      label={property.status === "wanted" ? t("status.wanted") : t("status.visited")}
                       size="small"
                       variant="outlined"
                       sx={{ mt: 0.5 }}
