@@ -5,8 +5,6 @@ import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import Container from "@mui/material/Container";
-import Typography from "@mui/material/Typography";
 
 export default function ComparePage() {
   const searchParams = useSearchParams();
@@ -22,10 +20,10 @@ export default function ComparePage() {
   }, [router, searchParams]);
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography color="text.secondary">
+    <div className="mx-auto max-w-3xl px-6 pt-20 pb-12">
+      <p className="text-sm text-[var(--muted-foreground)]">
         {t("redirecting")}
-      </Typography>
-    </Container>
+      </p>
+    </div>
   );
 }

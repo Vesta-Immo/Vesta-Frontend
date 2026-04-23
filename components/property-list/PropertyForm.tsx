@@ -1,23 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import InputAdornment from "@mui/material/InputAdornment";
-import Alert from "@mui/material/Alert";
-import IconButton from "@mui/material/IconButton";
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
-import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
 import { useTranslations } from "next-intl";
 import type { PropertyItem, PropertyStatus, PropertyType } from "@/types/simulation";
+import { Trash2, Plus } from "lucide-react";
 
 export function isValidListingUrl(value: string): boolean {
   try {
@@ -79,8 +68,10 @@ export default function PropertyForm({
     }
   }
 
-  function field(key: keyof Omit<PropertyItem, "renovationWorkItems">) {
-    return (e: React.ChangeEvent<HTMLInputElement | { value: unknown }>) => {
+  function handleInputChange(
+    key: keyof Omit<PropertyItem, "renovationWorkItems" | "status" | "propertyType">
+  ) {
+    return (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       setForm((prev) => ({
         ...prev,
@@ -122,54 +113,73 @@ export default function PropertyForm({
   }
 
   return (
-    <Box component="form" onSubmit={handleSubmit} noValidate>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      {validationError && <Alert severity="error" sx={{ mb: 2 }}>{validationError}</Alert>}
+    <form onSubmit={handleSubmit} noValidate>
+      {(error || validationError) && (
+        <div className="mb-4 rounded-[var(--radius)] border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+          {error || validationError}
+        </div>
+      )}
 
-      <Stack spacing={2.5} sx={{ pt: 1 }}>
-        {/* Core property fields */}
-        <FormControl fullWidth>
-          <InputLabel>{t("field.status.label")}</InputLabel>
-          <Select
+      <div className="grid gap-4 pt-1">
+        <div className="grid gap-1.5">
+          <label className="text-sm font-medium text-[var(--foreground)]">
+            {t("field.status.label")}
+          </label>
+          <select
             value={form.status}
-            onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value as PropertyStatus }))}
-            label={t("field.status.label")}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                status: e.target.value as PropertyStatus,
+              }))
+            }
+            className="w-full rounded-[var(--radius)] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
           >
-            <MenuItem value="wanted">{t("field.status.wanted")}</MenuItem>
-            <MenuItem value="visited">{t("field.status.visited")}</MenuItem>
-          </Select>
-        </FormControl>
+            <option value="wanted">{t("field.status.wanted")}</option>
+            <option value="visited">{t("field.status.visited")}</option>
+          </select>
+        </div>
 
-        <FormControl fullWidth>
-          <InputLabel>{t("field.propertyType.label")}</InputLabel>
-          <Select
+        <div className="grid gap-1.5">
+          <label className="text-sm font-medium text-[var(--foreground)]">
+            {t("field.propertyType.label")}
+          </label>
+          <select
             value={form.propertyType}
-            onChange={(e) => setForm((prev) => ({ ...prev, propertyType: e.target.value as PropertyType }))}
-            label={t("field.propertyType.label")}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                propertyType: e.target.value as PropertyType,
+              }))
+            }
+            className="w-full rounded-[var(--radius)] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
           >
-            <MenuItem value="NEW">{t("field.propertyType.new")}</MenuItem>
-            <MenuItem value="OLD">{t("field.propertyType.old")}</MenuItem>
-          </Select>
-        </FormControl>
+            <option value="NEW">{t("field.propertyType.new")}</option>
+            <option value="OLD">{t("field.propertyType.old")}</option>
+          </select>
+        </div>
 
-        <TextField
+        <Input
           label={t("field.title")}
           placeholder={t("field.titlePlaceholder")}
           value={form.addressOrSector}
-          onChange={field("addressOrSector")}
+          onChange={handleInputChange("addressOrSector")}
           required
-          fullWidth
         />
 
-        <TextField
+        <Input
           label={t("field.departmentCode")}
           placeholder={t("field.departmentCodePlaceholder")}
           value={form.departmentCode || ""}
-          onChange={(e) => setForm((prev) => ({ ...prev, departmentCode: e.target.value || undefined }))}
-          fullWidth
+          onChange={(e) =>
+            setForm((prev) => ({
+              ...prev,
+              departmentCode: e.target.value || undefined,
+            }))
+          }
         />
 
-        <TextField
+        <Input
           label={t("field.listingUrl")}
           placeholder={t("field.listingUrlPlaceholder")}
           type="url"
@@ -179,116 +189,110 @@ export default function PropertyForm({
             setValidationError(null);
             setForm((prev) => ({ ...prev, listingUrl: value }));
           }}
-          fullWidth
         />
 
-        <TextField
+        <Input
           label={t("field.purchasePrice")}
           type="number"
-          inputProps={{ min: 0, step: 1000 }}
+          min={0}
+          step={1000}
           value={form.price}
-          onChange={field("price")}
-          slotProps={{
-            input: { endAdornment: <InputAdornment position="end">€</InputAdornment> },
-          }}
+          onChange={handleInputChange("price")}
+          unit="€"
           required
-          fullWidth
         />
 
-        <TextField
+        <Input
           label={t("field.propertyTax")}
           type="number"
-          inputProps={{ min: 0, step: 100 }}
+          min={0}
+          step={100}
           value={form.propertyTaxAnnual}
-          onChange={field("propertyTaxAnnual")}
-          slotProps={{
-            input: { endAdornment: <InputAdornment position="end">€</InputAdornment> },
-          }}
-          fullWidth
+          onChange={handleInputChange("propertyTaxAnnual")}
+          unit="€"
         />
 
-        <TextField
+        <Input
           label={t("field.coOwnershipFees")}
           type="number"
-          inputProps={{ min: 0, step: 100 }}
+          min={0}
+          step={100}
           value={form.coOwnershipFeesAnnual}
-          onChange={field("coOwnershipFeesAnnual")}
-          slotProps={{
-            input: { endAdornment: <InputAdornment position="end">€</InputAdornment> },
-          }}
-          fullWidth
+          onChange={handleInputChange("coOwnershipFeesAnnual")}
+          unit="€"
         />
 
-        {/* Renovation work items */}
-        <Box>
-          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+        <div>
+          <p className="mb-2 text-sm font-semibold text-[var(--foreground)]">
             {t("section.renovation")}
-          </Typography>
-          <Stack spacing={1.5}>
+          </p>
+          <div className="grid gap-3">
             {form.renovationWorkItems.map((item, idx) => (
-              <Paper
-                key={idx}
-                variant="outlined"
-                sx={{ p: 2 }}
-              >
-                <Stack spacing={1.5} direction={{ xs: "column", sm: "row" }}>
-                  <TextField
-                    label={t("field.renovationName")}
-                    placeholder={t("field.renovationNamePlaceholder")}
-                    value={item.name}
-                    onChange={(e) => updateRenovationItem(idx, "name", e.target.value)}
-                    size="small"
-                    sx={{ flex: 1 }}
-                  />
-                  <TextField
-                    label={t("field.renovationDetails")}
-                    placeholder={t("field.renovationDetailsPlaceholder")}
-                    value={item.details || ""}
-                    onChange={(e) => updateRenovationItem(idx, "details", e.target.value)}
-                    size="small"
-                    sx={{ flex: 1 }}
-                  />
-                  <TextField
-                    label={t("field.renovationCost")}
-                    type="number"
-                    inputProps={{ min: 0, step: 500 }}
-                    value={item.cost}
-                    onChange={(e) => updateRenovationItem(idx, "cost", e.target.value)}
-                    size="small"
-                    slotProps={{
-                      input: { endAdornment: <InputAdornment position="end">€</InputAdornment> },
-                    }}
-                    sx={{ width: 120 }}
-                  />
-                  <IconButton
+              <Card key={idx} className="p-3">
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <div className="flex-1">
+                    <Input
+                      label={t("field.renovationName")}
+                      placeholder={t("field.renovationNamePlaceholder")}
+                      value={item.name}
+                      onChange={(e) =>
+                        updateRenovationItem(idx, "name", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Input
+                      label={t("field.renovationDetails")}
+                      placeholder={t("field.renovationDetailsPlaceholder")}
+                      value={item.details || ""}
+                      onChange={(e) =>
+                        updateRenovationItem(idx, "details", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="w-full sm:w-32">
+                    <Input
+                      label={t("field.renovationCost")}
+                      type="number"
+                      min={0}
+                      step={500}
+                      value={item.cost}
+                      onChange={(e) =>
+                        updateRenovationItem(idx, "cost", e.target.value)
+                      }
+                      unit="€"
+                    />
+                  </div>
+                  <button
+                    type="button"
                     onClick={() => removeRenovationItem(idx)}
-                    size="small"
-                    color="error"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center self-end rounded-[var(--radius)] text-red-600 transition-colors hover:bg-red-50"
                   >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Stack>
-              </Paper>
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </Card>
             ))}
             <Button
+              type="button"
+              variant="outline"
               onClick={addRenovationItem}
-              startIcon={<AddIcon />}
-              variant="outlined"
+              className="w-full"
             >
+              <Plus className="mr-1.5 h-4 w-4" />
               {t("action.addWork")}
             </Button>
-          </Stack>
-        </Box>
+          </div>
+        </div>
 
-        <Button
-          type="submit"
-          variant="contained"
-          fullWidth
-          disabled={loading}
-        >
-          {loading ? t("action.saving") : initialValues ? t("action.update") : t("action.addProperty")}
+        <Button type="submit" disabled={loading} className="w-full">
+          {loading
+            ? t("action.saving")
+            : initialValues
+              ? t("action.update")
+              : t("action.addProperty")}
         </Button>
-      </Stack>
-    </Box>
+      </div>
+    </form>
   );
 }

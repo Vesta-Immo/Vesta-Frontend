@@ -1,12 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
-import Alert from "@mui/material/Alert";
-import InputAdornment from "@mui/material/InputAdornment";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
 import { useTranslations } from "next-intl";
 import type { FinancingSettings } from "@/types/simulation";
 
@@ -94,79 +90,70 @@ export default function FinancingSettingsForm({
   }
 
   return (
-    <Box component="form" onSubmit={handleSubmit}>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+    <form onSubmit={handleSubmit}>
+      {error && (
+        <div className="mb-4 rounded-[var(--radius)] border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+          {error}
+        </div>
+      )}
 
-      <Stack spacing={2.5}>
-        <TextField
+      <div className="grid gap-4">
+        <Input
           label={t("field.annualRate")}
           type="number"
-          inputProps={{ min: 0, max: 30, step: 0.01 }}
+          min={0}
+          max={30}
+          step={0.01}
           value={form.annualRatePercent}
           onChange={field("annualRatePercent")}
-          slotProps={{
-            input: { endAdornment: <InputAdornment position="end">%</InputAdornment> },
-          }}
-          fullWidth
+          unit="%"
         />
 
-        <TextField
+        <Input
           label={t("field.loanDuration")}
           type="number"
-          inputProps={{ min: 12, max: 480, step: 1 }}
+          min={12}
+          max={480}
+          step={1}
           value={form.durationMonths}
           onChange={field("durationMonths")}
-          slotProps={{
-            input: { endAdornment: <InputAdornment position="end">{t("unit.months")}</InputAdornment> },
-          }}
-          fullWidth
+          unit={t("unit.months")}
         />
 
-        <TextField
+        <Input
           label={t("field.downPayment")}
           type="number"
-          inputProps={{ min: 0, step: 1000 }}
+          min={0}
+          step={1000}
           value={form.downPayment}
           onChange={field("downPayment")}
-          slotProps={{
-            input: { endAdornment: <InputAdornment position="end">€</InputAdornment> },
-          }}
-          fullWidth
+          unit="€"
         />
 
-        <TextField
+        <Input
           label={t("field.annualIncome")}
           type="number"
-          inputProps={{ min: 0, step: 1000 }}
+          min={0}
+          step={1000}
           value={form.annualHouseholdIncome}
           onChange={field("annualHouseholdIncome")}
-          slotProps={{
-            input: { endAdornment: <InputAdornment position="end">€</InputAdornment> },
-          }}
-          fullWidth
+          unit="€"
         />
 
-        <TextField
+        <Input
           label={t("field.monthlyDebt")}
           type="number"
-          inputProps={{ min: 0, step: 50 }}
+          min={0}
+          step={50}
           value={form.monthlyCurrentDebtPayments}
           onChange={field("monthlyCurrentDebtPayments")}
-          slotProps={{
-            input: { endAdornment: <InputAdornment position="end">€</InputAdornment> },
-          }}
-          fullWidth
+          unit="€"
         />
 
-        <Button
-          type="submit"
-          variant="contained"
-          fullWidth
-          disabled={loading}
-        >
+        <Button type="submit" disabled={loading} className="w-full">
           {loading ? t("action.saving") : t("action.saveSettings")}
         </Button>
-      </Stack>
-    </Box>
+      </div>
+    </form>
   );
 }

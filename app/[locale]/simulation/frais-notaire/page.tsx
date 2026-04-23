@@ -1,19 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Container from "@mui/material/Container";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
-import MenuItem from "@mui/material/MenuItem";
-import InputAdornment from "@mui/material/InputAdornment";
-import Button from "@mui/material/Button";
-import Alert from "@mui/material/Alert";
-import Paper from "@mui/material/Paper";
-import Stack from "@mui/material/Stack";
-import CircularProgress from "@mui/material/CircularProgress";
-import MuiLink from "@mui/material/Link";
-import ResultBadge from "@/components/ui/ResultBadge";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import Input from "@/components/ui/Input";
 import { computeNotaryFees } from "@/lib/simulate";
 import { useFormat } from "@/lib/format";
 import type { NotaryFeesResult, PropertyType } from "@/types/simulation";
@@ -33,8 +23,15 @@ export default function FraisNotairePage() {
   const [error, setError] = useState<string | null>(null);
 
   function field(key: keyof typeof form) {
-    return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-      setForm((prev) => ({ ...prev, [key]: e.target.value as typeof prev[typeof key] }));
+    return (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >
+    ) =>
+      setForm((prev) => ({
+        ...prev,
+        [key]: e.target.value as typeof prev[typeof key],
+      }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -58,137 +55,158 @@ export default function FraisNotairePage() {
     }
   }
 
-  const totalCost =
-    result
-      ? Number(form.propertyPrice) + result.notaryFees
-      : null;
+  const totalCost = result
+    ? Number(form.propertyPrice) + result.notaryFees
+    : null;
 
   return (
-    <Container maxWidth="sm" sx={{ py: 6 }}>
-      <Box sx={{ mb: 5 }}>
-        <Typography
-          variant="overline"
-          color="primary"
-          sx={{ fontWeight: 700, letterSpacing: "0.12em" }}
-        >
+    <div className="mx-auto max-w-lg px-4 py-12">
+      <div className="mb-8">
+        <span className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
           {t("overline")}
-        </Typography>
-        <Typography
-          variant="h3"
-          sx={{ mt: 1, fontSize: { xs: "2rem", sm: "2.5rem" } }}
-        >
+        </span>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--foreground)] sm:text-4xl">
           {t("title")}
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 1.5 }}>
-          {t("description")}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        </h1>
+        <p className="mt-3 text-[var(--muted)]">{t("description")}</p>
+        <p className="mt-2 text-sm text-[var(--muted)]">
           {t("helperText")}{" "}
-          <MuiLink
-            component={Link}
+          <Link
             href="/simulation/budget-cible"
-            color="primary"
-            underline="always"
-            sx={{ fontWeight: 600 }}
+            className="font-semibold text-[var(--accent)] underline underline-offset-4"
           >
             {t("helperLink")}
-          </MuiLink>
-        </Typography>
-      </Box>
+          </Link>
+        </p>
+      </div>
 
-      <Stack component="form" onSubmit={handleSubmit} spacing={3}>
-        <TextField
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <Input
           label={t("fields.propertyPrice.label")}
-          helperText={t("fields.propertyPrice.helperText")}
+          hint={t("fields.propertyPrice.helperText")}
           type="number"
           required
           placeholder="280 000"
           value={form.propertyPrice}
           onChange={field("propertyPrice")}
-          slotProps={{
-            input: {
-              endAdornment: <InputAdornment position="end">€</InputAdornment>,
-            },
-            htmlInput: { min: 0, step: 1000 },
-          }}
+          unit="€"
+          min={0}
+          step={1000}
         />
 
-        <TextField
-          select
-          label={t("fields.propertyType.label")}
-          value={form.propertyType}
-          onChange={field("propertyType")}
-        >
-          <MenuItem value="OLD">{t("fields.propertyType.options.OLD")}</MenuItem>
-          <MenuItem value="NEW">{t("fields.propertyType.options.NEW")}</MenuItem>
-        </TextField>
+        <div className="grid gap-1.5">
+          <label className="text-sm font-medium text-[var(--foreground)]">
+            {t("fields.propertyType.label")}
+          </label>
+          <select
+            className="w-full rounded-[var(--radius)] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--foreground)] transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
+            value={form.propertyType}
+            onChange={field("propertyType")}
+          >
+            <option value="OLD">
+              {t("fields.propertyType.options.OLD")}
+            </option>
+            <option value="NEW">
+              {t("fields.propertyType.options.NEW")}
+            </option>
+          </select>
+        </div>
 
-        <TextField
+        <Input
           label={t("fields.departmentCode.label")}
-          helperText={t("fields.departmentCode.helperText")}
+          hint={t("fields.departmentCode.helperText")}
           placeholder="75"
           value={form.departmentCode}
           onChange={field("departmentCode")}
-          slotProps={{
-            htmlInput: { maxLength: 3, pattern: "[0-9]{2,3}|2[AB]" },
-          }}
+          maxLength={3}
+          pattern="[0-9]{2,3}|2[AB]"
         />
 
         <Button
           type="submit"
-          variant="contained"
-          size="large"
+          variant="primary"
+          size="lg"
           disabled={loading}
-          startIcon={
-            loading ? <CircularProgress size={16} color="inherit" /> : null
-          }
-          sx={{ mt: 1 }}
+          className="mt-1"
         >
+          {loading && (
+            <svg
+              className="mr-2 h-4 w-4 animate-spin text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+          )}
           {loading ? t("button.loading") : t("button.submit")}
         </Button>
-      </Stack>
+      </form>
 
       {error && (
-        <Alert severity="error" sx={{ mt: 4 }}>
+        <div className="mt-6 rounded-[var(--radius)] border border-red-200 bg-red-50 p-4 text-sm text-red-800">
           {error}
-        </Alert>
+        </div>
       )}
 
       {result && (
-        <Paper
-          component="section"
-          aria-live="polite"
-          variant="outlined"
-          sx={{ mt: 5, p: 3 }}
-        >
-          <Typography
-            variant="overline"
-            color="primary"
-            sx={{ fontWeight: 700, letterSpacing: "0.12em" }}
-          >
+        <section aria-live="polite" className="mt-8">
+          <span className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
             {t("result.title")}
-          </Typography>
-          <Stack spacing={2} sx={{ mt: 2 }}>
-            <ResultBadge
-              label={t("result.notaryFeesLabel")}
-              value={formatEuros(result.notaryFees)}
-              prominent
-            />
-            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-              <ResultBadge
-                label={t("result.appliedRateLabel")}
-                value={formatPercent(result.appliedRatePercent)}
-              />
+          </span>
+          <div className="mt-3 flex flex-col gap-3">
+            <Card className="bg-[var(--accent)] text-white">
+              <div className="p-4">
+                <div className="mb-1 text-xs font-bold uppercase tracking-widest text-white/70">
+                  {t("result.notaryFeesLabel")}
+                </div>
+                <div className="text-xl font-semibold">
+                  {formatEuros(result.notaryFees)}
+                </div>
+              </div>
+            </Card>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Card>
+                <div className="p-4">
+                  <div className="mb-1 text-xs font-bold uppercase tracking-widest text-[var(--muted)]">
+                    {t("result.appliedRateLabel")}
+                  </div>
+                  <div className="text-lg font-semibold text-[var(--foreground)]">
+                    {formatPercent(result.appliedRatePercent)}
+                  </div>
+                </div>
+              </Card>
               {totalCost !== null && (
-                <ResultBadge label={t("result.totalCostLabel")} value={formatEuros(totalCost)} />
+                <Card>
+                  <div className="p-4">
+                    <div className="mb-1 text-xs font-bold uppercase tracking-widest text-[var(--muted)]">
+                      {t("result.totalCostLabel")}
+                    </div>
+                    <div className="text-lg font-semibold text-[var(--foreground)]">
+                      {formatEuros(totalCost)}
+                    </div>
+                  </div>
+                </Card>
               )}
-            </Box>
-            <Typography variant="caption" color="text.secondary">
+            </div>
+            <p className="text-xs text-[var(--muted)]">
               {t("result.disclaimer")}
-            </Typography>
-          </Stack>
-        </Paper>
+            </p>
+          </div>
+        </section>
       )}
-    </Container>
+    </div>
   );
 }

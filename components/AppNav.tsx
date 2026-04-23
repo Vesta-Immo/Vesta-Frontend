@@ -1,32 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Alert from "@mui/material/Alert";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import Container from "@mui/material/Container";
-import Button from "@mui/material/Button";
-import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
-import Drawer from "@mui/material/Drawer";
-import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
-import Divider from "@mui/material/Divider";
-import Slide from "@mui/material/Slide";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import useScrollTrigger from "@mui/material/useScrollTrigger";
-import { useTheme } from "@mui/material/styles";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Link, usePathname } from "@/i18n/navigation";
-import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
+import { Menu, ChevronDown } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
+import Button from "@/components/ui/Button";
 import vestaHouseLogo from "@/img/vesta-house-no-bg.png";
 import { useTranslations } from "next-intl";
 
@@ -53,18 +33,14 @@ function useNavLinks(): { nav: NavLink[]; outils: NavLink[] } {
 
 export default function AppNav() {
   const pathname = usePathname();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const hideOnScroll = useScrollTrigger({
-    disableHysteresis: true,
-    threshold: 72,
-  });
+  const [hideOnScroll, setHideOnScroll] = useState(false);
   const { authLoading, signInWithGoogle, signOut, user } = useAuth();
   const [authError, setAuthError] = useState<string | null>(null);
   const [authBusy, setAuthBusy] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [outilMenuAnchor, setOutilMenuAnchor] = useState<null | HTMLElement>(null);
+  const [outilMenuOpen, setOutilMenuOpen] = useState(false);
+  const outilMenuRef = useRef<HTMLDivElement>(null);
   const { nav: NAV_LINKS, outils: OUTILS_LINKS } = useNavLinks();
   const tNav = useTranslations("nav");
 
@@ -72,17 +48,27 @@ export default function AppNav() {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    function handleScroll() {
+      setHideOnScroll(window.scrollY > 72);
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (outilMenuRef.current && !outilMenuRef.current.contains(event.target as Node)) {
+        setOutilMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const isOutilActive = OUTILS_LINKS.some(
     ({ href }) => pathname === href || pathname.startsWith(href)
   );
-
-  const handleOutilMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setOutilMenuAnchor(event.currentTarget);
-  };
-
-  const handleOutilMenuClose = () => {
-    setOutilMenuAnchor(null);
-  };
 
   const authButtonLabel = authLoading
     ? "Session"
@@ -126,331 +112,216 @@ export default function AppNav() {
     }
   }
 
+  const navLinkClass = (active: boolean, flagship?: boolean) =>
+    `relative px-3 py-1.5 text-sm font-medium rounded-[var(--radius)] transition-colors ${
+      active || flagship
+        ? flagship
+          ? active
+            ? "bg-[var(--accent)] text-white hover:bg-[#1a3d2f]"
+            : "bg-[var(--accent)]/80 text-white hover:bg-[var(--accent)]"
+          : "bg-[var(--accent)] text-white hover:bg-[#1a3d2f]"
+        : "text-[var(--foreground)]/60 hover:text-[var(--foreground)] hover:bg-[var(--foreground)]/5"
+    }`;
+
   const navLinks = (
     <>
       {NAV_LINKS.map(({ href, labelKey, flagship }) => {
         const active = pathname === href || pathname.startsWith(href);
         return (
-          <Button
-            key={href}
-            component={Link}
-            href={href}
-            size="small"
-            variant={active || flagship ? "contained" : "text"}
-            color="primary"
-            sx={
-              active || flagship
-                ? flagship
-                  ? {
-                      fontWeight: 700,
-                      boxShadow: "none",
-                      bgcolor: active ? "primary.main" : "primary.light",
-                      color: "primary.contrastText",
-                      "&:hover": {
-                        boxShadow: "none",
-                        bgcolor: active ? "primary.dark" : "primary.main",
-                        color: "primary.contrastText",
-                      },
-                    }
-                  : {}
-                : { color: "text.secondary" }
-            }
-          >
+          <Link key={href} href={href} className={navLinkClass(active, flagship)}>
             {labelKey}
-          </Button>
+          </Link>
         );
       })}
     </>
   );
 
-  const navBar = (
-    <AppBar
-      position={isMobile ? "fixed" : "sticky"}
-      color="default"
-      enableColorOnDark={false}
-      sx={{ boxShadow: isMobile ? "0 2px 10px rgba(27, 32, 30, 0.08)" : undefined }}
-    >
-      <Container maxWidth="lg">
-        <Toolbar
-          disableGutters
-          sx={{
-            justifyContent: "space-between",
-            gap: { xs: 1, sm: 2 },
-            flexWrap: "nowrap",
-            py: { xs: 0.25, sm: 1 },
-            minHeight: { xs: 56, sm: 68 },
-          }}
-        >
-          <Button
-            component={Link}
-            href="/"
-            disableRipple
-            sx={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 1,
-              fontFamily: "var(--font-fraunces)",
-              fontSize: { xs: "1.3rem", sm: "2rem" },
-              fontWeight: 700,
-              color: "primary.main",
-              letterSpacing: "-0.01em",
-              px: 0,
-              textTransform: "none",
-              "&:hover": { bgcolor: "transparent" },
-            }}
-          >
-            <Image
-              src={vestaHouseLogo}
-              alt="Logo Vesta"
-              width={30}
-              height={30}
-              style={{ width: "auto", height: isMobile ? "1.35rem" : "1.7rem" }}
-            />
-            Vesta
-          </Button>
+  return (
+    <>
+      <header
+        className={`bg-[var(--background)] border-b border-[var(--border)] z-50 transition-transform duration-300 ${
+          hideOnScroll ? "-translate-y-full" : "translate-y-0"
+        } md:sticky md:top-0 fixed top-0 left-0 right-0`}
+      >
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="flex items-center justify-between gap-2 sm:gap-4 py-1 sm:py-2 min-h-[56px] sm:min-h-[68px]">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 font-bold text-[var(--accent)] tracking-tight text-[1.3rem] sm:text-[2rem] shrink-0"
+            >
+              <Image
+                src={vestaHouseLogo}
+                alt="Logo Vesta"
+                width={30}
+                height={30}
+                className="h-[1.35rem] sm:h-[1.7rem] w-auto"
+              />
+              Vesta
+            </Link>
 
-          <Box sx={{ display: { xs: "none", md: "flex" }, gap: 0.5, flexWrap: "wrap", flex: 1 }}>
-            {navLinks}
-            <Button
-              size="small"
-              variant={isOutilActive ? "contained" : "text"}
-              color="primary"
-              onClick={handleOutilMenuOpen}
-              endIcon={<ExpandMoreIcon />}
-              sx={
-                isOutilActive
-                  ? {}
-                  : { color: "text.secondary" }
-              }
-              aria-haspopup="true"
-              aria-expanded={Boolean(outilMenuAnchor)}
-            >
-              {tNav("tools")}
-            </Button>
-            <Menu
-              anchorEl={outilMenuAnchor}
-              open={Boolean(outilMenuAnchor)}
-              onClose={handleOutilMenuClose}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-            >
-              {OUTILS_LINKS.map(({ href, labelKey }) => (
-                <MenuItem
-                  key={href}
-                  component={Link}
-                  href={href}
-                  onClick={handleOutilMenuClose}
-                  selected={pathname === href || pathname.startsWith(href)}
+            <nav className="hidden md:flex items-center gap-2 flex-wrap flex-1">
+              {navLinks}
+              <div className="relative" ref={outilMenuRef}>
+                <button
+                  onClick={() => setOutilMenuOpen((prev) => !prev)}
+                  className={`inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-[var(--radius)] transition-colors ${
+                    isOutilActive
+                      ? "bg-[var(--accent)] text-white hover:bg-[#1a3d2f]"
+                      : "text-[var(--foreground)]/60 hover:text-[var(--foreground)] hover:bg-[var(--foreground)]/5"
+                  }`}
+                  aria-haspopup="true"
+                  aria-expanded={outilMenuOpen}
                 >
-                  {labelKey}
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
+                  {tNav("tools")}
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
 
-          <Stack
-            direction="row"
-            spacing={0.75}
-            alignItems="center"
-            sx={{ ml: "auto", display: { xs: "none", md: "flex" } }}
-          >
-            <LocaleSwitcher />
+                {outilMenuOpen && (
+                  <div className="absolute left-0 mt-1.5 w-56 rounded-[var(--radius)] border border-[var(--border)] bg-white shadow-lg py-1 z-50">
+                    {OUTILS_LINKS.map(({ href, labelKey }) => {
+                      const active = pathname === href || pathname.startsWith(href);
+                      return (
+                        <Link
+                          key={href}
+                          href={href}
+                          onClick={() => setOutilMenuOpen(false)}
+                          className={`block px-3 py-2 text-sm transition-colors ${
+                            active
+                              ? "bg-[var(--accent)]/10 text-[var(--accent)] font-semibold"
+                              : "text-[var(--foreground)] hover:bg-[var(--foreground)]/5"
+                          }`}
+                        >
+                          {labelKey}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </nav>
+
+            <div className="hidden md:flex items-center gap-2 ml-auto">
+              <LocaleSwitcher />
+
+              {mounted && user?.email ? (
+                  <span className="max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap text-[0.79rem] font-medium tracking-tight text-[var(--muted-foreground)]">
+                  {user.email}
+                </span>
+              ) : null}
+
+              {mounted ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={user ? handleSignOut : handleSignIn}
+                  disabled={authLoading || authBusy}
+                  className="min-h-[36px] text-[0.84rem] font-semibold tracking-tight"
+                >
+                  {authButtonLabel}
+                </Button>
+              ) : null}
+            </div>
+
+            <button
+              aria-label="Ouvrir le menu"
+              onClick={() => setMobileMenuOpen(true)}
+              className="inline-flex md:hidden items-center justify-center p-2 rounded-[var(--radius)] text-[var(--accent)] hover:bg-[var(--foreground)]/5 transition-colors"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+          </div>
+
+          {authError ? (
+            <div className="mb-3 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              {authError}
+            </div>
+          ) : null}
+        </div>
+      </header>
+
+      <div className="md:hidden h-14" />
+
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-[100]">
+          <div
+            className="absolute inset-0 bg-black/30"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <div className="absolute right-0 top-0 bottom-0 w-[min(88vw,360px)] bg-white shadow-xl p-4 flex flex-col overflow-y-auto">
+            <div className="text-xs font-bold text-[var(--foreground)]/60 uppercase tracking-wider px-2 pb-2">
+              Navigation
+            </div>
+
+            <nav className="flex flex-col gap-1">
+              {NAV_LINKS.map(({ href, labelKey }) => {
+                const active = pathname === href || pathname.startsWith(href);
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`px-3 py-2.5 rounded-[var(--radius)] text-[0.95rem] transition-colors ${
+                      active
+                        ? "bg-[var(--accent)]/10 text-[var(--accent)] font-bold"
+                        : "text-[var(--foreground)] hover:bg-[var(--foreground)]/5 font-medium"
+                    }`}
+                  >
+                    {labelKey}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            <div className="text-xs font-bold text-[var(--foreground)]/60 uppercase tracking-wider px-2 pt-4 pb-2">
+              {tNav("tools")}
+            </div>
+
+            <nav className="flex flex-col gap-1">
+              {OUTILS_LINKS.map(({ href, labelKey }) => {
+                const active = pathname === href || pathname.startsWith(href);
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`px-3 py-2.5 rounded-[var(--radius)] text-[0.95rem] transition-colors ${
+                      active
+                        ? "bg-[var(--accent)]/10 text-[var(--accent)] font-bold"
+                        : "text-[var(--foreground)] hover:bg-[var(--foreground)]/5 font-medium"
+                    }`}
+                  >
+                    {labelKey}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            <hr className="my-3 border-[var(--border)]" />
 
             {mounted && user?.email ? (
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{
-                  maxWidth: 220,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                  fontSize: "0.79rem",
-                  fontWeight: 500,
-                  letterSpacing: "-0.01em",
-                  color: "rgba(33, 43, 54, 0.58)",
-                }}
-              >
+              <p className="px-2 pb-2 text-sm text-[var(--foreground)]/60 break-words">
                 {user.email}
-              </Typography>
+              </p>
             ) : null}
 
             {mounted ? (
               <Button
-                size="small"
-                variant="outlined"
-                color="primary"
+                variant="outline"
+                size="sm"
                 onClick={user ? handleSignOut : handleSignIn}
                 disabled={authLoading || authBusy}
-                sx={{
-                  minWidth: "auto",
-                  minHeight: 36,
-                  px: 1.4,
-                  borderRadius: 999,
-                  borderColor: user ? "rgba(25, 118, 210, 0.16)" : "rgba(25, 118, 210, 0.22)",
-                  backgroundColor: user ? "transparent" : "rgba(255, 255, 255, 0.72)",
-                  color: user ? "text.secondary" : "primary.main",
-                  fontSize: "0.84rem",
-                  fontWeight: 600,
-                  letterSpacing: "-0.01em",
-                  textTransform: "none",
-                  boxShadow: "none",
-                  backdropFilter: "blur(10px)",
-                  "&:hover": {
-                    borderColor: user ? "rgba(25, 118, 210, 0.28)" : "rgba(25, 118, 210, 0.34)",
-                    backgroundColor: user
-                      ? "rgba(25, 118, 210, 0.05)"
-                      : "rgba(255, 255, 255, 0.9)",
-                    boxShadow: "none",
-                  },
-                  "&.Mui-disabled": {
-                    borderColor: "rgba(25, 118, 210, 0.12)",
-                    color: "text.disabled",
-                  },
-                }}
+                className="w-full mt-1"
               >
                 {authButtonLabel}
               </Button>
             ) : null}
-          </Stack>
 
-          <IconButton
-            aria-label="Ouvrir le menu"
-            onClick={() => setMobileMenuOpen(true)}
-            color="primary"
-            sx={{ display: { xs: "inline-flex", md: "none" } }}
-          >
-            <MenuRoundedIcon />
-          </IconButton>
-        </Toolbar>
-
-        {authError ? (
-          <Alert severity="error" sx={{ mb: 1.5 }}>
-            {authError}
-          </Alert>
-        ) : null}
-      </Container>
-    </AppBar>
-  );
-
-  return (
-    <>
-      {isMobile ? (
-        <Slide appear={false} direction="down" in={!hideOnScroll}>
-          {navBar}
-        </Slide>
-      ) : (
-        navBar
+            <div className="mt-3 px-2">
+              <LocaleSwitcher />
+            </div>
+          </div>
+        </div>
       )}
-
-      {isMobile ? <Toolbar sx={{ minHeight: 56 }} /> : null}
-
-      <Drawer
-        anchor="right"
-        open={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
-        PaperProps={{ sx: { width: "min(88vw, 360px)", p: 1.25 } }}
-      >
-        <Typography
-          variant="subtitle2"
-          sx={{ px: 1, pb: 1, fontWeight: 700, color: "text.secondary", textTransform: "uppercase" }}
-        >
-          Navigation
-        </Typography>
-
-        <List disablePadding>
-          {NAV_LINKS.map(({ href, labelKey }) => {
-            const active = pathname === href || pathname.startsWith(href);
-            return (
-              <ListItemButton
-                key={href}
-                component={Link}
-                href={href}
-                selected={active}
-                onClick={() => setMobileMenuOpen(false)}
-                sx={{ borderRadius: 1.5, mb: 0.5 }}
-              >
-                <ListItemText
-                  primary={labelKey}
-                  slotProps={{
-                    primary: {
-                      fontSize: "0.95rem",
-                      fontWeight: active ? 700 : 500,
-                    },
-                  }}
-                />
-              </ListItemButton>
-            );
-          })}
-        </List>
-
-        <Typography
-          variant="subtitle2"
-          sx={{ px: 1, pt: 2, pb: 1, fontWeight: 700, color: "text.secondary", textTransform: "uppercase" }}
-        >
-          {tNav("tools")}
-        </Typography>
-
-        <List disablePadding>
-          {OUTILS_LINKS.map(({ href, labelKey }) => {
-            const active = pathname === href || pathname.startsWith(href);
-            return (
-              <ListItemButton
-                key={href}
-                component={Link}
-                href={href}
-                selected={active}
-                onClick={() => setMobileMenuOpen(false)}
-                sx={{ borderRadius: 1.5, mb: 0.5 }}
-              >
-                <ListItemText
-                  primary={labelKey}
-                  slotProps={{
-                    primary: {
-                      fontSize: "0.95rem",
-                      fontWeight: active ? 700 : 500,
-                    },
-                  }}
-                />
-              </ListItemButton>
-            );
-          })}
-        </List>
-
-        <Divider sx={{ my: 1 }} />
-
-        {mounted && user?.email ? (
-          <Typography
-            variant="body2"
-            sx={{ px: 1, pb: 1, color: "text.secondary", overflowWrap: "anywhere" }}
-          >
-            {user.email}
-          </Typography>
-        ) : null}
-
-        {mounted ? (
-          <Button
-            fullWidth
-            variant="outlined"
-            color="primary"
-            onClick={user ? handleSignOut : handleSignIn}
-            disabled={authLoading || authBusy}
-            sx={{ mt: 0.5, textTransform: "none", borderRadius: 999 }}
-          >
-            {authButtonLabel}
-          </Button>
-        ) : null}
-
-        <Box sx={{ mt: 1 }}>
-          <LocaleSwitcher />
-        </Box>
-      </Drawer>
     </>
   );
 }

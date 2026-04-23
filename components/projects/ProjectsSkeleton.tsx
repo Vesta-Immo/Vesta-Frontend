@@ -1,18 +1,12 @@
-// filepath: components/projects/ProjectsSkeleton.tsx
-import Skeleton from "@mui/material/Skeleton";
-import Stack from "@mui/material/Stack";
-
 export default function ProjectsSkeleton() {
   return (
-    <Stack spacing={2}>
+    <div className="space-y-4">
       {[1, 2, 3].map((i) => (
-        <Skeleton
+        <div
           key={i}
-          variant="rectangular"
-          height={100}
-          sx={{ borderRadius: 2 }}
+          className="h-28 animate-pulse rounded-[var(--radius)] bg-[var(--muted)]"
         />
       ))}
-    </Stack>
+    </div>
   );
 }

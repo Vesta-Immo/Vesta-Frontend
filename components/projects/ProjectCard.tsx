@@ -1,23 +1,12 @@
-// filepath: components/projects/ProjectCard.tsx
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import { Link } from "@/i18n/navigation";
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import { useState } from "react";
+import { FolderOpen, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import type { Project } from '@/types/project';
+import type { Project } from "@/types/project";
 import { useDeleteProject } from "@/lib/projects";
+import Card from "@/components/ui/Card";
 
 interface ProjectCardProps {
   project: Project;
@@ -26,110 +15,91 @@ interface ProjectCardProps {
 
 export default function ProjectCard({ project, onRename }: ProjectCardProps) {
   const t = useTranslations("projectsComp");
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const deleteMutation = useDeleteProject();
 
-
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
-    <>
-      <Card
-        component={Link}
+    <Card className="transition-colors hover:border-[var(--accent)]/30">
+      <Link
         href={`/simulation/projects/${project.id}`}
-        sx={{
-          textDecoration: "none",
-          transition: "box-shadow 0.2s",
-          "&:hover": {
-            boxShadow: 4,
-          },
-        }}
+        className="flex items-center gap-4 p-4 no-underline"
       >
-        <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Box
-            sx={{
-              width: 48,
-              height: 48,
-              borderRadius: 2,
-              bgcolor: "primary.main",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-              flexShrink: 0,
-            }}
-          >
-            <FolderOpenIcon />
-          </Box>
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--radius)] bg-[var(--accent)] text-white">
+          <FolderOpen className="h-5 w-5" />
+        </div>
 
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="subtitle1" fontWeight={600} noWrap>
-              {project.name}
-            </Typography>
-            {project.location && (
-              <Typography variant="body2" color="text.secondary" noWrap>
-                {project.location}
-              </Typography>
-            )}
-          </Box>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-[var(--foreground)]">
+            {project.name}
+          </p>
+          {project.location && (
+            <p className="truncate text-sm text-[var(--foreground)]/60">
+              {project.location}
+            </p>
+          )}
+        </div>
 
-          <IconButton
-            edge="end"
+        <div className="relative" ref={menuRef}>
+          <button
+            className="inline-flex h-9 w-9 items-center justify-center rounded-[var(--radius)] text-[var(--foreground)]/60 transition-colors hover:bg-[var(--foreground)]/5 hover:text-[var(--foreground)]"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              setAnchorEl(e.currentTarget);
+              setMenuOpen((prev) => !prev);
             }}
           >
-            <MoreVertIcon />
-          </IconButton>
-        </CardContent>
-      </Card>
+            <MoreVertical className="h-4 w-4" />
+          </button>
 
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={() => setAnchorEl(null)}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-      >
-        <MenuItem
-          component={Link}
-          href={`/simulation/projects/${project.id}`}
-          onClick={() => setAnchorEl(null)}
-        >
-          <ListItemIcon>
-            <FolderOpenIcon fontSize="small" />
-          </ListItemIcon>
-          {t("action.open")}
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setAnchorEl(null);
-            onRename?.(project);
-          }}
-        >
-          <ListItemIcon>
-            <EditIcon fontSize="small" />
-          </ListItemIcon>
-          {t("action.rename")}
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setAnchorEl(null);
-            if (confirm(t("confirmDelete", { name: project.name }))) {
-              deleteMutation.mutate(project.id);
-            }
-          }}
-          sx={{ color: "error.main" }}
-        >
-          <ListItemIcon>
-            <DeleteIcon fontSize="small" color="error" />
-          </ListItemIcon>
-          {t("action.delete")}
-        </MenuItem>
-      </Menu>
-    </>
+          {menuOpen && (
+            <div className="absolute right-0 top-full z-10 mt-1 w-48 rounded-[var(--radius)] border border-[var(--border)] bg-white py-1">
+              <Link
+                href={`/simulation/projects/${project.id}`}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--foreground)] no-underline transition-colors hover:bg-[var(--background)]"
+                onClick={() => setMenuOpen(false)}
+              >
+                <FolderOpen className="h-4 w-4 text-[var(--foreground)]/60" />
+                {t("action.open")}
+              </Link>
+              <button
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[var(--foreground)] transition-colors hover:bg-[var(--background)]"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMenuOpen(false);
+                  onRename?.(project);
+                }}
+              >
+                <Pencil className="h-4 w-4 text-[var(--foreground)]/60" />
+                {t("action.rename")}
+              </button>
+              <button
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-600 transition-colors hover:bg-red-50"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMenuOpen(false);
+                  if (confirm(t("confirmDelete", { name: project.name }))) {
+                    deleteMutation.mutate(project.id);
+                  }
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+                {t("action.delete")}
+              </button>
+            </div>
+          )}
+        </div>
+      </Link>
+    </Card>
   );
 }

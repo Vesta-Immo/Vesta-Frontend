@@ -3,20 +3,13 @@
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { Suspense } from "react";
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import Skeleton from "@mui/material/Skeleton";
-import Alert from "@mui/material/Alert";
-
+import { ArrowLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useCompareScenarios } from "@/lib/projects";
 import CompareTable from "@/components/projects/CompareTable";
 import InsightsCards from "@/components/projects/InsightsCards";
+import Button from "@/components/ui/Button";
 
 function CompareContent() {
   const t = useTranslations("compare");
@@ -28,35 +21,39 @@ function CompareContent() {
 
   if (isError) {
     return (
-      <Alert severity="error">
+      <div className="rounded-[var(--radius)] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
         {error instanceof Error ? error.message : t("errors.comparison")}
-      </Alert>
+      </div>
     );
   }
 
   if (isLoading) {
     return (
-      <Stack spacing={2}>
-        <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 2 }} />
-        <Skeleton variant="rectangular" height={100} sx={{ borderRadius: 2 }} />
-      </Stack>
+      <div className="space-y-4">
+        <div className="h-[300px] animate-pulse rounded-[var(--radius)] bg-[var(--muted)]" />
+        <div className="h-[100px] animate-pulse rounded-[var(--radius)] bg-[var(--muted)]" />
+      </div>
     );
   }
 
   if (!data || data.scenarios.length === 0) {
-    return <Alert severity="warning">{t("selectAtLeastTwo")}</Alert>;
+    return (
+      <div className="rounded-[var(--radius)] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        {t("selectAtLeastTwo")}
+      </div>
+    );
   }
 
   return (
     <>
       <InsightsCards insights={data.insights} scenarios={data.scenarios} />
-      <Box sx={{ mt: 3 }}>
+      <div className="mt-6">
         <CompareTable
           scenarios={data.scenarios}
           deltas={data.deltas}
           insights={data.insights}
         />
-      </Box>
+      </div>
     </>
   );
 }
@@ -66,27 +63,31 @@ export default function ComparePage() {
   const t = useTranslations("compare");
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Stack direction="row" alignItems="center" gap={1} sx={{ mb: 1 }}>
+    <div className="mx-auto max-w-5xl px-6 pt-20 pb-12">
+      <div className="mb-6 flex items-center gap-2">
         <Button
-          startIcon={<ArrowBackIcon />}
+          variant="ghost"
+          size="sm"
           onClick={() => router.push("/simulation/projects")}
-          variant="text"
-          size="small"
         >
+          <ArrowLeft className="mr-2 h-4 w-4" />
           {t("backToScenarios")}
         </Button>
-      </Stack>
+      </div>
 
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" fontWeight={700}>
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-[2rem] font-bold leading-tight text-[var(--foreground)]">
           {t("title")}
-        </Typography>
-      </Stack>
+        </h1>
+      </div>
 
-      <Suspense fallback={<Skeleton variant="rectangular" height={400} sx={{ borderRadius: 2 }} />}>
+      <Suspense
+        fallback={
+          <div className="h-[400px] animate-pulse rounded-[var(--radius)] bg-[var(--muted)]" />
+        }
+      >
         <CompareContent />
       </Suspense>
-    </Container>
+    </div>
   );
 }

@@ -1,27 +1,13 @@
-// filepath: components/projects/ScenarioCard.tsx
 "use client";
 
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
-import Checkbox from "@mui/material/Checkbox";
-import IconButton from "@mui/material/IconButton";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import EditIcon from "@mui/icons-material/Edit";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import DeleteIcon from "@mui/icons-material/Delete";
-import StarIcon from "@mui/icons-material/Star";
-import Stack from "@mui/material/Stack";
-import Chip from "@mui/material/Chip";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { Star, MoreVertical, Pencil, Copy, Trash2 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
-import type { Scenario } from '@/types/project';
-import { isStale } from '@/types/project';
+import type { Scenario } from "@/types/project";
+import { isStale } from "@/types/project";
 import { useDeleteScenario, useCopyScenario, useRecomputeScenario } from "@/lib/projects";
+import Card from "@/components/ui/Card";
+import Badge from "@/components/ui/Badge";
 import StalenessBadge from "./StalenessBadge";
 
 interface ScenarioCardProps {
@@ -54,7 +40,8 @@ export default function ScenarioCard({
   onToggleSelect,
   onEdit,
 }: ScenarioCardProps) {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const deleteMutation = useDeleteScenario();
   const copyMutation = useCopyScenario();
   const recomputeMutation = useRecomputeScenario();
@@ -68,154 +55,143 @@ export default function ScenarioCard({
   const fmt = (n: number) =>
     new Intl.NumberFormat(locale, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
 
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <>
-      <Card
-        sx={{
-          border: isSelected ? "2px solid" : "1px solid",
-          borderColor: isSelected ? "primary.main" : "divider",
-          transition: "border-color 0.2s, box-shadow 0.2s",
-          "&:hover": { boxShadow: 2 },
-        }}
-      >
-        <CardContent sx={{ pb: "16px !important" }}>
-          <Stack direction="row" alignItems="flex-start" gap={1}>
-            <Checkbox
-              checked={isSelected}
-              onChange={onToggleSelect}
-              sx={{ mt: -0.5, p: 0 }}
-            />
+    <Card
+      className={`transition-colors ${isSelected ? "border-[var(--accent)]" : "border-[var(--border)]"} hover:border-[var(--accent)]/30`}
+    >
+      <div className="p-4">
+        <div className="flex items-start gap-3">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={onToggleSelect}
+            className="mt-1 h-4 w-4 shrink-0 rounded border-[var(--border-strong)] accent-[var(--accent)]"
+          />
 
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Stack direction="row" alignItems="center" gap={1} flexWrap="wrap">
-                <Typography variant="subtitle1" fontWeight={600} noWrap>
-                  {scenario.name}
-                </Typography>
-                {scenario.isBaseline && (
-                  <Chip
-                    icon={<StarIcon sx={{ fontSize: 14 }} />}
-                    label={t("baseline")}
-                    size="small"
-                    color="primary"
-                    variant="outlined"
-                  />
-                )}
-                {stale && hasResult && (
-                  <StalenessBadge
-                    onRecalculate={() => recomputeMutation.mutate(scenario.id)}
-                    isRecomputing={recomputeMutation.isPending}
-                  />
-                )}
-              </Stack>
-
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                {t("scenarioSubtitle", {
-                  years: scenario.inputParams.durationMonths / 12,
-                  rate: scenario.inputParams.annualRatePercent,
-                  downPayment: fmt(scenario.inputParams.downPayment),
-                })}
-              </Typography>
-
-              {hasResult && scenario.outputResult && (
-                <Stack direction="row" gap={3} sx={{ mt: 1.5 }} flexWrap="wrap">
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      {t("table.borrowingCapacity")}
-                    </Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {fmt(scenario.outputResult.borrowingCapacity)}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      {t("table.monthlyPayment")}
-                    </Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {fmt(scenario.outputResult.monthlyCreditPayment)}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      {t("table.totalBudget")}
-                    </Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {fmt(scenario.outputResult.totalBudget)}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      {t("computed")}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {formatComputedAt(scenario.computedAt)}
-                    </Typography>
-                  </Box>
-                </Stack>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="truncate text-sm font-semibold text-[var(--foreground)]">
+                {scenario.name}
+              </span>
+              {scenario.isBaseline && (
+                <Badge variant="accent">
+                  <Star className="mr-1 h-3 w-3" />
+                  {t("baseline")}
+                </Badge>
               )}
-
-              {!hasResult && (
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  {t("notComputed")}
-                </Typography>
+              {stale && hasResult && (
+                <StalenessBadge
+                  onRecalculate={() => recomputeMutation.mutate(scenario.id)}
+                  isRecomputing={recomputeMutation.isPending}
+                />
               )}
-            </Box>
+            </div>
 
-            <IconButton
-              edge="end"
+            <p className="mt-1 text-sm text-[var(--foreground)]/60">
+              {t("scenarioSubtitle", {
+                years: scenario.inputParams.durationMonths / 12,
+                rate: scenario.inputParams.annualRatePercent,
+                downPayment: fmt(scenario.inputParams.downPayment),
+              })}
+            </p>
+
+            {hasResult && scenario.outputResult && (
+              <div className="mt-4 flex flex-wrap gap-6">
+                <div>
+                  <p className="text-xs text-[var(--foreground)]/50">{t("table.borrowingCapacity")}</p>
+                  <p className="text-sm font-semibold text-[var(--foreground)]">
+                    {fmt(scenario.outputResult.borrowingCapacity)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-[var(--foreground)]/50">{t("table.monthlyPayment")}</p>
+                  <p className="text-sm font-semibold text-[var(--foreground)]">
+                    {fmt(scenario.outputResult.monthlyCreditPayment)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-[var(--foreground)]/50">{t("table.totalBudget")}</p>
+                  <p className="text-sm font-semibold text-[var(--foreground)]">
+                    {fmt(scenario.outputResult.totalBudget)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-[var(--foreground)]/50">{t("computed")}</p>
+                  <p className="text-sm text-[var(--foreground)]/60">
+                    {formatComputedAt(scenario.computedAt)}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {!hasResult && (
+              <p className="mt-2 text-sm text-[var(--foreground)]/60">{t("notComputed")}</p>
+            )}
+          </div>
+
+          <div className="relative shrink-0" ref={menuRef}>
+            <button
+              className="inline-flex h-9 w-9 items-center justify-center rounded-[var(--radius)] text-[var(--foreground)]/60 transition-colors hover:bg-[var(--foreground)]/5 hover:text-[var(--foreground)]"
               onClick={(e) => {
                 e.stopPropagation();
-                setAnchorEl(e.currentTarget);
+                setMenuOpen((prev) => !prev);
               }}
             >
-              <MoreVertIcon />
-            </IconButton>
-          </Stack>
-        </CardContent>
-      </Card>
+              <MoreVertical className="h-4 w-4" />
+            </button>
 
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={() => setAnchorEl(null)}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <MenuItem
-          onClick={() => {
-            setAnchorEl(null);
-            onEdit();
-          }}
-        >
-          <ListItemIcon>
-            <EditIcon fontSize="small" />
-          </ListItemIcon>
-          {t("action.edit")}
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setAnchorEl(null);
-            copyMutation.mutate(scenario.id);
-          }}
-        >
-          <ListItemIcon>
-            <ContentCopyIcon fontSize="small" />
-          </ListItemIcon>
-          {t("action.duplicate")}
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setAnchorEl(null);
-            if (confirm(t("confirmDelete", { name: scenario.name }))) {
-              deleteMutation.mutate(scenario.id);
-            }
-          }}
-          sx={{ color: "error.main" }}
-        >
-          <ListItemIcon>
-            <DeleteIcon fontSize="small" color="error" />
-          </ListItemIcon>
-          {t("action.delete")}
-        </MenuItem>
-      </Menu>
-    </>
+            {menuOpen && (
+              <div className="absolute right-0 top-full z-10 mt-1 w-48 rounded-[var(--radius)] border border-[var(--border)] bg-white py-1">
+                <button
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[var(--foreground)] transition-colors hover:bg-[var(--background)]"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMenuOpen(false);
+                    onEdit();
+                  }}
+                >
+                  <Pencil className="h-4 w-4 text-[var(--foreground)]/60" />
+                  {t("action.edit")}
+                </button>
+                <button
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[var(--foreground)] transition-colors hover:bg-[var(--background)]"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMenuOpen(false);
+                    copyMutation.mutate(scenario.id);
+                  }}
+                >
+                  <Copy className="h-4 w-4 text-[var(--foreground)]/60" />
+                  {t("action.duplicate")}
+                </button>
+                <button
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-600 transition-colors hover:bg-red-50"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMenuOpen(false);
+                    if (confirm(t("confirmDelete", { name: scenario.name }))) {
+                      deleteMutation.mutate(scenario.id);
+                    }
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {t("action.delete")}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </Card>
   );
 }

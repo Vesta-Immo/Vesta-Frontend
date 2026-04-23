@@ -1,17 +1,11 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import Alert from "@mui/material/Alert";
-import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
-import Container from "@mui/material/Container";
-import Paper from "@mui/material/Paper";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { Loader2 } from "lucide-react";
 
 const DEFAULT_REDIRECT_PATH = "/simulation/property-list";
 
@@ -19,7 +13,6 @@ function getSafeRedirectPath(nextPath: string | null) {
   if (!nextPath || !nextPath.startsWith("/") || nextPath.startsWith("//")) {
     return DEFAULT_REDIRECT_PATH;
   }
-
   return nextPath;
 }
 
@@ -80,38 +73,34 @@ function AuthCallbackContent() {
     return () => {
       isMounted = false;
     };
-  }, [router, searchParams]);
+  }, [router, searchParams, t]);
 
   return (
-    <Container maxWidth="sm" sx={{ py: 10 }}>
-      <Paper
-        elevation={0}
-        sx={{
-          borderRadius: 4,
-          border: "1px solid",
-          borderColor: "divider",
-          p: { xs: 3, sm: 4 },
-        }}
-      >
-        <Stack spacing={2.5} alignItems="flex-start">
-          <Typography variant="h4">{t("title")}</Typography>
-          <Typography color="text.secondary" sx={{ lineHeight: 1.7 }}>
+    <div className="mx-auto max-w-sm px-4 py-10">
+      <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8">
+        <div className="flex flex-col items-start gap-5">
+          <h1 className="text-2xl font-bold text-[var(--foreground)]">
+            {t("title")}
+          </h1>
+          <p className="text-[var(--muted-foreground)] leading-[1.7]">
             {t("description")}
-          </Typography>
+          </p>
 
           {errorMessage ? (
-            <Alert severity="error" sx={{ width: "100%" }}>
+            <div className="w-full rounded-[var(--radius)] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
               {errorMessage}
-            </Alert>
+            </div>
           ) : (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <CircularProgress size={20} />
-              <Typography color="text.secondary">{t("validating")}</Typography>
-            </Box>
+            <div className="flex items-center gap-3">
+              <Loader2 className="h-5 w-5 animate-spin text-[var(--muted-foreground)]" />
+              <span className="text-[var(--muted-foreground)]">
+                {t("validating")}
+              </span>
+            </div>
           )}
-        </Stack>
-      </Paper>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -119,28 +108,24 @@ function AuthCallbackFallback() {
   const t = useTranslations("auth");
 
   return (
-    <Container maxWidth="sm" sx={{ py: 10 }}>
-      <Paper
-        elevation={0}
-        sx={{
-          borderRadius: 4,
-          border: "1px solid",
-          borderColor: "divider",
-          p: { xs: 3, sm: 4 },
-        }}
-      >
-        <Stack spacing={2.5} alignItems="flex-start">
-          <Typography variant="h4">{t("title")}</Typography>
-          <Typography color="text.secondary" sx={{ lineHeight: 1.7 }}>
+    <div className="mx-auto max-w-sm px-4 py-10">
+      <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8">
+        <div className="flex flex-col items-start gap-5">
+          <h1 className="text-2xl font-bold text-[var(--foreground)]">
+            {t("title")}
+          </h1>
+          <p className="text-[var(--muted-foreground)] leading-[1.7]">
             {t("description")}
-          </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <CircularProgress size={20} />
-            <Typography color="text.secondary">{t("validating")}</Typography>
-          </Box>
-        </Stack>
-      </Paper>
-    </Container>
+          </p>
+          <div className="flex items-center gap-3">
+            <Loader2 className="h-5 w-5 animate-spin text-[var(--muted-foreground)]" />
+            <span className="text-[var(--muted-foreground)]">
+              {t("validating")}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

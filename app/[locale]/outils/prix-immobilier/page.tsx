@@ -1,13 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import Typography from "@mui/material/Typography";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Stack from "@mui/material/Stack";
 import AppNav from "@/components/AppNav";
+import Card from "@/components/ui/Card";
 import RegionList from "./RegionList";
 import { useTranslations } from "next-intl";
 
@@ -16,56 +11,28 @@ export default function PrixImmobilierPage() {
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        bgcolor: "background.default",
-      }}
-    >
+    <div className="flex min-h-screen flex-col bg-[var(--background)]">
       <AppNav />
 
-      <Container maxWidth="lg" sx={{ flex: 1, py: { xs: 4, md: 6 } }}>
-        <Stack spacing={4}>
-          <Box>
-            <Typography
-              variant="h1"
-              sx={{
-                fontSize: { xs: "1.8rem", sm: "2.4rem", md: "3rem" },
-                lineHeight: 1.1,
-                letterSpacing: "-0.02em",
-                fontWeight: 700,
-              }}
-            >
+      <div className="mx-auto max-w-5xl flex-1 px-4 py-8 md:py-12">
+        <div className="flex flex-col gap-8">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)] md:text-5xl">
               {t("title")}
-            </Typography>
-            <Typography
-              variant="body1"
-              color="text.secondary"
-              sx={{ mt: 1.5, fontSize: "1.08rem", lineHeight: 1.75 }}
-            >
+            </h1>
+            <p className="mt-3 text-base leading-relaxed text-[var(--muted-foreground)]">
               {t("description")}
-            </Typography>
-          </Box>
+            </p>
+          </div>
 
-          <Card
-            elevation={0}
-            sx={{
-              borderRadius: 4,
-              border: "1px solid",
-              borderColor: "divider",
-            }}
-          >
-            <CardContent sx={{ p: { xs: 3, sm: 4, md: 5 } }}>
-              <RegionList
-                selectedRegion={selectedRegion}
-                onRegionSelect={setSelectedRegion}
-              />
-            </CardContent>
+          <Card className="p-6 md:p-10">
+            <RegionList
+              selectedRegion={selectedRegion}
+              onRegionSelect={setSelectedRegion}
+            />
           </Card>
-        </Stack>
-      </Container>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 }

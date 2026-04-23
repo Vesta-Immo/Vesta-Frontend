@@ -1,17 +1,6 @@
 "use client";
 
-import Stack from "@mui/material/Stack";
-import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Link from "@mui/material/Link";
+import Badge from "@/components/ui/Badge";
 import { useTranslations } from "next-intl";
 import type { PropertyWithResults } from "@/types/simulation";
 import { useFormat } from "@/lib/format";
@@ -24,108 +13,128 @@ export default function PropertyResults({ results }: PropertyResultsProps) {
   const t = useTranslations("propertyList");
   const { formatEuros } = useFormat();
 
-  function debtLevelColor(level: PropertyWithResults["debtRatioLevel"]) {
+  function debtLevelVariant(level: PropertyWithResults["debtRatioLevel"]) {
     if (level === "LOW") {
-      return "success";
+      return "accent" as const;
     }
     if (level === "OK") {
-      return "warning";
+      return "default" as const;
     }
-    return "error";
+    return "outline" as const;
   }
 
   if (results.length === 0) {
     return (
-      <Box sx={{ textAlign: "center", py: 4 }}>
-        <Typography color="text.secondary">
-          {t("noResults")}
-        </Typography>
-      </Box>
+      <div className="py-8 text-center text-sm text-[var(--muted-foreground)]">
+        {t("noResults")}
+      </div>
     );
   }
 
   return (
-    <Stack spacing={2}>
-      <Typography variant="h6" sx={{ fontWeight: 700 }}>
+    <div className="grid gap-4">
+      <h3 className="text-lg font-bold text-[var(--foreground)]">
         {t("resultsTitle")}
-      </Typography>
+      </h3>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-              <TableCell>{t("table.property")}</TableCell>
-              <TableCell align="right">{t("table.purchasePrice")}</TableCell>
-              <TableCell align="right">{t("table.notaryFees")}</TableCell>
-              <TableCell align="right">{t("table.renovations")}</TableCell>
-              <TableCell align="right">{t("table.requiredLoan")}</TableCell>
-              <TableCell align="right">{t("table.monthlyCredit")}</TableCell>
-              <TableCell align="right">{t("table.monthlyWithCharges")}</TableCell>
-              <TableCell align="right">{t("table.debtRatio")}</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+      <div className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)]">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-[var(--border)] bg-[var(--foreground)]/5">
+              <th className="px-4 py-3 text-left font-semibold text-[var(--foreground)]">
+                {t("table.property")}
+              </th>
+              <th className="px-4 py-3 text-right font-semibold text-[var(--foreground)]">
+                {t("table.purchasePrice")}
+              </th>
+              <th className="px-4 py-3 text-right font-semibold text-[var(--foreground)]">
+                {t("table.notaryFees")}
+              </th>
+              <th className="px-4 py-3 text-right font-semibold text-[var(--foreground)]">
+                {t("table.renovations")}
+              </th>
+              <th className="px-4 py-3 text-right font-semibold text-[var(--foreground)]">
+                {t("table.requiredLoan")}
+              </th>
+              <th className="px-4 py-3 text-right font-semibold text-[var(--foreground)]">
+                {t("table.monthlyCredit")}
+              </th>
+              <th className="px-4 py-3 text-right font-semibold text-[var(--foreground)]">
+                {t("table.monthlyWithCharges")}
+              </th>
+              <th className="px-4 py-3 text-right font-semibold text-[var(--foreground)]">
+                {t("table.debtRatio")}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
             {results.map((property) => (
-              <TableRow key={property.id}>
-                <TableCell>
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              <tr
+                key={property.id}
+                className="border-b border-[var(--border)] last:border-b-0"
+              >
+                <td className="px-4 py-3">
+                  <div className="grid gap-1">
+                    <span className="font-semibold text-[var(--foreground)]">
                       {property.addressOrSector}
-                    </Typography>
+                    </span>
                     {property.listingUrl && (
-                      <Link
+                      <a
                         href={property.listingUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        variant="caption"
-                        sx={{ display: "inline-block", mt: 0.5 }}
+                        className="text-xs text-[var(--accent)] hover:underline"
                       >
                         {t("viewListing")}
-                      </Link>
+                      </a>
                     )}
-                    <Chip
-                      label={property.status === "wanted" ? t("status.wanted") : t("status.visited")}
-                      size="small"
-                      variant="outlined"
-                      sx={{ mt: 0.5 }}
-                    />
-                  </Box>
-                </TableCell>
-                <TableCell align="right">
+                    <Badge variant="outline" className="mt-0.5 w-fit">
+                      {property.status === "wanted"
+                        ? t("status.wanted")
+                        : t("status.visited")}
+                    </Badge>
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-right">
                   {formatEuros(property.price)}
-                </TableCell>
-                <TableCell align="right">
+                </td>
+                <td className="px-4 py-3 text-right">
                   {formatEuros(property.notaryFees)}
-                </TableCell>
-                <TableCell align="right">
+                </td>
+                <td className="px-4 py-3 text-right">
                   {formatEuros(property.totalRenovationBudget)}
-                </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>
+                </td>
+                <td className="px-4 py-3 text-right font-semibold">
                   {formatEuros(property.requiredLoanAmount)}
-                </TableCell>
-                <TableCell align="right">
+                </td>
+                <td className="px-4 py-3 text-right">
                   {formatEuros(property.monthlyCreditPayment)}
-                </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 700, color: "primary.main" }}>
+                </td>
+                <td className="px-4 py-3 text-right font-bold text-[var(--accent)]">
                   {formatEuros(property.monthlyPaymentWithCharges)}
-                </TableCell>
-                <TableCell align="right">
-                  <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <span className="font-semibold text-[var(--foreground)]">
                       {property.debtRatioPercent.toFixed(1)}%
-                    </Typography>
-                    <Chip
-                      label={property.debtRatioLevel}
-                      size="small"
-                      color={debtLevelColor(property.debtRatioLevel)}
-                    />
-                  </Stack>
-                </TableCell>
-              </TableRow>
+                    </span>
+                    <Badge
+                      variant={debtLevelVariant(property.debtRatioLevel)}
+                      className={
+                        property.debtRatioLevel === "HIGH"
+                          ? "border-red-200 bg-red-50 text-red-700"
+                          : ""
+                      }
+                    >
+                      {property.debtRatioLevel}
+                    </Badge>
+                  </div>
+                </td>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Stack>
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
