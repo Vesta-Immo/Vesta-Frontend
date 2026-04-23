@@ -15,7 +15,7 @@ on:
       - "types/**"
   push:
     branches:
-      - main
+      - '*'
     paths:
       - ".github/workflows/build-image.yml"
       - "Dockerfile"
@@ -28,15 +28,70 @@ on:
       - "types/**"
 
 jobs:
-  build-and-deploy:
-    name: Build image and push it to GCP Artifact Registry, then deploy to Cloud Run
+  docker-validate:
+    name: Validate image build
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/main')
     runs-on: ubuntu-latest
-    environment: prod
+
     permissions:
       contents: read
 
     env:
-      IMAGE_URI: europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/vesta/nextjs:${{ github.sha }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL || secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_REDIRECT_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_REDIRECT_URL || secrets.NEXT_PUBLIC_SUPABASE_REDIRECT_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validate required build variables
+        run: |
+          missing=0
+
+          for name in NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_REDIRECT_URL NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY SENTRY_AUTH_TOKEN; do
+            if [ -z "${!name}" ]; then
+              echo "Missing required GitHub variable or secret: $name" >&2
+              missing=1
+            fi
+          done
+
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Build Docker image for validation
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: vesta-frontend:pr-${{ github.event.pull_request.number }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NEXT_PUBLIC_SUPABASE_URL=${{ env.NEXT_PUBLIC_SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_REDIRECT_URL=${{ env.NEXT_PUBLIC_SUPABASE_REDIRECT_URL }}
+            NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${{ env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+            SENTRY_AUTH_TOKEN=${{ env.SENTRY_AUTH_TOKEN }}
+
+  docker-publish-and-deploy:
+    name: Build image and push it to GCP Artifact Registry, then deploy to Cloud Run
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    environment: prod
+
+    permissions:
+      contents: read
+
+    env:
+      IMAGE_URI: europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/vesta/frontend:${{ github.sha }}
       NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL || secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_REDIRECT_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_REDIRECT_URL || secrets.NEXT_PUBLIC_SUPABASE_REDIRECT_URL }}
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
@@ -65,9 +120,6 @@ jobs:
           fi
 
       - name: Validate required publish secrets
-        if: |
-          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-          (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
         env:
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
@@ -86,24 +138,15 @@ jobs:
           fi
 
       - name: Authenticate to Google Cloud
-        if: |
-          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-          (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
         id: auth
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Setup gcloud
-        if: |
-          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-          (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Log in to GCP Artifact Registry
-        if: |
-          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-          (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
         run: gcloud auth configure-docker europe-west1-docker.pkg.dev
 
       - name: Build Docker image
@@ -120,7 +163,6 @@ jobs:
             NEXT_PUBLIC_SUPABASE_REDIRECT_URL=${{ env.NEXT_PUBLIC_SUPABASE_REDIRECT_URL }}
             NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${{ env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
             SENTRY_AUTH_TOKEN=${{ env.SENTRY_AUTH_TOKEN }}
-
 
       - name: Deploy to Cloud Run
         run: |
