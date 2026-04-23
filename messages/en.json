@@ -707,7 +707,6 @@
     "computedDaysAgo": "{days} days ago",
     "computedWeeksAgo": "{weeks} weeks ago",
     "computedOnDate": "On {date}"
-  }
   },
   "authComp": {
     "action": {
