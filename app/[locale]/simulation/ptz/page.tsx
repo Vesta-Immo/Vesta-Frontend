@@ -1,24 +1,26 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import Container from "@mui/material/Container";
-import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
-import MenuItem from "@mui/material/MenuItem";
-import InputAdornment from "@mui/material/InputAdornment";
-import Button from "@mui/material/Button";
-import Alert from "@mui/material/Alert";
-import Paper from "@mui/material/Paper";
-import Stack from "@mui/material/Stack";
-import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
-import ResultBadge from "@/components/ui/ResultBadge";
-import MuiLink from "@mui/material/Link";
 import { Link } from "@/i18n/navigation";
 import {
-  checkPtzEligibility,
-  computePtzAmount,
-} from "@/lib/simulate";
+  Loader2,
+  Calculator,
+  Home,
+  Users,
+  UserCheck,
+  Building2,
+  Wallet,
+  FileText,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import Select from "@/components/ui/Select";
+import Toggle from "@/components/ui/Toggle";
+import ResultBadge from "@/components/ui/ResultBadge";
+import { checkPtzEligibility, computePtzAmount } from "@/lib/simulate";
 import { useFormat } from "@/lib/format";
 import type {
   CheckPtzEligibilityRequest,
@@ -28,10 +30,7 @@ import type {
   PtzPropertyType,
   PtzOperationType,
 } from "@/types/simulation";
-import {
-  ComplementaryLoanType,
-  PrimoAccedantException,
-} from "@/types/simulation";
+import { ComplementaryLoanType, PrimoAccedantException } from "@/types/simulation";
 import { useTranslations } from "next-intl";
 
 const ZONE_OPTIONS: PtzZone[] = ["A_BIS", "A", "B1", "B2", "C"];
@@ -51,6 +50,23 @@ const PRIMO_EXCEPTION_OPTIONS: PrimoAccedantException[] = [
 const PROPERTY_TYPE_OPTIONS: PtzPropertyType[] = ["COLLECTIF", "MAISON_INDIVIDUELLE"];
 const OPERATION_TYPE_OPTIONS: PtzOperationType[] = ["NEUF", "ANCIEN_AVEC_TRAVAUX"];
 
+function SectionHeader({
+  icon: Icon,
+  title,
+}: {
+  icon: React.ElementType;
+  title: string;
+}) {
+  return (
+    <div className="sm:col-span-2 flex items-center gap-3 pt-2">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent)]/10 text-[var(--accent)]">
+        <Icon className="h-4 w-4" />
+      </div>
+      <h2 className="text-sm font-semibold text-[var(--foreground)]">{title}</h2>
+    </div>
+  );
+}
+
 export default function PtzSimulateurPage() {
   const t = useTranslations("ptz");
   const { formatEuros } = useFormat();
@@ -67,13 +83,14 @@ export default function PtzSimulateurPage() {
     propertyType: "COLLECTIF",
     operationType: "NEUF",
   });
-  const [eligibilityResult, setEligibilityResult] = useState<CheckPtzEligibilityResult | null>(null);
+  const [eligibilityResult, setEligibilityResult] =
+    useState<CheckPtzEligibilityResult | null>(null);
   const [computeResult, setComputeResult] = useState<ComputePtzResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function field(key: keyof typeof form) {
-    return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       const value = e.target.value;
       setForm((prev) => ({ ...prev, [key]: value }));
     };
@@ -130,395 +147,319 @@ export default function PtzSimulateurPage() {
     }
   }
 
+  const showWorkPercentage = form.operationType === "ANCIEN_AVEC_TRAVAUX";
+
   return (
-    <Container maxWidth="md" sx={{ py: 6 }}>
-      <Box sx={{ mb: 5 }}>
-        <Typography
-          variant="overline"
-          color="primary"
-          sx={{ fontWeight: 700, letterSpacing: "0.12em" }}
-        >
+    <div className="mx-auto max-w-3xl px-4 py-12">
+      <div className="mb-8">
+        <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
           {t("overline")}
-        </Typography>
-        <Typography
-          variant="h3"
-          sx={{ mt: 1, fontSize: { xs: "2rem", sm: "2.5rem" } }}
-        >
+        </p>
+        <h1 className="mt-1 text-3xl font-bold tracking-tight text-[var(--foreground)] sm:text-4xl">
           {t("title")}
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 1.5 }}>
+        </h1>
+        <p className="mt-3 text-base text-[var(--muted-foreground)]">
           {t("description")}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        </p>
+        <p className="mt-2 text-sm text-[var(--muted-foreground)]">
           {t("helperText")}{" "}
-          <MuiLink
-            component={Link}
+          <Link
             href="/simulation/ptz/conditions"
-            color="primary"
-            underline="always"
-            sx={{ fontWeight: 600 }}
+            className="font-semibold text-[var(--accent)] underline underline-offset-2"
           >
             {t("helperLink")}
-          </MuiLink>
-        </Typography>
-      </Box>
+          </Link>
+        </p>
+      </div>
 
-      <Box
-        component="form"
+      <form
         onSubmit={handleCalculate}
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "minmax(0, 1fr)", sm: "minmax(0, 1fr) minmax(0, 1fr)" },
-          gap: 2,
-          width: "100%",
-          maxWidth: 800,
-        }}
+        className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2"
       >
-        <Box sx={{ gridColumn: { xs: "1", sm: "span 2" } }}>
-          <Typography variant="overline" color="primary" sx={{ fontWeight: 700, letterSpacing: "0.12em" }}>
-            {t("sections.property")}
-          </Typography>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            label={t("fields.propertyPrice.label")}
-            helperText={t("fields.propertyPrice.helperText")}
-            type="number"
-            required
-            placeholder="250 000"
-            value={form.propertyPrice || ""}
-            onChange={field("propertyPrice")}
-            slotProps={{
-              input: {
-                endAdornment: <InputAdornment position="end">€</InputAdornment>,
-              },
-              htmlInput: { min: 0, step: 1000 },
-            }}
-          />
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            select
-            label={t("fields.propertyZone.label")}
-            value={form.propertyZone}
-            onChange={field("propertyZone")}
-            helperText={t("fields.propertyZone.helperText")}
-          >
-            {ZONE_OPTIONS.map((value) => (
-              <MenuItem key={value} value={value}>
-                {t(`fields.propertyZone.options.${value}`)}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Box>
+        <SectionHeader icon={Home} title={t("sections.property")} />
+        <Input
+          label={t("fields.propertyPrice.label")}
+          hint={t("fields.propertyPrice.helperText")}
+          type="number"
+          required
+          placeholder="250 000"
+          value={form.propertyPrice || ""}
+          onChange={field("propertyPrice")}
+          unit="€"
+          min={0}
+          step={1000}
+        />
+        <Select
+          label={t("fields.propertyZone.label")}
+          hint={t("fields.propertyZone.helperText")}
+          value={form.propertyZone}
+          onChange={field("propertyZone")}
+        >
+          {ZONE_OPTIONS.map((value) => (
+            <option key={value} value={value}>
+              {t(`fields.propertyZone.options.${value}`)}
+            </option>
+          ))}
+        </Select>
 
-        <Box sx={{ gridColumn: { xs: "1", sm: "span 2" } }}>
-          <Typography variant="overline" color="primary" sx={{ fontWeight: 700, letterSpacing: "0.12em" }}>
-            {t("sections.household")}
-          </Typography>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            select
-            label={t("fields.householdSize.label")}
-            value={form.householdSize}
-            onChange={field("householdSize")}
-            helperText={t("fields.householdSize.helperText")}
-          >
-            {HOUSEHOLD_SIZES.map((value) => (
-              <MenuItem key={value} value={value}>
-                {value === 8
-                  ? t("fields.householdSize.options.8plus")
-                  : t("fields.householdSize.options.n", { count: value })}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            label={t("fields.annualIncome.label")}
-            helperText={t("fields.annualIncome.helperText")}
-            type="number"
-            required
-            placeholder="45 000"
-            value={form.annualIncome || ""}
-            onChange={field("annualIncome")}
-            slotProps={{
-              input: {
-                endAdornment: <InputAdornment position="end">€ / an</InputAdornment>,
-              },
-              htmlInput: { min: 0, step: 1000 },
-            }}
-          />
-        </Box>
+        <div className="sm:col-span-2">
+          <hr className="border-dashed border-[var(--border)]" />
+        </div>
+        <SectionHeader icon={Users} title={t("sections.household")} />
+        <Select
+          label={t("fields.householdSize.label")}
+          hint={t("fields.householdSize.helperText")}
+          value={String(form.householdSize)}
+          onChange={(e) =>
+            setForm((prev) => ({ ...prev, householdSize: Number(e.target.value) }))
+          }
+        >
+          {HOUSEHOLD_SIZES.map((value) => (
+            <option key={value} value={value}>
+              {value === 8
+                ? t("fields.householdSize.options.8plus")
+                : t("fields.householdSize.options.n", { count: value })}
+            </option>
+          ))}
+        </Select>
+        <Input
+          label={t("fields.annualIncome.label")}
+          hint={t("fields.annualIncome.helperText")}
+          type="number"
+          required
+          placeholder="45 000"
+          value={form.annualIncome || ""}
+          onChange={field("annualIncome")}
+          unit="€ / an"
+          min={0}
+          step={1000}
+        />
 
-        <Box sx={{ gridColumn: { xs: "1", sm: "span 2" } }}>
-          <Typography variant="overline" color="primary" sx={{ fontWeight: 700, letterSpacing: "0.12em" }}>
-            {t("sections.buyerStatus")}
-          </Typography>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            select
-            label={t("fields.isPrimoAccedant.label")}
-            helperText={t("fields.isPrimoAccedant.helperText")}
-            value={form.isPrimoAccedant ? "yes" : "no"}
+        <div className="sm:col-span-2">
+          <hr className="border-dashed border-[var(--border)]" />
+        </div>
+        <SectionHeader icon={UserCheck} title={t("sections.buyerStatus")} />
+        <Toggle
+          label={t("fields.isPrimoAccedant.label")}
+          hint={t("fields.isPrimoAccedant.helperText")}
+          value={form.isPrimoAccedant}
+          onChange={(value) => setForm((prev) => ({ ...prev, isPrimoAccedant: value }))}
+          trueLabel={t("yes")}
+          falseLabel={t("no")}
+        />
+        {!form.isPrimoAccedant && (
+          <Select
+            label={t("fields.primoAccedantException.label")}
+            hint={t("fields.primoAccedantException.helperText")}
+            value={form.primoAccedantException || ""}
             onChange={(e) =>
               setForm((prev) => ({
                 ...prev,
-                isPrimoAccedant: e.target.value === "yes",
+                primoAccedantException: e.target.value as PrimoAccedantException,
               }))
             }
           >
-            <MenuItem value="yes">{t("yes")}</MenuItem>
-            <MenuItem value="no">{t("no")}</MenuItem>
-          </TextField>
-        </Box>
-        <Box>
-          {!form.isPrimoAccedant && (
-            <TextField
-              fullWidth
-              select
-              label={t("fields.primoAccedantException.label")}
-              value={form.primoAccedantException || ""}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  primoAccedantException: e.target.value as PrimoAccedantException,
-                }))
-              }
-              helperText={t("fields.primoAccedantException.helperText")}
-            >
-              {PRIMO_EXCEPTION_OPTIONS.map((value) => (
-                <MenuItem key={value} value={value}>
-                  {t(`fields.primoAccedantException.options.${value}`)}
-                </MenuItem>
-              ))}
-            </TextField>
-          )}
-        </Box>
+            {PRIMO_EXCEPTION_OPTIONS.map((value) => (
+              <option key={value} value={value}>
+                {t(`fields.primoAccedantException.options.${value}`)}
+              </option>
+            ))}
+          </Select>
+        )}
 
-        <Box sx={{ gridColumn: { xs: "1", sm: "span 2" } }}>
-          <Typography variant="overline" color="primary" sx={{ fontWeight: 700, letterSpacing: "0.12em" }}>
-            {t("sections.project")}
-          </Typography>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            select
-            label={t("fields.propertyType.label")}
-            value={form.propertyType || "COLLECTIF"}
-            onChange={(e) =>
-              setForm((prev) => ({
-                ...prev,
-                propertyType: e.target.value as PtzPropertyType,
-              }))
-            }
-            helperText={t("fields.propertyType.helperText")}
-          >
-            {PROPERTY_TYPE_OPTIONS.map((value) => (
-              <MenuItem key={value} value={value}>
-                {t(`fields.propertyType.options.${value}`)}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            select
-            label={t("fields.operationType.label")}
-            value={form.operationType || "NEUF"}
-            onChange={(e) =>
-              setForm((prev) => ({
-                ...prev,
-                operationType: e.target.value as PtzOperationType,
-                isOldProperty: e.target.value === "ANCIEN_AVEC_TRAVAUX",
-              }))
-            }
-            helperText={t("fields.operationType.helperText")}
-          >
-            {OPERATION_TYPE_OPTIONS.map((value) => (
-              <MenuItem key={value} value={value}>
-                {t(`fields.operationType.options.${value}`)}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
+        <div className="sm:col-span-2">
+          <hr className="border-dashed border-[var(--border)]" />
+        </div>
+        <SectionHeader icon={Building2} title={t("sections.project")} />
+        <Select
+          label={t("fields.propertyType.label")}
+          hint={t("fields.propertyType.helperText")}
+          value={form.propertyType || "COLLECTIF"}
+          onChange={(e) =>
+            setForm((prev) => ({
+              ...prev,
+              propertyType: e.target.value as PtzPropertyType,
+            }))
+          }
+        >
+          {PROPERTY_TYPE_OPTIONS.map((value) => (
+            <option key={value} value={value}>
+              {t(`fields.propertyType.options.${value}`)}
+            </option>
+          ))}
+        </Select>
+        <Select
+          label={t("fields.operationType.label")}
+          hint={t("fields.operationType.helperText")}
+          value={form.operationType || "NEUF"}
+          onChange={(e) =>
+            setForm((prev) => ({
+              ...prev,
+              operationType: e.target.value as PtzOperationType,
+              isOldProperty: e.target.value === "ANCIEN_AVEC_TRAVAUX",
+            }))
+          }
+        >
+          {OPERATION_TYPE_OPTIONS.map((value) => (
+            <option key={value} value={value}>
+              {t(`fields.operationType.options.${value}`)}
+            </option>
+          ))}
+        </Select>
+        {showWorkPercentage && (
+          <Input
             label={t("fields.workPercentage.label")}
-            helperText={t("fields.workPercentage.helperText")}
+            hint={t("fields.workPercentage.helperText")}
             type="number"
             placeholder="25"
             value={form.workPercentage || ""}
             onChange={field("workPercentage")}
-            slotProps={{
-              input: {
-                endAdornment: <InputAdornment position="end">%</InputAdornment>,
-              },
-              htmlInput: { min: 0, max: 100, step: 1 },
-            }}
+            unit="%"
+            min={0}
+            max={100}
+            step={1}
           />
-        </Box>
+        )}
 
-        <Box sx={{ gridColumn: { xs: "1", sm: "span 2" } }}>
-          <Typography variant="overline" color="primary" sx={{ fontWeight: 700, letterSpacing: "0.12em" }}>
-            {t("sections.financing")}
-          </Typography>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            select
-            label={t("fields.hasComplementaryLoan.label")}
-            value={form.hasComplementaryLoan ? "yes" : "no"}
+        <div className="sm:col-span-2">
+          <hr className="border-dashed border-[var(--border)]" />
+        </div>
+        <SectionHeader icon={Wallet} title={t("sections.financing")} />
+        <Toggle
+          label={t("fields.hasComplementaryLoan.label")}
+          hint={t("fields.hasComplementaryLoan.helperText")}
+          value={form.hasComplementaryLoan}
+          onChange={(value) => setForm((prev) => ({ ...prev, hasComplementaryLoan: value }))}
+          trueLabel={t("yes")}
+          falseLabel={t("no")}
+        />
+        {form.hasComplementaryLoan && (
+          <Select
+            label={t("fields.complementaryLoanType.label")}
+            hint={t("fields.complementaryLoanType.helperText")}
+            value={form.complementaryLoanType || ""}
             onChange={(e) =>
               setForm((prev) => ({
                 ...prev,
-                hasComplementaryLoan: e.target.value === "yes",
+                complementaryLoanType: e.target.value as ComplementaryLoanType,
               }))
             }
-            helperText={t("fields.hasComplementaryLoan.helperText")}
           >
-            <MenuItem value="yes">{t("yes")}</MenuItem>
-            <MenuItem value="no">{t("no")}</MenuItem>
-          </TextField>
-        </Box>
-        <Box>
-          {form.hasComplementaryLoan && (
-            <TextField
-              fullWidth
-              select
-              label={t("fields.complementaryLoanType.label")}
-              value={form.complementaryLoanType || ""}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  complementaryLoanType: e.target.value as ComplementaryLoanType,
-                }))
-              }
-              helperText={t("fields.complementaryLoanType.helperText")}
-            >
-              {COMPLEMENTARY_LOAN_OPTIONS.map((value) => (
-                <MenuItem key={value} value={value}>
-                  {t(`fields.complementaryLoanType.options.${value}`)}
-                </MenuItem>
-              ))}
-            </TextField>
-          )}
-        </Box>
+            {COMPLEMENTARY_LOAN_OPTIONS.map((value) => (
+              <option key={value} value={value}>
+                {t(`fields.complementaryLoanType.options.${value}`)}
+              </option>
+            ))}
+          </Select>
+        )}
 
-        <Box sx={{ gridColumn: { xs: "1", sm: "span 2" } }}>
-          <Typography variant="overline" color="primary" sx={{ fontWeight: 700, letterSpacing: "0.12em" }}>
-            {t("sections.metadata")}
-          </Typography>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            select
-            label={t("fields.hasDependencies.label")}
-            value={form.hasDependencies ? "yes" : "no"}
-            onChange={(e) =>
-              setForm((prev) => ({
-                ...prev,
-                hasDependencies: e.target.value === "yes",
-              }))
-            }
-            helperText={t("fields.hasDependencies.helperText")}
-          >
-            <MenuItem value="yes">{t("yes")}</MenuItem>
-            <MenuItem value="no">{t("no")}</MenuItem>
-          </TextField>
-        </Box>
-        <Box>
-          <TextField
-            fullWidth
-            label={t("fields.operationId.label")}
-            helperText={t("fields.operationId.helperText")}
-            type="text"
-            placeholder="OP-2024-001"
-            value={form.operationId || ""}
-            onChange={field("operationId")}
-          />
-        </Box>
+        <div className="sm:col-span-2">
+          <hr className="border-dashed border-[var(--border)]" />
+        </div>
+        <SectionHeader icon={FileText} title={t("sections.metadata")} />
+        <Toggle
+          label={t("fields.hasDependencies.label")}
+          hint={t("fields.hasDependencies.helperText")}
+          value={form.hasDependencies}
+          onChange={(value) => setForm((prev) => ({ ...prev, hasDependencies: value }))}
+          trueLabel={t("yes")}
+          falseLabel={t("no")}
+        />
+        <Input
+          label={t("fields.operationId.label")}
+          hint={t("fields.operationId.helperText")}
+          type="text"
+          placeholder="OP-2024-001"
+          value={form.operationId || ""}
+          onChange={field("operationId")}
+        />
 
-        <Box sx={{ gridColumn: { xs: "1", sm: "span 2" } }}>
-          <Stack direction="row" spacing={2} sx={{ mt: 1, width: "100%" }}>
-          <Button
-            type="submit"
-            variant="contained"
-            size="large"
-            disabled={loading}
-            sx={{ flex: 1 }}
-          >
-            {loading ? t("button.loading") : t("button.submit")}
+        <div className="sm:col-span-2 mt-1">
+          <Button type="submit" size="lg" disabled={loading} className="w-full">
+            {loading ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {t("button.loading")}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-2">
+                <Calculator className="h-4 w-4" />
+                {t("button.submit")}
+              </span>
+            )}
           </Button>
-          </Stack>
-        </Box>
-      </Box>
+        </div>
+      </form>
 
       {error && (
-        <Alert severity="error" sx={{ mt: 4 }}>
+        <div className="mt-8 rounded-[var(--radius)] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
-        </Alert>
+        </div>
       )}
 
       {(eligibilityResult || computeResult) && (
-        <Paper
-          component="section"
-          aria-live="polite"
-          variant="outlined"
-          sx={{ mt: 5, p: 3, width: "100%" }}
-        >
-          <Typography
-            variant="overline"
-            color="primary"
-            sx={{ fontWeight: 700, letterSpacing: "0.12em" }}
-          >
+        <Card className="mt-10 p-6" aria-live="polite">
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
             {t("result.title")}
-          </Typography>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-              gap: 2,
-              mt: 2,
-            }}
-          >
-            {(() => {
-              const isEligible = computeResult?.isEligible ?? eligibilityResult?.isEligible ?? false;
-              const maxPtzAmount = computeResult?.maxPtzAmount ?? eligibilityResult?.maxPtzAmount;
-              const ptzDuration = computeResult?.ptzDuration ?? eligibilityResult?.ptzDuration;
-              const loanPercentage = computeResult?.loanPercentage;
-              const durationInfo = computeResult?.durationInfo ?? eligibilityResult?.durationInfo;
-              const reasons = computeResult?.reasons ?? eligibilityResult?.reasons;
+          </p>
 
-              return (
-                <>
-                  <ResultBadge
-                    label={t("result.eligibleLabel")}
-                    value={isEligible ? t("result.eligibleYes") : t("result.eligibleNo")}
-                    prominent
-                  />
-                  {maxPtzAmount !== undefined && (
-                    <ResultBadge
-                      label={t("result.amountLabel")}
-                      value={formatEuros(maxPtzAmount)}
-                    />
+          {(() => {
+            const isEligible =
+              computeResult?.isEligible ?? eligibilityResult?.isEligible ?? false;
+            const maxPtzAmount =
+              computeResult?.maxPtzAmount ?? eligibilityResult?.maxPtzAmount;
+            const ptzDuration =
+              computeResult?.ptzDuration ?? eligibilityResult?.ptzDuration;
+            const loanPercentage = computeResult?.loanPercentage;
+            const durationInfo =
+              computeResult?.durationInfo ?? eligibilityResult?.durationInfo;
+            const reasons = computeResult?.reasons ?? eligibilityResult?.reasons;
+
+            return (
+              <div className="mt-4 space-y-4">
+                {/* Éligibilité */}
+                <div
+                  className={`flex items-center gap-3 rounded-[var(--radius)] p-4 ${
+                    isEligible
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  {isEligible ? (
+                    <CheckCircle2 className="h-6 w-6 shrink-0" />
+                  ) : (
+                    <XCircle className="h-6 w-6 shrink-0" />
                   )}
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.08em] opacity-70">
+                      {t("result.eligibleLabel")}
+                    </p>
+                    <p className="text-lg font-semibold">
+                      {isEligible ? t("result.eligibleYes") : t("result.eligibleNo")}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Montant principal */}
+                {maxPtzAmount !== undefined && (
+                  <div className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-6 text-center">
+                    <p className="text-xs font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
+                      {t("result.amountLabel")}
+                    </p>
+                    <p className="mt-2 text-4xl font-bold text-[var(--accent)]">
+                      {formatEuros(maxPtzAmount)}
+                    </p>
+                  </div>
+                )}
+
+                {/* Détails secondaires */}
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {loanPercentage !== undefined && (
                     <ResultBadge
                       label={t("result.loanPercentageLabel")}
-                      value={t("result.loanPercentageValue", { percentage: loanPercentage })}
+                      value={t("result.loanPercentageValue", {
+                        percentage: loanPercentage,
+                      })}
                     />
                   )}
                   {ptzDuration && (
@@ -531,37 +472,47 @@ export default function PtzSimulateurPage() {
                     <>
                       <ResultBadge
                         label={t("result.totalDurationLabel")}
-                        value={t("result.totalDurationValue", { months: durationInfo.totalDurationMonths })}
+                        value={t("result.totalDurationValue", {
+                          months: durationInfo.totalDurationMonths,
+                        })}
                       />
                       <ResultBadge
                         label={t("result.deferredPeriodLabel")}
-                        value={t("result.deferredPeriodValue", { months: durationInfo.deferredPeriodMonths })}
+                        value={t("result.deferredPeriodValue", {
+                          months: durationInfo.deferredPeriodMonths,
+                        })}
                       />
                       <ResultBadge
                         label={t("result.repaymentPeriodLabel")}
-                        value={t("result.repaymentPeriodValue", { months: durationInfo.repaymentPeriodMonths })}
+                        value={t("result.repaymentPeriodValue", {
+                          months: durationInfo.repaymentPeriodMonths,
+                        })}
                       />
                       <ResultBadge
                         label={t("result.rfrPercentageLabel")}
-                        value={t("result.rfrPercentageValue", { value: (durationInfo.rfrPercentage / 100).toFixed(2) })}
+                        value={t("result.rfrPercentageValue", {
+                          value: (durationInfo.rfrPercentage / 100).toFixed(2),
+                        })}
                       />
                     </>
                   )}
-                  {reasons && reasons.length > 0 && (
-                    <Box sx={{ gridColumn: { xs: "1", sm: "span 2" } }}>
-                      <Alert severity="info" variant="outlined">
-                        <Typography variant="body2">
-                          {reasons.join(" • ")}
-                        </Typography>
-                      </Alert>
-                    </Box>
-                  )}
-                </>
-              );
-            })()}
-          </Box>
-        </Paper>
+                </div>
+
+                {/* Raisons */}
+                {reasons && reasons.length > 0 && (
+                  <div className="rounded-[var(--radius)] border border-blue-200 bg-blue-50 px-4 py-3">
+                    <ul className="list-disc space-y-1 pl-4 text-sm text-blue-700">
+                      {reasons.map((reason, idx) => (
+                        <li key={idx}>{reason}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+        </Card>
       )}
-    </Container>
+    </div>
   );
 }
